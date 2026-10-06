@@ -22,8 +22,13 @@ if [ -d "$DATA" ]; then
 fi
 cd "$DST"
 set +e
+copy_back() {
+  mkdir -p "$SRC/outputs"
+  rsync -a outputs/ "$SRC/outputs/"
+}
+# timeout(1) sends TERM to the whole process group: copy the outputs (partial results) back first.
+trap 'copy_back; echo "wsl_job: stopped, outputs copied back" >&2; exit 143' TERM INT
 "$@"
 status=$?
-mkdir -p "$SRC/outputs"
-rsync -a outputs/ "$SRC/outputs/"
+copy_back
 exit $status
