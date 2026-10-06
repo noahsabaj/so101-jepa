@@ -72,7 +72,7 @@ level1:
   encoder:
     projector: {type: identity}
     pixel_encoder:
-      encoder: {type: vit, scale: tiny, use_mask_token: false}
+      encoder: {type: vit, scale: tiny, use_mask_token: false, gradient_checkpointing: true}  # batch 128 fits 8 GB
       projector: {type: mlp, output_dim: 256}
     proprio_encoder:
       encoder: {type: mlp, hidden_dim: 256, output_dim: 128}
