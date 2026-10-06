@@ -6,58 +6,58 @@
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.102,
-   "median_pos_err_mm": 14.527,
-   "physics_steps_per_s": 7117,
-   "geoms": 237
+   "max_penetration_mm": 0.099,
+   "median_pos_err_mm": 14.549,
+   "physics_steps_per_s": 3176,
+   "geoms": 1600
   },
   "0.0 perturbed": {
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.174,
-   "median_pos_err_mm": 14.485,
-   "physics_steps_per_s": 7410,
-   "geoms": 237
+   "max_penetration_mm": 0.221,
+   "median_pos_err_mm": 14.145,
+   "physics_steps_per_s": 3253,
+   "geoms": 1600
   },
   "0.2 aligned": {
-   "success": 0,
+   "success": 100,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.041,
-   "median_pos_err_mm": 14.594,
-   "physics_steps_per_s": 7238,
-   "geoms": 237
+   "max_penetration_mm": 6.364,
+   "median_pos_err_mm": 0.073,
+   "physics_steps_per_s": 1048,
+   "geoms": 1600
   },
   "0.2 perturbed": {
-   "success": 0,
+   "success": 2,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.337,
-   "median_pos_err_mm": 14.059,
-   "physics_steps_per_s": 7377,
-   "geoms": 237
+   "max_penetration_mm": 0.233,
+   "median_pos_err_mm": 13.919,
+   "physics_steps_per_s": 3134,
+   "geoms": 1600
   },
   "0.4 aligned": {
    "success": 100,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.014,
-   "median_pos_err_mm": 0.131,
-   "physics_steps_per_s": 4829,
-   "geoms": 237
+   "max_penetration_mm": 6.387,
+   "median_pos_err_mm": 0.078,
+   "physics_steps_per_s": 1243,
+   "geoms": 1600
   },
   "0.4 perturbed": {
-   "success": 4,
+   "success": 1,
    "trials": 100,
-   "unstable": 0,
-   "max_penetration_mm": 0.302,
-   "median_pos_err_mm": 13.476,
-   "physics_steps_per_s": 7102,
-   "geoms": 237
+   "unstable": 1,
+   "max_penetration_mm": 0.257,
+   "median_pos_err_mm": 13.355,
+   "physics_steps_per_s": 3047,
+   "geoms": 1600
   }
  },
- "render_fps_64x64": 160,
- "gl_renderer": "Mesa Intel(R) Iris(R) Xe Graphics (TGL GT2)",
- "render_fps_480x640": 148
+ "render_fps_64x64": 198,
+ "gl_renderer": "Mesa Intel(R) Iris(R) Xe Graphics (ADL GT2)",
+ "render_fps_480x640": 157
 }

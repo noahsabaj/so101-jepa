@@ -12,51 +12,51 @@
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 34.837,
-   "median_pos_err_mm": 13.884,
-   "physics_steps_per_s": 5591
+   "max_penetration_mm": 9.151,
+   "median_pos_err_mm": 14.829,
+   "physics_steps_per_s": 2227
   },
   "0.0 perturbed": {
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 31.373,
-   "median_pos_err_mm": 14.032,
-   "physics_steps_per_s": 6385
+   "max_penetration_mm": 8.886,
+   "median_pos_err_mm": 14.775,
+   "physics_steps_per_s": 2313
   },
   "0.2 aligned": {
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 34.766,
-   "median_pos_err_mm": 13.86,
-   "physics_steps_per_s": 5701
+   "max_penetration_mm": 9.131,
+   "median_pos_err_mm": 14.834,
+   "physics_steps_per_s": 2257
   },
   "0.2 perturbed": {
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 31.361,
-   "median_pos_err_mm": 13.938,
-   "physics_steps_per_s": 6397
+   "max_penetration_mm": 9.303,
+   "median_pos_err_mm": 14.69,
+   "physics_steps_per_s": 2300
   },
   "0.4 aligned": {
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 34.771,
-   "median_pos_err_mm": 13.888,
-   "physics_steps_per_s": 5669
+   "max_penetration_mm": 9.139,
+   "median_pos_err_mm": 14.828,
+   "physics_steps_per_s": 2234
   },
   "0.4 perturbed": {
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 34.124,
-   "median_pos_err_mm": 14.018,
-   "physics_steps_per_s": 6429
+   "max_penetration_mm": 8.887,
+   "median_pos_err_mm": 14.665,
+   "physics_steps_per_s": 2298
   }
  },
- "render_fps_64x64": 1393,
- "render_fps_480x640": 168
+ "render_fps_64x64": 565,
+ "render_fps_480x640": 150
 }
