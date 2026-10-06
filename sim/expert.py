@@ -11,10 +11,14 @@ from env import MAX_ACTION, REST, SO101Env, sample_cube_xy
 from scene import CUBE_HALF
 
 # The grasp point in the gripperframe site frame (x along the fingers, z across the jaws): the
-# centre of a 25 mm cube that rests on the fixed pad face.
+# centre of a 25 mm cube that rests on the fixed pad face, at the middle of the pads' length.
 GRASP_POINT = np.array([-0.020, 0.0, 0.012])
 OPEN, CLOSED = 0.55, -0.15  # gripper joint targets (rad); CLOSED squeezes the cube
 DOWN = np.array([0.0, 0.0, -1.0])
+# The pad tips are 25 mm past the grasp point, so the grasp point cannot go below 25 mm over the
+# table. Grasp with the tips 3 mm over the table (grasp point 15.5 mm over the cube centre), and
+# place with the held cube about 2.5 mm over the table.
+GRASP_DZ, PLACE_DZ = 0.0155, 0.018
 
 
 def ik(env: SO101Env, point, finger_dir, jaw_dir, q0, iters=80):
@@ -53,8 +57,9 @@ def jaw_dir_for(yaw):
 class Expert:
     """Plays one long episode: tasks follow each other until the episode ends."""
 
-    def __init__(self, env: SO101Env, rng, noise=0.02):
+    def __init__(self, env: SO101Env, rng, noise=0.02, grasp_dz=GRASP_DZ, place_dz=PLACE_DZ):
         self.env, self.rng, self.noise = env, rng, noise
+        self.grasp_dz, self.place_dz = grasp_dz, place_dz
         self.plan = []  # list of (joint target, steps allowed, phase name)
         self.phase = "start"
 
@@ -72,13 +77,13 @@ class Expert:
             goal = sample_cube_xy(self.rng)
         z = CUBE_HALF
         self.waypoint([*xy, z + 0.08], yaw, OPEN, 12, "approach")
-        self.waypoint([*xy, z + 0.002], yaw, OPEN, 8, "descend")
-        self.waypoint([*xy, z + 0.002], yaw, CLOSED, 5, "grasp")
+        self.waypoint([*xy, z + self.grasp_dz], yaw, OPEN, 8, "descend")
+        self.waypoint([*xy, z + self.grasp_dz], yaw, CLOSED, 5, "grasp")
         self.waypoint([*xy, z + 0.10], yaw, CLOSED, 8, "lift")
         place_yaw = yaw + self.rng.uniform(-0.5, 0.5)
         self.waypoint([*goal, z + 0.10], place_yaw, CLOSED, 12, "carry")
-        self.waypoint([*goal, z + 0.006], place_yaw, CLOSED, 8, "lower")
-        self.waypoint([*goal, z + 0.006], place_yaw, OPEN, 4, "release")
+        self.waypoint([*goal, z + self.place_dz], place_yaw, CLOSED, 8, "lower")
+        self.waypoint([*goal, z + self.place_dz], place_yaw, OPEN, 4, "release")
         self.waypoint([*goal, z + 0.09], place_yaw, OPEN, 6, "retreat")
 
     def reach(self):

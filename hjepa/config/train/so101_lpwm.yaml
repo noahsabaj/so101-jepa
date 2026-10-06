@@ -1,0 +1,27 @@
+# SO-101 sim: LpWM (arXiv 2608.22764), as the flat LeWM with LpWM's sparse latents. The encoder
+# and predictor end in an MLP head with RepReLU (non-negative, sparse codes), and RDMReg (a
+# sliced-Wasserstein match to a rectified Laplace) replaces SIGReg. RDMReg settings are LpWM's
+# (lpwm_swm/config/lpwm.yaml, with the paper's RMS normalization for sparse runs). Everything else
+# (data, encoder, predictor, inverse dynamics loss, optimizer) is the same as so101_lewm.
+defaults:
+- base/so101
+- _self_
+output_model_name: so101_lpwm
+num_levels: 1
+level1:
+  encoder:
+    projector: {type: mlp, link: reprelu}
+  predictor:
+    projector: {type: mlp, link: reprelu}
+  loss:
+    embed:
+      sigreg:
+        enabled: false
+      rdmreg:
+        enabled: true
+        weight: 10.0
+        p: 1.0
+        link: ReLU
+        num_slices: 1024
+        matching_mode: b_t_d
+        rms_norm: true

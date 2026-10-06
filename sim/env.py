@@ -104,6 +104,7 @@ class SO101Env:
 
 
 def sample_cube_xy(rng):
-    """A cube position in the reachable band in front of the arm."""
-    r, a = rng.uniform(0.15, 0.28), rng.uniform(-np.pi / 3, np.pi / 3)
+    """A cube position in the band in front of the arm where top-down grasps are reliable. Past
+    26 cm the arm is almost straight and the expert lifts the cube in under half of its tries."""
+    r, a = rng.uniform(0.15, 0.25), rng.uniform(-np.pi / 3, np.pi / 3)
     return np.array([r * np.cos(a), r * np.sin(a)])

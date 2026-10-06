@@ -20,7 +20,7 @@ from scipy.spatial.transform import Rotation
 
 import hand
 
-PARTS = Path("bakeoff/parts")
+PARTS = Path(os.environ.get("PARTS", "bakeoff/parts"))
 OUT = Path("bakeoff/results")
 CLEARANCES_MM = [0.0, 0.2, 0.4]
 TRIALS = int(sys.argv[1]) if len(sys.argv) > 1 else 100

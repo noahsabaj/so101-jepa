@@ -97,6 +97,7 @@ back into the data.
 | A11 | Closed-loop vision and chamfers give sub-mm alignment with this arm. | Rung 3 success against chamfer size, in sim, then real. | Open |
 | A12 | One arm and printed fixtures are sufficient. | Rungs 4 to 6 with fixtures. If they fail for lack of a second hand, we build a second follower. | Open |
 | A13 | Assembly videos with no actions improve the upper levels. | L3 prediction of step results, with and without video pretraining. | Open |
+| A14 | Dense Gaussian latents (SIGReg) are a good choice for planning; sparse latents (LpWM: RDMReg to a rectified Laplace, RepReLU heads) are not better. | LpWM against LeWM: same data, encoder, predictor and trials; each with gradient descent and CEM; offline tests and rungs 1 and 2 (rule 6, paired). If LpWM wins, a dense control with the same heads (Identity link, Gaussian target) tells if sparsity or the heads give the gain. | Open (set up 2026-10-06) |
 
 ## 6. The ladder
 
@@ -123,6 +124,9 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   its rest pose. No sub-goals. Success: after 300 steps (60 s) the cube is within 2 cm (xy) of the
   goal place and rests on the table. Test trials: seeds 5000 to 5049.
 - We tune on seeds 1000 to 4999. We compare flat LeWM and 2-level H-JEPA on the same test trials.
+- Change (2026-10-06, before any test): cubes and goal places are 15 to 25 cm from the arm's base
+  (was 15 to 28 cm), within +-60 degrees. Past 26 cm the arm is almost straight, and the scripted
+  expert, which knows the true state, lifted the cube in only 43 of 99 tries (sim/expert_eval.py).
 
 ## 7. Phases
 
@@ -137,10 +141,11 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
    step 1, rungs 3 and higher move to it.
 3. Scripted data: 1,000 or more reach and pick-and-place episodes. Make the episodes long, because
    the upper levels need long windows (H-JEPA failed on short Push-T episodes).
-4. Train a flat LeWM and a 2-level H-JEPA (H-JEPA code). Offline tests: the rank of the expert's
-   move among random moves, and the plan direction (skunkworks tests).
+4. Train a flat LeWM, a flat LpWM (A14) and a 2-level H-JEPA (H-JEPA code). Offline tests: the
+   rank of the expert's move among random moves, and the plan direction (skunkworks tests).
 5. Community data: train on the 23k SO-100 episodes. Test on held-out episodes (A5, offline part).
-6. Closed loop in sim: rung 1, then rung 2 with only the final goal image.
+6. Closed loop in sim: rung 1, then rung 2 with only the final goal image. The flat models plan
+   with gradient descent and with CEM (A7, A14).
 7. You: print the parts (gauge files first). Record a video when you assemble the arm (scene
    camera and top camera). This is real assembly data (A13).
 
@@ -156,6 +161,7 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 | 2026-10-06 | North star: an SO-101 assembles an SO-101. The robot-friendly SO-101 first, the stock arm last. |
 | 2026-10-06 | An actor is permitted, but only as a proposer. The world model and the cost select the action. |
 | 2026-10-06 | New repository (this one). The lessons of skunkworks carry over as methods, not as code. |
+| 2026-10-06 | Noah: try LpWM again. The skunkworks test (2026-10-03) was not decisive: frozen V-JEPA 2.1 encoder, 100 real episodes (it overfit), gradient planner only, offline tests only. Here it is trained end to end, in sim, with both planners and the closed-loop rungs (A14). |
 
 ## 9. Results log
 
@@ -166,9 +172,14 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 | Step 1: ManiSkill engine, SAPIEN 3 PhysX CPU (600 trials, bakeoff/insert_maniskill.py) | 2026-10-06 | 0 of 600 in, at every clearance. With the PhysX defaults, velocity spikes (unstable trials) and 2-7 mm penetration; the best of 4 settings (TGS, 0.5 mm contact offset, slow push-out) removed the spikes, but PhysX then reported contact depths of 31-35 mm, which are not physical for a 45 mm servo: a fault in our PhysX setup or in its convex-piece handling, not found yet. 6,000 physics steps/s. Render 1,393 fps at 64x64 (8 times MuJoCo), 168 fps at 480x640. |
 | Step 1: Isaac Lab (exact-mesh SDF contact; bakeoff/insert_isaaclab.py) | 2026-10-06 | Not run: needs a Linux RTX GPU (Brev paused by Noah). Script and setup are written, not tested. |
 | Step 1: decision | 2026-10-06 | MuJoCo, provisionally: the only simulator that inserted the servo and stayed physical. Open: Isaac Lab's SDF contact, and an exact-mesh contact in MuJoCo (SDF plugin), to remove the decomposition error that blocks the 0.2 mm case. |
+| Step 1: why MuJoCo jammed at 0.2 mm (bakeoff/path_check.py) | 2026-10-06 | A static check along the insertion path: the CAD meshes never overlap at 0.2 mm clearance, but the convex pieces overlapped by 0.18 mm from 6 mm in, where the servo jammed (0.05 mm from the base split, 0.09 mm from the servo split). A finer base split alone (CoACD 0.005, 984 pieces) removed the base part and still jammed (0 of 20). With the servo split also finer (0.01, 616 pieces) the pieces overlap 0.001 mm, and MuJoCo inserts at 0.2 mm: 20 of 20, aligned hand (median error 0.07 mm). The cause was the convex split, not MuJoCo's contact. These parts are now the default (bakeoff/parts). Physics: 1,000-3,200 steps/s (more pieces). The perturbed hand (1.5 mm, 2 degrees) still fails at every clearance: a hand-strategy problem for rung 3. |
 | Step 2: SO-101 scene (sim/scene.py, env.py) | 2026-10-06 | Official SO-101 MJCF. The jaw collision hulls fill the gap between the fingers (the cube cannot enter), so box pads on the measured finger faces replace them. Wrist camera at the front of the camera module, aimed between the fingers; scene camera above and in front. Randomized per episode: camera pose (+-2 cm), light, table and cube colour, cube friction, joint offsets (+-0.45 degrees, calibration and backlash), servo gain (+-20%). |
 | Step 3: expert and collector (sim/expert.py, collect.py) | 2026-10-06 | 60 s play episodes at 5 Hz: pick-and-place (60%), reach (25%), free motion (15%). In the 3 checked episodes the expert lifts the cube 11-12 cm and places it. Data: 64x128 frames (scene and wrist), joints, joint-target changes, and the true state for tests; about 10 KB per step. Speed: 40 steps/s per process on a Linux laptop, 280 on kat-pc (GPU rendering). |
+| Step 3: expert test at scale (sim/stats.py, expert_eval.py) | 2026-10-06 | The first 1,300-episode dataset was faulty. Over 5,063 pick-and-place tries the expert lifted the cube in 66% and placed it within 2 cm in 40% (the 3 checked episodes had hidden this). Causes: (1) the grasp target was 1.2 cm too low: the finger pads reach 25 mm past the grasp point, so the arm pressed the pads into the table and the cube slipped; (2) past 26 cm the arm is almost straight, and lifts failed in 56 of 99 tries. Fixes: grasp with the pad tips 3 mm over the table, place with the cube 2.5 mm over it, and cubes and goals 15 to 25 cm out (also for the rung 1 and 2 tests, see section 6). Fast test (100 episodes, no rendering): 88% lifted, 79% placed within 2 cm (median error 1.1 cm). The dataset was made again with the fixed expert. |
+| Step 3: dataset, second build (sim/make_dataset.sh, stats.py) | 2026-10-06 | 1,200 train episodes (seeds 1,000,000 and up) and 100 val episodes (2,000,000 and up), 300 steps each: 360,000 and 30,000 steps, 3.5 and 0.3 GB (10-frame image chunks). Expert in the train data: 5,366 pick-and-place tries, 91% lifted, 83% placed within 2 cm; val: 90% and 79%. Share of steps: pick-and-place 88%, reach 7%, free motion 5%. No NaN; no dark or flat frame in 600 sampled frames per split. In 2 train episodes the cube leaves the table. 50 min on samsung-2 (14 processes). |
+| Step 5: community data (community/build.py, verify.py) | 2026-10-06 | lerobot/community_dataset_v3 (revision ab92ac3f), a sample of 441 SO-100/SO-101 datasets (105 GB of video), one camera each, 5 Hz, 64x64. Test = 43 whole datasets (setups not in training). Train: 388 datasets, 13,692 episodes, 1,246,544 steps (13.5 GB); test: 1,092 episodes, 128,640 steps (1.4 GB). 10 datasets left out for data errors (black frames, frozen video, joints wrapped past 360 degrees, leader and follower calibrations that differ by 45 degrees or more). Normalization per dataset: z-scores of the joint angles (proprio) and of leader minus follower (action), with the difference wrapped to +-180 degrees, a std floor (5 and 1 degrees) and a clip at +-10; without these, 0.03% of the steps had z up to 38. Frames: 1 blank and 2 green ones among 5,000 random train frames, none in test. |
 | GPU for steps 4-6 | 2026-10-06 | Brev paused by Noah. Kaggle's weekly GPU quota is used up (32.8 h); Noah chose to wait for its reset (about 2026-10-10). Steps 4-6 wait. |
+| GPU: WSL on kat-pc | 2026-10-06 | Noah approved Ubuntu 24.04 in WSL2 on kat-pc (RTX 4060 Ti, 8 GB); the fleet maintainer installed it. Jobs run through wsl.exe (hjepa/wsl_job.sh) with --gpu-gb 7 --ram-gb 20 --cpus 20. The GPU is shared with SailingGame's Unreal work, so jobs wait in the queue while it runs. |
 | H-JEPA on Windows | 2026-10-06 | Training stops on kat-pc: stable-pretraining uses POSIX signals (SIGUSR1). Training and planning run on Linux only. The full chain (data, training, offline tests, closed loop) passed a smoke test with a 3-step model. |
 
 ## 10. Prior evidence

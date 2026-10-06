@@ -6,7 +6,7 @@ All three simulators use the same output (bakeoff/parts/):
 - parts.json: the seated servo pose in the base frame, the free insertion direction found by a
   sweep test, and the CAD clearance around the servo body.
 
-Run: uv run python bakeoff/geometry.py
+Run: uv run --with rtree --with manifold3d python bakeoff/geometry.py
 """
 
 import json
@@ -19,14 +19,17 @@ import trimesh
 from scipy.spatial.transform import Rotation
 
 ASSETS = Path("assets/so101/assets")
-OUT = Path("bakeoff/parts")
+OUT = Path(os.environ.get("PARTS", "bakeoff/parts"))
 
 # Poses from assets/so101/so101_new_calib_camera.xml, body "base" (MuJoCo quat order: w x y z).
 BASE_MESH_POSE = ([-0.00636471, 0.0, -0.0024], [0.5, 0.5, 0.5, 0.5])
 SERVO_POSE = ([0.0263353, 0.0, 0.0437], [1.0, 0.0, 0.0, 0.0])
-# CoACD concavity threshold for the base: 0.03 gave 66 pieces that reach up to 0.59 mm into the
-# pocket, more than the clearances under test. Set from the comparison in parts.json.
-BASE_THRESHOLD = float(os.environ.get("BASE_THRESHOLD", "0.01"))
+# CoACD concavity thresholds. The pieces must not overlap along the insertion path at 0.2 mm
+# clearance (bakeoff/path_check.py). Base 0.03 reached 0.59 mm into the pocket and 0.01 reached
+# 0.19 mm; servo 0.05 and 0.02 bulged 0.09 and 0.22 mm. Base 0.005 (984 pieces) with servo 0.01
+# (616 pieces) leaves 0.001 mm, and MuJoCo then inserts at 0.2 mm (2026-10-06).
+BASE_THRESHOLD = float(os.environ.get("BASE_THRESHOLD", "0.005"))
+SERVO_THRESHOLD = float(os.environ.get("SERVO_THRESHOLD", "0.01"))
 
 
 def pose_matrix(pos, quat_wxyz):
@@ -124,7 +127,7 @@ def main():
     servo.export(OUT / "servo.obj")
 
     base_parts = decompose(base_crop, threshold=BASE_THRESHOLD)
-    servo_parts = decompose(servo, threshold=0.05)
+    servo_parts = decompose(servo, threshold=SERVO_THRESHOLD)
     for i, p in enumerate(base_parts):
         p.export(OUT / f"base_{i:02d}.obj")
     for i, p in enumerate(servo_parts):
@@ -138,6 +141,7 @@ def main():
         "side_gaps_mm": gaps,
         "base_pieces": len(base_parts),
         "base_coacd_threshold": BASE_THRESHOLD,
+        "servo_coacd_threshold": SERVO_THRESHOLD,
         "pocket_intrusion_mm_max_p99": intrusion_mm(base_parts, servo_in_base),
         "servo_pieces": len(servo_parts),
         "servo_mass_kg": 0.055,

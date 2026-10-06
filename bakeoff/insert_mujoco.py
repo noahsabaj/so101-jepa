@@ -12,6 +12,7 @@ Run: MUJOCO_GL=egl uv run python bakeoff/insert_mujoco.py [trials]
 """
 
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -24,7 +25,7 @@ from scipy.spatial.transform import Rotation
 
 import hand
 
-PARTS = Path("bakeoff/parts")
+PARTS = Path(os.environ.get("PARTS", "bakeoff/parts"))
 OUT = Path("bakeoff/results")
 CLEARANCES_MM = [0.0, 0.2, 0.4]
 TRIALS = int(sys.argv[1]) if len(sys.argv) > 1 else 100
@@ -157,7 +158,7 @@ def main():
     fps64, gl = render_fps(model, data, (64, 64))
     report["render_fps_64x64"], report["gl_renderer"] = round(fps64), gl
     report["render_fps_480x640"] = round(render_fps(model, data, (480, 640))[0])
-    (OUT / "mujoco.json").write_text(json.dumps(report, indent=1))
+    (OUT / os.environ.get("REPORT", "mujoco.json")).write_text(json.dumps(report, indent=1))
     print(json.dumps(report, indent=1))
 
 

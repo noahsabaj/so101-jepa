@@ -46,7 +46,7 @@ def create(f, sample):
     for k, v in sample.items():
         image = v.ndim == 4
         f.create_dataset(k, shape=(0, *v.shape[1:]), maxshape=(None, *v.shape[1:]), dtype=v.dtype,
-                         chunks=(100 if image else 1000, *v.shape[1:]),
+                         chunks=(10 if image else 1000, *v.shape[1:]),  # 10 frames: cheap random clips
                          compression=IMAGE_COMPRESSION if image else None)
     f.create_dataset("ep_len", shape=(0,), maxshape=(None,), dtype=np.int32)
     f.create_dataset("ep_offset", shape=(0,), maxshape=(None,), dtype=np.int64)

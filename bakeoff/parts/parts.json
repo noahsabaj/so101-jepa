@@ -22,12 +22,13 @@
   "+z": -0.0,
   "-z": -0.0
  },
- "base_pieces": 191,
- "base_coacd_threshold": 0.01,
+ "base_pieces": 984,
+ "base_coacd_threshold": 0.005,
+ "servo_coacd_threshold": 0.01,
  "pocket_intrusion_mm_max_p99": [
-  0.194,
-  0.125
+  0.148,
+  0.051
  ],
- "servo_pieces": 46,
+ "servo_pieces": 616,
  "servo_mass_kg": 0.055
 }

@@ -1,6 +1,7 @@
 """H-JEPA planning for the SO-101: load a trained model and plan from an observation to a goal.
 
-The solver code is H-JEPA's (multi-start gradient descent per level; hierarchical_solver.py).
+The solver code is H-JEPA's: multi-start gradient descent per level (hierarchical_solver.py), or the
+cross-entropy method (stable_worldmodel/solver/cem.py, added in our fork).
 This module only converts our observations (uint8 64x128 pixels, 6 joint angles) the way the
 training pipeline did, and the planned actions back to raw joint-target changes (rad).
 """

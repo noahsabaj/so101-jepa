@@ -1,0 +1,296 @@
+{
+ "parts": "bakeoff/parts_s0.01",
+ "base_pieces": 984,
+ "servo_pieces": 616,
+ "clearances": {
+  "0.2": [
+   {
+    "out_mm": 20.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 19.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 19.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 18.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 18.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 17.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 17.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 16.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 16.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 15.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 15.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 14.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 14.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 13.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 13.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 12.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 12.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 11.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 11.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 10.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 10.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 9.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 9.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 8.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 8.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 7.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 7.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 6.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 6.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 5.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 5.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 4.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 4.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 3.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 3.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 2.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 2.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 1.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 1.0,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 0.5,
+    "pieces": 0.0,
+    "servo_mesh_vs_base_pieces": 0.0,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   },
+   {
+    "out_mm": 0.0,
+    "pieces": 0.001,
+    "servo_mesh_vs_base_pieces": 0.001,
+    "servo_pieces_vs_base_mesh": 0.0,
+    "meshes": 0.0
+   }
+  ]
+ }
+}

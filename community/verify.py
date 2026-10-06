@@ -28,13 +28,14 @@ def check(f, split, meta):
     ds = cols["dataset_id"]
     assert (ds[offs] == ds[offs + lens - 1]).all() and (np.diff(ds) >= 0).all()  # whole episodes, by dataset
     ep_ds = ds[offs]
+    clip = meta["z_clip"]
     for i in np.unique(ds):
         info, rows = meta["datasets"][str(i)], ds == i
         assert info["split"] == split and info["episodes"]["kept"] == (ep_ds == i).sum() and info["steps"] == rows.sum()
         s, st, dt = cols["state_raw"][rows], info["state_stats"], info["delta_stats"]
-        assert np.allclose(cols["proprio"][rows], (s - st["mean"]) / np.array(st["std"]), atol=1e-3)
-        assert np.allclose(cols["action"][rows], (cols["action_raw"][rows] - s - dt["mean"]) / np.array(dt["std"]),
-                           atol=1e-3)
+        delta = (cols["action_raw"][rows] - s + 180.0) % 360.0 - 180.0  # wrapped, as in build.py
+        assert np.allclose(cols["proprio"][rows], np.clip((s - st["mean"]) / np.array(st["std"]), -clip, clip), atol=1e-3)
+        assert np.allclose(cols["action"][rows], np.clip((delta - dt["mean"]) / np.array(dt["std"]), -clip, clip), atol=1e-3)
     counts = dict(datasets=len(np.unique(ds)), episodes=len(lens), steps=n)
     assert counts == meta["splits"][split], (counts, meta["splits"][split])
     print(f"{split}: {counts}, episode steps min/median/max {lens.min()}/{int(np.median(lens))}/{lens.max()}")

@@ -44,7 +44,9 @@ MIN_EPISODES = 15_000
 STRIDE = 6  # source frames per step: 30 fps -> 5 Hz
 SIZE = 64  # image side
 MIN_STEPS = 16  # 3.2 s: one H-JEPA clip (level 2: 4 steps x frameskip 5)
-STD_FLOOR = 1e-3
+# Per-dataset z-scores. A joint that hardly moves in a dataset has a tiny std, and its rare moves
+# then get z of 30 or more, so the std has a floor (degrees; gripper units), and z is clipped.
+STATE_STD_FLOOR, DELTA_STD_FLOOR, Z_CLIP = 5.0, 1.0, 10.0
 # Source datasets with data errors, found by the first build (2026-10-06) and left out of the files.
 EXCLUDE = {
     "Ryosei2/0704_donut3": "100% black frames",
@@ -134,9 +136,23 @@ def decode_steps(container, out, t0, t1, fps):
     return seen.all()
 
 
-def zscore(x):
-    mean, std = x.mean(0), np.maximum(x.std(0), STD_FLOOR)
-    return ((x - mean) / std).astype(np.float32), dict(mean=mean.tolist(), std=std.tolist())
+def wrap(d):
+    """Angle differences into [-180, 180) degrees: a reading that wrapped past 360 (59 train steps
+    of the 2026-10-06 build had |action - state| > 180) is not a 360-degree move."""
+    return (d + 180.0) % 360.0 - 180.0
+
+
+def zscore(x, floor):
+    mean, std = x.mean(0), np.maximum(x.std(0), floor)
+    z = np.clip((x - mean) / std, -Z_CLIP, Z_CLIP)
+    return z.astype(np.float32), dict(mean=mean.tolist(), std=std.tolist())
+
+
+def normalize(s, a):
+    """proprio and action columns (and their stats) from raw states and leader actions of one dataset."""
+    proprio, state_stats = zscore(s, STATE_STD_FLOOR)
+    action, delta_stats = zscore(wrap(a - s), DELTA_STD_FLOOR)
+    return proprio, action, state_stats, delta_stats
 
 
 def convert_dataset(i, row):
@@ -205,8 +221,7 @@ def convert_dataset(i, row):
     arrays = {}
     if kept:
         s, a = (np.concatenate(x) for x in zip(*kept))
-        proprio, summary["state_stats"] = zscore(s)
-        act, summary["delta_stats"] = zscore(a - s)
+        proprio, act, summary["state_stats"], summary["delta_stats"] = normalize(s, a)
         arrays = dict(pixels=pixels[:m], proprio=proprio, action=act, state_raw=s.astype(np.float32),
                       action_raw=a.astype(np.float32), ep_len=np.array([len(k[0]) for k in kept], np.int32))
     SHARDS.mkdir(parents=True, exist_ok=True)
@@ -228,7 +243,7 @@ def merge(rows, summaries):
         with h5py.File(path.with_suffix(".tmp"), "w") as f:
             def column(name, shape, dtype, chunk_rows=1000, **kw):
                 f.create_dataset(name, shape, dtype, chunks=(min(chunk_rows, shape[0]),) + shape[1:], **kw)
-            column("pixels", (n, SIZE, SIZE, 3), np.uint8, 100, compression=blosc)
+            column("pixels", (n, SIZE, SIZE, 3), np.uint8, 10, compression=blosc)  # 10 frames: cheap random clips
             for k in ("proprio", "action", "state_raw", "action_raw"):
                 column(k, (n, 6), np.float32)
             column("dataset_id", (n,), np.int32)
@@ -251,7 +266,8 @@ def merge(rows, summaries):
         splits[split] = dict(datasets=len(ids), episodes=n_ep, steps=n)
         print(f"{path}: {len(ids)} datasets, {n_ep} episodes, {n} steps, {path.stat().st_size / 1e9:.2f} GB")
     meta = dict(source=REPO, revision=REVISION, license="Apache-2.0", step_hz=5, frame_stride=STRIDE,
-                image_size=SIZE, min_steps=MIN_STEPS, std_floor=STD_FLOOR, splits=splits,
+                image_size=SIZE, min_steps=MIN_STEPS, state_std_floor=STATE_STD_FLOOR,
+                delta_std_floor=DELTA_STD_FLOOR, z_clip=Z_CLIP, splits=splits,
                 datasets={str(i): summaries[i] for i in sorted(summaries)})
     (OUT / "community_meta.json").write_text(json.dumps(meta, indent=1) + "\n")
     shutil.rmtree(SHARDS)
@@ -283,5 +299,25 @@ def convert():
     print(f"convert: {time.time() - t0:.0f} s")
 
 
+def renormalize():
+    """Rewrite the proprio and action columns of community_{train,test}.h5 from state_raw and
+    action_raw with the current normalize(), and their stats in community_meta.json (no video decode)."""
+    meta_path = OUT / "community_meta.json"
+    meta = json.loads(meta_path.read_text())
+    for split in ("train", "test"):
+        with h5py.File(OUT / f"community_{split}.h5", "r+") as f:
+            ds, s, a = f["dataset_id"][:], f["state_raw"][:].astype(np.float64), f["action_raw"][:].astype(np.float64)
+            proprio, action = np.empty_like(s, np.float32), np.empty_like(s, np.float32)
+            for i in np.unique(ds):
+                rows = ds == i
+                proprio[rows], action[rows], st, dt = normalize(s[rows], a[rows])
+                meta["datasets"][str(i)].update(state_stats=st, delta_stats=dt)
+            f["proprio"][:], f["action"][:] = proprio, action
+        print(f"{split}: renormalized {len(ds)} steps")
+    meta.pop("std_floor", None)
+    meta.update(state_std_floor=STATE_STD_FLOOR, delta_std_floor=DELTA_STD_FLOOR, z_clip=Z_CLIP)
+    meta_path.write_text(json.dumps(meta, indent=1) + "\n")
+
+
 if __name__ == "__main__":
-    {"sample": sample, "download": download, "convert": convert}[sys.argv[1]]()
+    {"sample": sample, "download": download, "convert": convert, "renormalize": renormalize}[sys.argv[1]]()
