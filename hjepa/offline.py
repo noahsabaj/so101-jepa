@@ -78,11 +78,14 @@ def main(ckpt, eval_config, data, out, cases=500):
     f, picks = load(data, rng, cases, max(RANKS_K))
     decoys = planner.normalize_action(f["action"][: min(len(f["action"]), 200000): 7])
     report = {"ckpt": ckpt, "planner": eval_config, "data": data, "cases": cases}
+    # The cases are the same for each model (fixed seeds): "_cases" keeps the values for paired tests.
     for k in RANKS_K:
-        report[f"expert_rank_k{k}"] = mean_ci(expert_rank(planner, f, picks, k, decoys))
+        x = expert_rank(planner, f, picks, k, decoys)
+        report[f"expert_rank_k{k}"], report[f"expert_rank_k{k}_cases"] = mean_ci(x), [round(v, 4) for v in x]
         print(k, report[f"expert_rank_k{k}"], flush=True)
     for k in PLAN_K:
-        report[f"plan_cosine_k{k}"] = mean_ci(plan_direction(planner, f, picks[: cases // 2], k))
+        x = plan_direction(planner, f, picks[: cases // 2], k)
+        report[f"plan_cosine_k{k}"], report[f"plan_cosine_k{k}_cases"] = mean_ci(x), [round(v, 4) for v in x]
         print(k, report[f"plan_cosine_k{k}"], flush=True)
     with open(out, "w") as fh:
         json.dump(report, fh, indent=1)
