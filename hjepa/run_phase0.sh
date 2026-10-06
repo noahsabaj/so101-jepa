@@ -2,8 +2,9 @@
 # Phase 0, steps 4 and 6, on one Linux GPU machine, after data/so101_{train,val}.h5 exist.
 # Trains flat LeWM, flat LpWM and 2-level H-JEPA, then runs the offline tests and the closed-loop
 # rung 1 and 2 test trials (seeds 5000-5099 and 5000-5049) for each model and planner, 10
-# processes at a time.
-# Usage: sh hjepa/run_phase0.sh train|offline|closed_loop
+# processes at a time. probe: linear probes of each model's latent for the cube and the grasp point
+# (hjepa/probe.py).
+# Usage: sh hjepa/run_phase0.sh train|offline|closed_loop|probe
 # Options (environment): MODELS (train; default: all three); RUNS (offline, closed_loop: model:eval
 # config pairs; default: each flat model with gradient descent and with CEM, H-JEPA with its
 # solver); SEQUENTIAL=1 trains one model after the other (a GPU with 8 GB); GPU_<model> chooses a
@@ -57,8 +58,14 @@ closed_loop)
     done
     waitall
   done ;;
+probe)
+  for m in $MODELS; do
+    case $m in hjepa_l2) cfg=so101_l2 ;; *) cfg=so101_flat ;; esac
+    uv run python hjepa/probe.py "$(ckpt "$m")" $cfg data/so101_val.h5 "outputs/probe_$m.json" \
+      > "outputs/probe_$m.log" 2>&1 || fail=1
+  done ;;
 *)
-  echo "usage: sh hjepa/run_phase0.sh train|offline|closed_loop" >&2
+  echo "usage: sh hjepa/run_phase0.sh train|offline|closed_loop|probe" >&2
   exit 2 ;;
 esac
 exit $fail
