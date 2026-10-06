@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+data/
+runs/
+outputs/
+checkpoints/
+*.pt
+*.ckpt
+*.safetensors
+*.h5
+*.mp4
