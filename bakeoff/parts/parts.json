@@ -1,0 +1,33 @@
+{
+ "seated_servo_pos": [
+  0.0263353,
+  0.0,
+  0.0437
+ ],
+ "seated_servo_quat_wxyz": [
+  1.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "free_directions": [
+  "+x"
+ ],
+ "seated_overlap_points": 0,
+ "side_gaps_mm": {
+  "+x": 3.28,
+  "-x": 0.0,
+  "+y": -0.05,
+  "-y": -0.05,
+  "+z": -0.0,
+  "-z": -0.0
+ },
+ "base_pieces": 191,
+ "base_coacd_threshold": 0.01,
+ "pocket_intrusion_mm_max_p99": [
+  0.194,
+  0.125
+ ],
+ "servo_pieces": 46,
+ "servo_mass_kg": 0.055
+}

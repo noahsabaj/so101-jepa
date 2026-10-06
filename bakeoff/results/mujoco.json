@@ -6,9 +6,9 @@
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.097,
+   "max_penetration_mm": 0.102,
    "median_pos_err_mm": 14.527,
-   "physics_steps_per_s": 7075,
+   "physics_steps_per_s": 7117,
    "geoms": 237
   },
   "0.0 perturbed": {
@@ -16,17 +16,17 @@
    "trials": 100,
    "unstable": 0,
    "max_penetration_mm": 0.174,
-   "median_pos_err_mm": 14.49,
-   "physics_steps_per_s": 7330,
+   "median_pos_err_mm": 14.485,
+   "physics_steps_per_s": 7410,
    "geoms": 237
   },
   "0.2 aligned": {
    "success": 0,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.042,
-   "median_pos_err_mm": 14.606,
-   "physics_steps_per_s": 7207,
+   "max_penetration_mm": 0.041,
+   "median_pos_err_mm": 14.594,
+   "physics_steps_per_s": 7238,
    "geoms": 237
   },
   "0.2 perturbed": {
@@ -35,7 +35,7 @@
    "unstable": 0,
    "max_penetration_mm": 0.337,
    "median_pos_err_mm": 14.059,
-   "physics_steps_per_s": 7360,
+   "physics_steps_per_s": 7377,
    "geoms": 237
   },
   "0.4 aligned": {
@@ -44,20 +44,20 @@
    "unstable": 0,
    "max_penetration_mm": 0.014,
    "median_pos_err_mm": 0.131,
-   "physics_steps_per_s": 4814,
+   "physics_steps_per_s": 4829,
    "geoms": 237
   },
   "0.4 perturbed": {
    "success": 4,
    "trials": 100,
    "unstable": 0,
-   "max_penetration_mm": 0.268,
-   "median_pos_err_mm": 13.481,
-   "physics_steps_per_s": 7110,
+   "max_penetration_mm": 0.302,
+   "median_pos_err_mm": 13.476,
+   "physics_steps_per_s": 7102,
    "geoms": 237
   }
  },
- "render_fps_64x64": 173,
+ "render_fps_64x64": 160,
  "gl_renderer": "Mesa Intel(R) Iris(R) Xe Graphics (TGL GT2)",
- "render_fps_480x640": 144
+ "render_fps_480x640": 148
 }

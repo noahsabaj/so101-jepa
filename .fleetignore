@@ -6,3 +6,4 @@ outputs/
 checkpoints/
 .fleet-home/
 !third_party/H-JEPA/stable_worldmodel/data/
+.isaac/

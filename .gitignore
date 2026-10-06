@@ -13,3 +13,4 @@ __pycache__/
 *.mp4
 bakeoff/results/*.png
 bakeoff/results/_*
+.isaac/

@@ -6,6 +6,7 @@ Run: uv run --with mani_skill python bakeoff/insert_maniskill.py [trials]
 """
 
 import json
+import os
 import sys
 import tempfile
 import time
@@ -24,6 +25,9 @@ OUT = Path("bakeoff/results")
 CLEARANCES_MM = [0.0, 0.2, 0.4]
 TRIALS = int(sys.argv[1]) if len(sys.argv) > 1 else 100
 TIMESTEP = 0.0005
+# PhysX settings for tight insertion (TGS solver, small contact offset, slow push-out of overlaps).
+PHYSX = dict(tgs=True, contact_offset=0.0005, depenetration=0.05, position_iterations=20)  # best of a 4-setting sweep
+PHYSX.update(json.loads(os.environ.get("PHYSX", "{}")))
 CAM_POS = np.array([0.16, -0.20, 0.16])
 
 
@@ -54,8 +58,9 @@ def look_at(pos, target):
 
 
 def build_scene(clearance, info, tmp):
-    sapien.physx.set_shape_config(contact_offset=0.002, rest_offset=0.0)
-    sapien.physx.set_body_config(solver_position_iterations=20, solver_velocity_iterations=2)
+    sapien.physx.set_scene_config(enable_tgs=PHYSX["tgs"], enable_pcm=True)
+    sapien.physx.set_shape_config(contact_offset=PHYSX["contact_offset"], rest_offset=0.0)
+    sapien.physx.set_body_config(solver_position_iterations=PHYSX["position_iterations"], solver_velocity_iterations=2)
     sapien.physx.set_default_material(static_friction=0.4, dynamic_friction=0.4, restitution=0.0)
     scene = sapien.Scene()
     scene.set_timestep(TIMESTEP)
@@ -75,6 +80,7 @@ def build_scene(clearance, info, tmp):
     b.add_visual_from_file(str(PARTS / "servo.obj"), scale=scale.tolist(),
                            material=sapien.render.RenderMaterial(base_color=[0.1, 0.1, 0.1, 1]))
     servo = b.build(name="servo")
+    servo.find_component_by_type(sapien.physx.PhysxRigidDynamicComponent).set_max_depenetration_velocity(PHYSX["depenetration"])
 
     cam = scene.add_camera("view", 640, 480, np.radians(45), 0.01, 10)
     cam.entity.set_pose(look_at(CAM_POS, info["seated_servo_pos"]))
@@ -137,7 +143,7 @@ def render_fps(scene, size, n=300):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     info = json.loads((PARTS / "parts.json").read_text())
-    report = {"simulator": f"sapien {sapien.__version__} (ManiSkill's engine), PhysX CPU",
+    report = {"simulator": f"sapien {sapien.__version__} (ManiSkill's engine), PhysX CPU", "physx": PHYSX,
               "contact": "convex pieces (CoACD)", "clearances": {}}
     cases = [(c, cond) for c in CLEARANCES_MM for cond in hand.CONDITIONS]
     with tempfile.TemporaryDirectory() as tmp:
@@ -159,7 +165,7 @@ def main():
             }
     report["render_fps_64x64"] = round(render_fps(scene, (64, 64)))
     report["render_fps_480x640"] = round(render_fps(scene, (480, 640)))
-    (OUT / "maniskill.json").write_text(json.dumps(report, indent=1))
+    (OUT / os.environ.get("REPORT", "maniskill.json")).write_text(json.dumps(report, indent=1))
     print(json.dumps(report, indent=1))
 
 
