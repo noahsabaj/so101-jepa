@@ -1,0 +1,27 @@
+# SO-101: flat planning with LeWM (multi-start gradient descent, H-JEPA DROID solver settings).
+# Level-1 steps are 0.2 s. The planner sees 1 s ahead and replans every 0.4 s.
+policy: ???
+seed: 1234
+solver:
+  _target_: stable_worldmodel.solver.GradientSolver
+  n_steps: 90
+  min_its: 30
+  early_stop_patience: 5
+  early_stop_rel_delta: 0.01
+  batch_size: 1
+  var_scale: 1.5
+  num_samples: 32
+  action_noise: 0
+  action_clip_sigma: 2.0
+  device: cuda
+  seed: ${seed}
+  optimizer_cls:
+    _target_: hydra.utils.get_class
+    path: torch.optim.AdamW
+  optimizer_kwargs:
+    lr: 0.05
+    weight_decay: 0.01
+plan_config:
+  horizon: 5
+  receding_horizon: 2
+  cost_last_n: 1

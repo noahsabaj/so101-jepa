@@ -1,0 +1,3 @@
+[submodule "third_party/H-JEPA"]
+	path = third_party/H-JEPA
+	url = https://github.com/noahsabaj/H-JEPA.git

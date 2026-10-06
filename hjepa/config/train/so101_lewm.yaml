@@ -1,0 +1,6 @@
+# SO-101 sim: flat LeWM (one level).
+defaults:
+- base/so101
+- _self_
+output_model_name: so101_lewm
+num_levels: 1

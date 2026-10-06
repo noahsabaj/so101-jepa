@@ -1,0 +1,63 @@
+{
+ "simulator": "mujoco 3.14.0",
+ "contact": "convex pieces (CoACD)",
+ "clearances": {
+  "0.0 aligned": {
+   "success": 0,
+   "trials": 100,
+   "unstable": 0,
+   "max_penetration_mm": 0.097,
+   "median_pos_err_mm": 14.527,
+   "physics_steps_per_s": 7075,
+   "geoms": 237
+  },
+  "0.0 perturbed": {
+   "success": 0,
+   "trials": 100,
+   "unstable": 0,
+   "max_penetration_mm": 0.174,
+   "median_pos_err_mm": 14.49,
+   "physics_steps_per_s": 7330,
+   "geoms": 237
+  },
+  "0.2 aligned": {
+   "success": 0,
+   "trials": 100,
+   "unstable": 0,
+   "max_penetration_mm": 0.042,
+   "median_pos_err_mm": 14.606,
+   "physics_steps_per_s": 7207,
+   "geoms": 237
+  },
+  "0.2 perturbed": {
+   "success": 0,
+   "trials": 100,
+   "unstable": 0,
+   "max_penetration_mm": 0.337,
+   "median_pos_err_mm": 14.059,
+   "physics_steps_per_s": 7360,
+   "geoms": 237
+  },
+  "0.4 aligned": {
+   "success": 100,
+   "trials": 100,
+   "unstable": 0,
+   "max_penetration_mm": 0.014,
+   "median_pos_err_mm": 0.131,
+   "physics_steps_per_s": 4814,
+   "geoms": 237
+  },
+  "0.4 perturbed": {
+   "success": 4,
+   "trials": 100,
+   "unstable": 0,
+   "max_penetration_mm": 0.268,
+   "median_pos_err_mm": 13.481,
+   "physics_steps_per_s": 7110,
+   "geoms": 237
+  }
+ },
+ "render_fps_64x64": 173,
+ "gl_renderer": "Mesa Intel(R) Iris(R) Xe Graphics (TGL GT2)",
+ "render_fps_480x640": 144
+}

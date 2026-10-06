@@ -1,0 +1,8 @@
+# Large outputs: never pushed, never deleted by a mirror. fleet matches these names at any depth,
+# so the H-JEPA package directory stable_worldmodel/data is added back explicitly.
+data/
+runs/
+outputs/
+checkpoints/
+.fleet-home/
+!third_party/H-JEPA/stable_worldmodel/data/

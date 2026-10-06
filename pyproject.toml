@@ -1,0 +1,41 @@
+[project]
+name = "so101-jepa"
+version = "0.1.0"
+description = "An SO-101 arm learns to assemble an SO-101 arm with a hierarchical JEPA world model"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "h-jepa",                     # third_party/H-JEPA: stable_worldmodel (+ h_jepa scripts run from source)
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "torchaudio==2.7.1",          # pulled in by h-jepa; listed so it comes from the cu128 index too
+    "transformers>=4.50.0",
+    "stable-pretraining==0.1.7",  # H-JEPA training needs exactly 0.1.7
+    "datasets>=4",
+    "lightning>=2.5",
+    "torchmetrics",
+    "hydra-core",
+    "scikit-learn",
+    "matplotlib",
+    "mujoco==3.14.0",             # pinned as in H-JEPA: versions change contact outcomes
+    "gymnasium==1.2.3",
+    "h5py",
+    "hdf5plugin",
+    "numpy",
+    "pillow",
+    "trimesh",
+    "coacd",                      # convex decomposition of CAD parts for contact
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+h-jepa = { path = "third_party/H-JEPA", editable = true }
+torch = [{ index = "pytorch-cu128", marker = "sys_platform != 'darwin'" }]
+torchvision = [{ index = "pytorch-cu128", marker = "sys_platform != 'darwin'" }]
+torchaudio = [{ index = "pytorch-cu128", marker = "sys_platform != 'darwin'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

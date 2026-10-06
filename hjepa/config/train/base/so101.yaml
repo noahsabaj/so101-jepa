@@ -1,0 +1,98 @@
+# @package _global_
+# SO-101 sim: settings shared by the flat LeWM and the H-JEPA models.
+# Level 1 follows the H-JEPA DROID recipe (causal transformer with AdaLN action input, raw actions,
+# inverse dynamics loss) with the AntMaze fusion encoder (pixels + joint angles). Data: 5 Hz.
+data:
+  dataset:
+    name: so101_train
+    val_name: so101_val
+    keys_to_load: [pixels, action, proprio]
+    keys_to_cache: [action, proprio]
+    level1:
+      frameskip: 1
+      num_steps: ${eval:'${level1.wm.history_size} + ${level1.wm.rollout_n}'}
+output_model_name: model
+env: so101
+subdir: ${env}/${output_model_name}/seed${seed}
+hydra:
+  run:
+    dir: ${oc.env:HJEPA_HOME}/ckpts/${subdir}/hydra
+quick_debug: false
+num_workers: 10
+seed: 42
+img_size: 64  # per view; frames are 64x128 (scene | wrist), the 8x8 position grid is stretched to 8x16
+patch_size: 8
+dump_object: true
+save_every_n_epochs: 1
+resume_every_n_steps: 2000
+trainer:
+  max_epochs: 10
+  devices: 1
+  accelerator: gpu
+  precision: bf16
+  gradient_clip_val: 1.0
+  num_sanity_val_steps: 1
+loader:
+  batch_size: 128
+  num_workers: ${num_workers}
+  drop_last: true
+  persistent_workers: true
+  prefetch_factor: 2
+  pin_memory: true
+  shuffle: true
+optimizer:
+  type: AdamW
+  lr: 5.0e-04
+  weight_decay: 1.0e-04
+  warmup_ratio: 0.05
+wandb:
+  enabled: false
+  config: {entity: null, project: so101-jepa, name: null, id: null, resume: allow, log_model: false}
+planning_eval:
+  enabled: false
+  config_name: null
+  output_subdir: planning_eval
+  run_on_train_end: false
+  every_n_epochs: 0
+final_probing_decoding_eval:
+  enabled: false
+level1:
+  lr: 5.0e-04
+  idm_coeff: 100
+  idm:
+    hidden_dim: 256
+  wm:
+    history_size: 4
+    rollout_n: 1
+    embed_dim: 384
+    use_proprio: true
+    proprio_emb_dim: 128
+    proprio_dim: 6
+    action_dim: 6
+  encoder:
+    projector: {type: identity}
+    pixel_encoder:
+      encoder: {type: vit, scale: tiny, use_mask_token: false}
+      projector: {type: mlp, output_dim: 256}
+    proprio_encoder:
+      encoder: {type: mlp, hidden_dim: 256, output_dim: 128}
+      projector: {type: identity}
+  predictor:
+    type: causal_transformer
+    action_dim: ${level1.wm.action_dim}
+    predictor_dim: 384
+    depth: 6
+    heads: 6
+    dim_head: 64
+    mlp_ratio: 4.0
+    max_seq_len: 16
+    dropout: 0.1
+    emb_dropout: 0.0
+    adaln_init_scale: 0.02
+  action_embed:
+    type: identity
+  loss:
+    embed:
+      sigreg:
+        enabled: true
+        weight: 0.08

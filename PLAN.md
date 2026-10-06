@@ -105,8 +105,8 @@ before its first test.
 
 | Rung | Task | Sim pass mark (proposal) |
 |---|---|---|
-| 1 | Reach to a goal image | 90 of 100 test trials within 1 cm |
-| 2 | Pick and place with only the final goal image | 30 of 50 |
+| 1 | Reach to a goal image | 90 of 100 test trials within 1 cm (fixed 2026-10-06, see below) |
+| 2 | Pick and place with only the final goal image | 30 of 50 (fixed 2026-10-06, see below) |
 | 3 | Put a servo into its housing | 30 of 50 fully in (within 1 mm of the CAD pose) |
 | 4 | Press a horn onto a servo | 30 of 50 |
 | 5 | One fastener (snap-fit first, then a screw with a tool) | 30 of 50 |
@@ -114,6 +114,15 @@ before its first test.
 | 7 | The full robot-friendly arm | 5 of 10 |
 | 8 | Rungs 1 to 7 on the real arm | Set before each test |
 | 9 | The stock SO-101 | Set before the test |
+
+Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_loop.py):
+- Rung 1: the goal is an observation (scene and wrist views, joint angles) of the arm at a random
+  reachable pose, gripper pointing down, 4 to 20 cm above the table. Success: the grasp point ends
+  within 1 cm of the goal's grasp point after 100 steps (20 s). Test trials: seeds 5000 to 5099.
+- Rung 2: the goal is an observation of the cube at a new place (6 cm or more away) and the arm at
+  its rest pose. No sub-goals. Success: after 300 steps (60 s) the cube is within 2 cm (xy) of the
+  goal place and rests on the table. Test trials: seeds 5000 to 5049.
+- We tune on seeds 1000 to 4999. We compare flat LeWM and 2-level H-JEPA on the same test trials.
 
 ## 7. Phases
 
@@ -123,6 +132,9 @@ before its first test.
    physics steps per second, render speed, and setup work on the fleet. Select one.
 2. SO-101 scene: official MJCF, table, cubes, wrist and scene cameras. Randomize textures,
    light, camera pose, servo backlash (0.9 degrees) and friction.
+   Deviation (2026-10-06): the scene is in MuJoCo before step 1 ends. Rungs 1 and 2 do not depend
+   on insertion physics, and MuJoCo has the official SO-101 model. If another simulator wins
+   step 1, rungs 3 and higher move to it.
 3. Scripted data: 1,000 or more reach and pick-and-place episodes. Make the episodes long, because
    the upper levels need long windows (H-JEPA failed on short Push-T episodes).
 4. Train a flat LeWM and a 2-level H-JEPA (H-JEPA code). Offline tests: the rank of the expert's
