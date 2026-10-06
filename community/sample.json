@@ -1,0 +1,3089 @@
+[
+ {
+  "dataset": "00ri/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "1lyz123576/so101_test-1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 35,
+  "video_gb": 0.105
+ },
+ {
+  "dataset": "356c/so100_duck_reposition_1",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 60,
+  "video_gb": 1.991
+ },
+ {
+  "dataset": "356c/so100_rope_reposition_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 60,
+  "video_gb": 2.013
+ },
+ {
+  "dataset": "Aaron757/so100_test7",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.081
+ },
+ {
+  "dataset": "Activationmobile/so101_test",
+  "camera": "observation.images.side_1",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.056
+ },
+ {
+  "dataset": "AndrejOrsula/lerobot_double_ball_stacking",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 51,
+  "video_gb": 0.065
+ },
+ {
+  "dataset": "AndrejOrsula/lerobot_triple_ball_stacking",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 101,
+  "video_gb": 0.257
+ },
+ {
+  "dataset": "Angry-Lasagna/so101_dice_circle_v1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.024
+ },
+ {
+  "dataset": "AntoineA/so100_green_cube_black_circle",
+  "camera": "observation.images.left_side",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.07
+ },
+ {
+  "dataset": "AshBastian9/so100_demopour2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.003
+ },
+ {
+  "dataset": "AshBastian9/so100_demotwist",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.003
+ },
+ {
+  "dataset": "Ayush-Sharan-1/c-4g_tC-T_fC-T_d-250525_v-1",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.214
+ },
+ {
+  "dataset": "Ayush-Sharan-1/so100_pickupOrangeCyl",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.067
+ },
+ {
+  "dataset": "Ayush-Sharan-1/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.277
+ },
+ {
+  "dataset": "Ayush-Sharan-1/so100_ticTacToe_v3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 19,
+  "video_gb": 0.085
+ },
+ {
+  "dataset": "Bapt120/so101_cup1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.011
+ },
+ {
+  "dataset": "Bapt120/so101_cup4",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.006
+ },
+ {
+  "dataset": "Bartm3/tape_to_bin2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.253
+ },
+ {
+  "dataset": "Beegbrain/so100_stack_green_cube",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.061
+ },
+ {
+  "dataset": "Beegbrain/stack_green_cube_blue",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.061
+ },
+ {
+  "dataset": "Beegbrain/sweep_tissue_cube",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.172
+ },
+ {
+  "dataset": "BobBobbson/so100_BEP_Tactile_Dataset_Finalllly",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 101,
+  "video_gb": 0.513
+ },
+ {
+  "dataset": "BobBobbson/so100_test_FIRST_DATA",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.245
+ },
+ {
+  "dataset": "BranoSandy/so100_test_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.004
+ },
+ {
+  "dataset": "CalvinChiff/record-flower",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 11,
+  "video_gb": 0.182
+ },
+ {
+  "dataset": "Clementppr/dataset_set_up_table_fork",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.136
+ },
+ {
+  "dataset": "Cornito/so101_chess17",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 190,
+  "video_gb": 4.235
+ },
+ {
+  "dataset": "Cornito/so101_chess4",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.024
+ },
+ {
+  "dataset": "CrawlAiHuggingFace/multiplied_so101_first",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.031
+ },
+ {
+  "dataset": "CrawlAiHuggingFace/multiplied_so101_pen_mug_10_1",
+  "camera": "observation.images.left_side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.067
+ },
+ {
+  "dataset": "CrawlAiHuggingFace/multiplied_so101_test",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.241
+ },
+ {
+  "dataset": "DAbraham/5Position",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.282
+ },
+ {
+  "dataset": "DanqingZ/filtered_pick_yellow",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 46,
+  "video_gb": 0.24
+ },
+ {
+  "dataset": "DanqingZ/new_tic_tac_toe_4",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.135
+ },
+ {
+  "dataset": "DanqingZ/new_tic_tac_toe_4_06182025",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.016
+ },
+ {
+  "dataset": "DanqingZ/pick_test",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 1,
+  "video_gb": 0.004
+ },
+ {
+  "dataset": "DanqingZ/so100_test_3_cameras",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.026
+ },
+ {
+  "dataset": "DanqingZ/so100_test_pick_green_1",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.012
+ },
+ {
+  "dataset": "DanqingZ/so100_test_pick_green_2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.014
+ },
+ {
+  "dataset": "DanqingZ/so100_test_pick_green_4",
+  "camera": "observation.images.right_side_1",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.015
+ },
+ {
+  "dataset": "DanqingZ/so100_test_pickup_gray_1",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.022
+ },
+ {
+  "dataset": "DanqingZ/so100_test_yellow_cuboid_2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.075
+ },
+ {
+  "dataset": "DanqingZ/tic_tac_toe_1_0615_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.111
+ },
+ {
+  "dataset": "DanqingZ/tic_tac_toe_7_raw_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.122
+ },
+ {
+  "dataset": "DanqingZ/tic_tac_toe_8_raw_3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.036
+ },
+ {
+  "dataset": "DanqingZ/tic_tac_toe_grid_4_raw",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.29
+ },
+ {
+  "dataset": "DanqingZ/tic_tac_toe_grid_4_raw_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.028
+ },
+ {
+  "dataset": "DavidJones03/lerobot",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.066
+ },
+ {
+  "dataset": "DavidYeh0709/so100_david_0610_2",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.035
+ },
+ {
+  "dataset": "DorayakiLin/so100_stack_cube",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.036
+ },
+ {
+  "dataset": "DorayakiLin/so100_test_Lucas2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.004
+ },
+ {
+  "dataset": "EGLima/pen_task_v3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 41,
+  "video_gb": 0.392
+ },
+ {
+  "dataset": "EverNorif/so101-place-orange",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 61,
+  "video_gb": 0.478
+ },
+ {
+  "dataset": "GD1221/so101_test",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.025
+ },
+ {
+  "dataset": "Gano007/so100_gano",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 50,
+  "video_gb": 0.444
+ },
+ {
+  "dataset": "Gano007/so100_second",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.226
+ },
+ {
+  "dataset": "HaloLi0828/record-pick-1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.535
+ },
+ {
+  "dataset": "Haribot099/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.008
+ },
+ {
+  "dataset": "Haribot099/so101_test1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.025
+ },
+ {
+  "dataset": "HarrisonLee24/so100_test-1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.013
+ },
+ {
+  "dataset": "Hugo-Castaing/LAR_DEMO",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 90,
+  "video_gb": 0.592
+ },
+ {
+  "dataset": "HuoYixiao/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.343
+ },
+ {
+  "dataset": "JackLiuX/so100_test_candy",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 35,
+  "video_gb": 0.123
+ },
+ {
+  "dataset": "Jeevesh2009/so101_gray_block_lowvar_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.212
+ },
+ {
+  "dataset": "Jeevesh2009/so101_new_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 62,
+  "video_gb": 0.191
+ },
+ {
+  "dataset": "Jiangeng/so100_413",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.187
+ },
+ {
+  "dataset": "JimmyPeng02/so100_test_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.016
+ },
+ {
+  "dataset": "Jinheng0130/Lay",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 60,
+  "video_gb": 0.177
+ },
+ {
+  "dataset": "Jinheng0130/Look",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.06
+ },
+ {
+  "dataset": "Kento2001/so100_test7",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.024
+ },
+ {
+  "dataset": "Kento2001/so100_test_",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.022
+ },
+ {
+  "dataset": "Kunalmod/so101_groot",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.164
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/141-Electrify-battery_placing",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 37,
+  "video_gb": 0.115
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/157-Pas_de_bras_Pas_de_Chocolat-Strawberries",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 41,
+  "video_gb": 0.09
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/159-LeBabybot-peg_in_hole",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 162,
+  "video_gb": 3.238
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/160-LegoBot-lego_pixelart_stage_1_v1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.241
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/174-Mate-so101_dataset6",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.063
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/190-RecycloBots-recyclobots",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 1.062
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/191-Dum-E-so100-fries",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 110,
+  "video_gb": 0.297
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/300-Mad_Robots-remove_orange_object",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.158
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/347-WaterworksCrew-HandymanBot",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 61,
+  "video_gb": 0.395
+ },
+ {
+  "dataset": "LeRobot-worldwide-hackathon/380-horseinbox-HorseInBox",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 83,
+  "video_gb": 0.357
+ },
+ {
+  "dataset": "Lightbulbuser/so101_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.198
+ },
+ {
+  "dataset": "Louisnbt/so100_test7",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.017
+ },
+ {
+  "dataset": "Louisnbt/so100_test9",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.198
+ },
+ {
+  "dataset": "M3thRocks/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.011
+ },
+ {
+  "dataset": "M3thRocks/so101_test12",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.016
+ },
+ {
+  "dataset": "M3thRocks/so101_test13",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 45,
+  "video_gb": 0.479
+ },
+ {
+  "dataset": "MarkoBrie/so101_banana",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.003
+ },
+ {
+  "dataset": "MarkusWuenstel/clean-pens",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 48,
+  "video_gb": 0.205
+ },
+ {
+  "dataset": "MarkusWuenstel/distinguish-pens",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 10,
+  "video_gb": 0.031
+ },
+ {
+  "dataset": "MarkusWuenstel/tape-two-cameras",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 11,
+  "video_gb": 0.015
+ },
+ {
+  "dataset": "Maski211123/so100_test0",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "Matlef/cube_tower_circle",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 211,
+  "video_gb": 6.673
+ },
+ {
+  "dataset": "Matlef/test3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.092
+ },
+ {
+  "dataset": "Mohamedal/eval_act_so100_model100k",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.088
+ },
+ {
+  "dataset": "Mohamedal/put_banana_bowl_dis_test2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.165
+ },
+ {
+  "dataset": "Mohamedal/put_peach_bowl_dis",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.287
+ },
+ {
+  "dataset": "Mohamedal/put_plum_bowl_dis",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.269
+ },
+ {
+  "dataset": "Mwuqiu/so100_point_first_ns",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 50,
+  "video_gb": 0.072
+ },
+ {
+  "dataset": "Ninkofu/sushi_put",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 101,
+  "video_gb": 0.218
+ },
+ {
+  "dataset": "Odog16/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.011
+ },
+ {
+  "dataset": "OmKulkarni/Pick_place_black_boxes",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.304
+ },
+ {
+  "dataset": "PPYH/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.01
+ },
+ {
+  "dataset": "Qiushuang/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.027
+ },
+ {
+  "dataset": "RASPIAUDIO/so100_test7",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.088
+ },
+ {
+  "dataset": "RaulSaya/Bylogic0",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.037
+ },
+ {
+  "dataset": "RaulSaya/so101_pickandplacebylogic",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.896
+ },
+ {
+  "dataset": "RaulSaya/so101_test3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.009
+ },
+ {
+  "dataset": "RaulSaya/so101_test5",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.019
+ },
+ {
+  "dataset": "ReubenLim/so101_lerobot_hackathon",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 52,
+  "video_gb": 0.085
+ },
+ {
+  "dataset": "RoboHP/pick_small_blue_cube_box",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.088
+ },
+ {
+  "dataset": "Ryosei2/0619_green50",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.154
+ },
+ {
+  "dataset": "Ryosei2/0704_bontan3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.015
+ },
+ {
+  "dataset": "Ryosei2/0704_donut1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.012
+ },
+ {
+  "dataset": "Ryosei2/0704_donut2",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 10,
+  "video_gb": 0.011
+ },
+ {
+  "dataset": "Ryosei2/0704_donut3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.001
+ },
+ {
+  "dataset": "Ryosei2/greenblock0613_0-50",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.068
+ },
+ {
+  "dataset": "SahilChande/so100_demo_cap_pick",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.01
+ },
+ {
+  "dataset": "SharkDan/so100_test_f2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 51,
+  "video_gb": 0.185
+ },
+ {
+  "dataset": "SharkDan/so100_test_f3c",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.191
+ },
+ {
+  "dataset": "Stevenyu8888/so101_test_3d",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 4,
+  "video_gb": 0.019
+ },
+ {
+  "dataset": "Tank-123/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.157
+ },
+ {
+  "dataset": "TzuShian/so100_chess_test2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.1
+ },
+ {
+  "dataset": "VoicAndrei/so100_cubes_noaptea_companiilor",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 6,
+  "video_gb": 0.086
+ },
+ {
+  "dataset": "WalonWal/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.019
+ },
+ {
+  "dataset": "Waykzen/raju",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 21,
+  "video_gb": 0.287
+ },
+ {
+  "dataset": "Whakamua/so100_mouse",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 1,
+  "video_gb": 0.002
+ },
+ {
+  "dataset": "Whakamua/so100_test2",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.002
+ },
+ {
+  "dataset": "Winster/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.023
+ },
+ {
+  "dataset": "XXRRSSRR/so100_v3_num_episodes_50",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.385
+ },
+ {
+  "dataset": "Xiewei1211/Grab_panda_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 54,
+  "video_gb": 0.196
+ },
+ {
+  "dataset": "ZHUZHUXIADDD/so100_test1",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.014
+ },
+ {
+  "dataset": "Zufayri/fayri2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.027
+ },
+ {
+  "dataset": "aaronsu11/so100_lego",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.764
+ },
+ {
+  "dataset": "aaronsu11/so100_pick",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 125,
+  "video_gb": 0.125
+ },
+ {
+  "dataset": "advpatel/so100_test2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.036
+ },
+ {
+  "dataset": "ahad-j/chess-b5-to-b6",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 10,
+  "video_gb": 0.118
+ },
+ {
+  "dataset": "ahad-j/chess_a8_to_d8",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.108
+ },
+ {
+  "dataset": "ahork/record-test-6",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.106
+ },
+ {
+  "dataset": "aiwhisperer/test2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.031
+ },
+ {
+  "dataset": "akira-sasaki/smolvla_base",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.114
+ },
+ {
+  "dataset": "alan-123456/test_red_final",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 8,
+  "video_gb": 0.094
+ },
+ {
+  "dataset": "allenchienxxx/so100_block_bin",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 51,
+  "video_gb": 0.087
+ },
+ {
+  "dataset": "allenchienxxx/so100_block_mug",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 101,
+  "video_gb": 0.265
+ },
+ {
+  "dataset": "andlyu/newiii_many_y_3d",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 75,
+  "video_gb": 2.336
+ },
+ {
+  "dataset": "andlyu/newiii_salad",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 21,
+  "video_gb": 1.559
+ },
+ {
+  "dataset": "andlyu/newiii_salad_cc",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.612
+ },
+ {
+  "dataset": "andlyu/newiii_salad_val",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.082
+ },
+ {
+  "dataset": "anichris/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.008
+ },
+ {
+  "dataset": "apayan/so100_ball1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.027
+ },
+ {
+  "dataset": "apayan/so100_key4",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 13,
+  "video_gb": 0.122
+ },
+ {
+  "dataset": "apayan/so100_key5",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.031
+ },
+ {
+  "dataset": "arulloomba/so100_test_20250424_213858",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.003
+ },
+ {
+  "dataset": "arulloomba/so100_test_5",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.269
+ },
+ {
+  "dataset": "arulloomba/so100_test_trimmed",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.206
+ },
+ {
+  "dataset": "asafxrev/so100_jenga_box_may24b_two_cameras",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.021
+ },
+ {
+  "dataset": "bensprenger/TEST_left_arm_lego_brick",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.004
+ },
+ {
+  "dataset": "bensprenger/final_final_right_arm_test_v1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.009
+ },
+ {
+  "dataset": "bensprenger/final_right_arm_test_0",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.009
+ },
+ {
+  "dataset": "bensprenger/left_arm_yellow_brick_in_box_v0",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.233
+ },
+ {
+  "dataset": "bensprenger/purple_test_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.012
+ },
+ {
+  "dataset": "bjb7/so101_pen_mug",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.338
+ },
+ {
+  "dataset": "bjb7/so101_pen_mug_10_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.067
+ },
+ {
+  "dataset": "bjb7/so101_pen_mug_10_13",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.065
+ },
+ {
+  "dataset": "bjb7/so101_pen_mug_10_14",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.06
+ },
+ {
+  "dataset": "bjb7/so101_pen_mug_10_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.074
+ },
+ {
+  "dataset": "boyangs235/so100-Put_square_into_area",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 107,
+  "video_gb": 0.19
+ },
+ {
+  "dataset": "burgalon/so100_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 53,
+  "video_gb": 0.413
+ },
+ {
+  "dataset": "bursomi/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.043
+ },
+ {
+  "dataset": "campa-rabb/so100_test",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.025
+ },
+ {
+  "dataset": "cerealkiller2527/so101_rayban_quality_assessment_001",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.054
+ },
+ {
+  "dataset": "cezarsolo/so100_data",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.368
+ },
+ {
+  "dataset": "cezarsolo/so100_newdata",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.382
+ },
+ {
+  "dataset": "cezarsolo/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.023
+ },
+ {
+  "dataset": "charleyong/so100_tic_tac_toe_autoend",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 180,
+  "video_gb": 1.182
+ },
+ {
+  "dataset": "charleyong/so100_ycube_put_box",
+  "camera": "observation.images.left_side",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.412
+ },
+ {
+  "dataset": "chirag1701/can",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.21
+ },
+ {
+  "dataset": "chirag1701/pick_place_blue_threecams_more",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 36,
+  "video_gb": 0.106
+ },
+ {
+  "dataset": "chirag1701/record-test_red",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.168
+ },
+ {
+  "dataset": "cjlqwe/so100_71_100",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.188
+ },
+ {
+  "dataset": "danaaubakirova/so100_task_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 25,
+  "video_gb": 0.124
+ },
+ {
+  "dataset": "danaaubakirova/so100_task_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 25,
+  "video_gb": 0.129
+ },
+ {
+  "dataset": "danaaubakirova/so100_task_3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 25,
+  "video_gb": 0.119
+ },
+ {
+  "dataset": "danaaubakirova/so100_v2_task_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.223
+ },
+ {
+  "dataset": "danaaubakirova/svla_so100_task4_v3_clean",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.386
+ },
+ {
+  "dataset": "danielkorth/bike-light",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 25,
+  "video_gb": 0.102
+ },
+ {
+  "dataset": "danielkorth/bike-light4am",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.165
+ },
+ {
+  "dataset": "danielkorth/green-marker",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.067
+ },
+ {
+  "dataset": "danielkorth/green-marker4am",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 52,
+  "video_gb": 0.251
+ },
+ {
+  "dataset": "danielkorth/usbc-cable-2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 17,
+  "video_gb": 0.044
+ },
+ {
+  "dataset": "davidgoss/record-test2",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 29,
+  "video_gb": 0.178
+ },
+ {
+  "dataset": "deepinsand/so100_test",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.01
+ },
+ {
+  "dataset": "deepinsand/so100_test2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.19
+ },
+ {
+  "dataset": "dongseon/so100_0429",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.03
+ },
+ {
+  "dataset": "dongseon/so100_0510",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.025
+ },
+ {
+  "dataset": "dongseon/so100_test11",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.059
+ },
+ {
+  "dataset": "dongseon/so100_test7",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 8,
+  "video_gb": 0.028
+ },
+ {
+  "dataset": "dongseon/so100_test8",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 8,
+  "video_gb": 0.025
+ },
+ {
+  "dataset": "dopaul/game_v5",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 56,
+  "video_gb": 1.912
+ },
+ {
+  "dataset": "dopaul/game_v6",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 144,
+  "video_gb": 4.004
+ },
+ {
+  "dataset": "drjaisree25/carrot_data_0",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 43,
+  "video_gb": 0.153
+ },
+ {
+  "dataset": "drjaisree25/onion_data",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 51,
+  "video_gb": 0.33
+ },
+ {
+  "dataset": "drjaisree25/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.041
+ },
+ {
+  "dataset": "dsfsg/grasp_pen_and_bottle",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.141
+ },
+ {
+  "dataset": "dsfsg/grasp_pens",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.379
+ },
+ {
+  "dataset": "dulics/so100_hellolerobot",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.024
+ },
+ {
+  "dataset": "dulics/so100_helloworld",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.027
+ },
+ {
+  "dataset": "duthvik/sputnik_100_64_kitchen_tasks",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.02
+ },
+ {
+  "dataset": "duthvik/sputnik_100_66_kitchen_tasks",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.029
+ },
+ {
+  "dataset": "duthvik/sputnik_100_67_kitchen_tasks",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.022
+ },
+ {
+  "dataset": "duthvik/sputnik_100_71_creative_tasks",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.016
+ },
+ {
+  "dataset": "dweiQAQ/so101_test_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.044
+ },
+ {
+  "dataset": "easonjcc/so100_test-02",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.131
+ },
+ {
+  "dataset": "easonjcc/so100_test-05",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.112
+ },
+ {
+  "dataset": "fljjoin/so100_test1004",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.006
+ },
+ {
+  "dataset": "fuka02/so101_test_0718_3",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.015
+ },
+ {
+  "dataset": "ganondorofu/so101_3cam_ml",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.079
+ },
+ {
+  "dataset": "gribok201/150episodes6",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.488
+ },
+ {
+  "dataset": "guanfengliu/grab_brush_diff_bin_orient",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.449
+ },
+ {
+  "dataset": "gustavkeppler/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.025
+ },
+ {
+  "dataset": "hhh6/so101_test8",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.165
+ },
+ {
+  "dataset": "hoon-shin/so100_basketball",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 1.993
+ },
+ {
+  "dataset": "howld/so100_grab_lego",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 25,
+  "video_gb": 0.275
+ },
+ {
+  "dataset": "howld/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.041
+ },
+ {
+  "dataset": "hrhraj/act_dice_dataset_25514",
+  "camera": "observation.images.front_side",
+  "split": "test",
+  "episodes": 46,
+  "video_gb": 0.29
+ },
+ {
+  "dataset": "hrhraj/calibrated_fresh_dataset",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 38,
+  "video_gb": 0.265
+ },
+ {
+  "dataset": "hrhraj/groundingdino_dice_demos_01",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "hrhraj/groundingdino_dice_demos_04",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "hrhraj/groundingdino_dice_demos_05",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "hrhraj/groundingdino_dice_demos_13",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "hrhraj/groundingdino_dice_demos_14",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "hrhraj/so100_dice_red_v2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.103
+ },
+ {
+  "dataset": "hrhraj/so100_dice_yellow",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 25,
+  "video_gb": 0.372
+ },
+ {
+  "dataset": "hrhraj/so100_lego_figure_with_boxes",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.165
+ },
+ {
+  "dataset": "hrhraj/so100_objects_v1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.206
+ },
+ {
+  "dataset": "huyouare/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.016
+ },
+ {
+  "dataset": "isadev/bougies3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 200,
+  "video_gb": 0.819
+ },
+ {
+  "dataset": "jiajun001/put13-2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.23
+ },
+ {
+  "dataset": "jiroh2000/so100_test_01",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.016
+ },
+ {
+  "dataset": "jiroh2000/so100_test_04",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.096
+ },
+ {
+  "dataset": "jiuyal2/so100_marker_new_camera_pose_new_red",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 16,
+  "video_gb": 0.068
+ },
+ {
+  "dataset": "jmrog/record-sweet3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 65,
+  "video_gb": 0.436
+ },
+ {
+  "dataset": "jmrog/record_group",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 12,
+  "video_gb": 0.132
+ },
+ {
+  "dataset": "joonsu0109/so100_pickup_green_lego",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.321
+ },
+ {
+  "dataset": "joonsu0109/so100_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.02
+ },
+ {
+  "dataset": "jsyoon80/act_so100_test",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.022
+ },
+ {
+  "dataset": "jsyoon80/act_so100_test1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.021
+ },
+ {
+  "dataset": "juni3227/so100_test01",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.004
+ },
+ {
+  "dataset": "juni3227/so100_test02",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.004
+ },
+ {
+  "dataset": "juni3227/so100_test05",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 60,
+  "video_gb": 0.624
+ },
+ {
+  "dataset": "juni3227/so100_test06",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 5,
+  "video_gb": 0.034
+ },
+ {
+  "dataset": "jyang-ca/so101_test_domino",
+  "camera": "observation.images.front_side",
+  "split": "test",
+  "episodes": 50,
+  "video_gb": 0.327
+ },
+ {
+  "dataset": "kaiserbuffle/hanoi",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.678
+ },
+ {
+  "dataset": "kaiserbuffle/hanoi_dc",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 35,
+  "video_gb": 1.699
+ },
+ {
+  "dataset": "kaiserbuffle/hanoi_the_good_one",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 6,
+  "video_gb": 0.322
+ },
+ {
+  "dataset": "kaiserbuffle/hanoiv5",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 22,
+  "video_gb": 0.482
+ },
+ {
+  "dataset": "kantine/flip_A1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 11,
+  "video_gb": 0.118
+ },
+ {
+  "dataset": "kantine/kapla_tower_2_expert",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.262
+ },
+ {
+  "dataset": "kikiyu/so100_test",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.014
+ },
+ {
+  "dataset": "kkurzweil/so100_test_v001",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "kozakvoj/so101_test4",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.014
+ },
+ {
+  "dataset": "kristaqp/so101-pick-place",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 1.915
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_A3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.088
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_B1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.092
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_B1_v2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.336
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_B2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.086
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_B2_v3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.274
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_B3",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 10,
+  "video_gb": 0.093
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_B3_v2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.264
+ },
+ {
+  "dataset": "kyomangold/so100_ttt_C3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.089
+ },
+ {
+  "dataset": "lirislab/open_top_drawer_teabox",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.102
+ },
+ {
+  "dataset": "lirislab/push_cup_target",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.088
+ },
+ {
+  "dataset": "lirislab/put_banana_bowl",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.11
+ },
+ {
+  "dataset": "lirislab/put_coffee_cap_teabox",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.107
+ },
+ {
+  "dataset": "lirislab/unfold_bottom_right",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.092
+ },
+ {
+  "dataset": "liyitenga/so100_pick_dabaitu1",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 35,
+  "video_gb": 0.175
+ },
+ {
+  "dataset": "love3165303/so100_pick4",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.006
+ },
+ {
+  "dataset": "love3165303/so100_pick_ball_colors1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.051
+ },
+ {
+  "dataset": "love3165303/so100_pick_ball_colors2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 166,
+  "video_gb": 0.386
+ },
+ {
+  "dataset": "lqzjbs/data_testssss6",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.187
+ },
+ {
+  "dataset": "lsrsir/so100_test2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.005
+ },
+ {
+  "dataset": "lt-s/so100_train_move_blue_block_tray_to_blue_dish",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 23,
+  "video_gb": 0.099
+ },
+ {
+  "dataset": "lt-s/so100_train_move_blue_block_tray_to_blue_dish_flip",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.078
+ },
+ {
+  "dataset": "lt-s/so100_train_move_red_block_tray_to_red_dish_flip",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.081
+ },
+ {
+  "dataset": "lt-s/so100_train_move_six_blocks_tray_to_matching_dishes",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.216
+ },
+ {
+  "dataset": "lt-s/so100_train_move_two_blocks_tray_to_matching_dishes",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.086
+ },
+ {
+  "dataset": "luke250305/play_dice_250311.1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.166
+ },
+ {
+  "dataset": "luriss/so100_pick_and_place_box_task_0428",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.071
+ },
+ {
+  "dataset": "luriss/so100_pick_and_place_box_task_0430",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 26,
+  "video_gb": 0.05
+ },
+ {
+  "dataset": "magnusk/so100_blocktest_50",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.05
+ },
+ {
+  "dataset": "masato-ka/so100_cutlery_handling_simple",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.377
+ },
+ {
+  "dataset": "masato-ka/so100_grasp_lego",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 52,
+  "video_gb": 0.291
+ },
+ {
+  "dataset": "masato-ka/so100_nlact_block_instruct_v3",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 113,
+  "video_gb": 0.595
+ },
+ {
+  "dataset": "meetrais/ball_in_the_box",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.347
+ },
+ {
+  "dataset": "meetrais/cube_in_the_box4",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 50,
+  "video_gb": 0.184
+ },
+ {
+  "dataset": "mfyu/so101_red_obj_white_box_nums_10_0731",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.191
+ },
+ {
+  "dataset": "mfyu/so101_white_box_green_nums_20_0730",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.496
+ },
+ {
+  "dataset": "mldev19/so100_test_brick_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.01
+ },
+ {
+  "dataset": "near0248/woogoo_20250615_043007",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.151
+ },
+ {
+  "dataset": "nebo1337/GetTheRubber",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.266
+ },
+ {
+  "dataset": "noorzamri86/so100_test_globe_in_bin",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.034
+ },
+ {
+  "dataset": "noorzamri86/so100_test_globe_in_bin1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.018
+ },
+ {
+  "dataset": "odellus/so100_grasp",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 33,
+  "video_gb": 0.171
+ },
+ {
+  "dataset": "odellus/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.008
+ },
+ {
+  "dataset": "orsoromeo/so101_pick_and_place",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 50,
+  "video_gb": 0.236
+ },
+ {
+  "dataset": "paszea/so100_whale_2",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 50,
+  "video_gb": 0.407
+ },
+ {
+  "dataset": "pbvr/so101_test003",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 150,
+  "video_gb": 0.179
+ },
+ {
+  "dataset": "peerlesssa/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.011
+ },
+ {
+  "dataset": "pierfabre/CowCleanRandom",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 22,
+  "video_gb": 0.135
+ },
+ {
+  "dataset": "pierfabre/chicken",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 65,
+  "video_gb": 0.396
+ },
+ {
+  "dataset": "pierfabre/pig2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.287
+ },
+ {
+  "dataset": "ppankti81/record-blue",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 8,
+  "video_gb": 0.06
+ },
+ {
+  "dataset": "pranavsaroha/so100_medicine_0604_test",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 1,
+  "video_gb": 0.044
+ },
+ {
+  "dataset": "pranavsaroha/so100_medicine_0611",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 43,
+  "video_gb": 0.554
+ },
+ {
+  "dataset": "provac/so100_test",
+  "camera": "observation.images.side_1",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.013
+ },
+ {
+  "dataset": "psg777/blacktape10",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 13,
+  "video_gb": 0.031
+ },
+ {
+  "dataset": "psg777/blacktape5",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.008
+ },
+ {
+  "dataset": "psg777/blacktape8",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 11,
+  "video_gb": 0.022
+ },
+ {
+  "dataset": "psg777/glue3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.025
+ },
+ {
+  "dataset": "psg777/greencube3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 14,
+  "video_gb": 0.045
+ },
+ {
+  "dataset": "psg777/newone3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 15,
+  "video_gb": 0.041
+ },
+ {
+  "dataset": "psg777/newone4",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 12,
+  "video_gb": 0.035
+ },
+ {
+  "dataset": "psg777/redtape1",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 20,
+  "video_gb": 0.05
+ },
+ {
+  "dataset": "psg777/redtapepickup2",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 12,
+  "video_gb": 0.022
+ },
+ {
+  "dataset": "psg777/so100test1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.03
+ },
+ {
+  "dataset": "ptizzza/so101_pompom",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 30,
+  "video_gb": 0.118
+ },
+ {
+  "dataset": "ptizzza/so101_test3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.011
+ },
+ {
+  "dataset": "qiujun/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 57,
+  "video_gb": 0.234
+ },
+ {
+  "dataset": "qiujun/so101_test_v2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.144
+ },
+ {
+  "dataset": "rbo-corematic/so101_test_2",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.009
+ },
+ {
+  "dataset": "rbo-corematic/strawberries",
+  "camera": "observation.images.side_1",
+  "split": "train",
+  "episodes": 49,
+  "video_gb": 0.099
+ },
+ {
+  "dataset": "rfruit/so100_building_house_3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.033
+ },
+ {
+  "dataset": "rfruit/so100_building_house_4",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 5,
+  "video_gb": 0.032
+ },
+ {
+  "dataset": "ricky0526/so101_pick_toy_to_plate_v4",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 80,
+  "video_gb": 0.406
+ },
+ {
+  "dataset": "robbrit/so100_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.027
+ },
+ {
+  "dataset": "robotchip/squidgame1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.192
+ },
+ {
+  "dataset": "roboticshack/team13-three-balls-stacking",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 101,
+  "video_gb": 0.257
+ },
+ {
+  "dataset": "romanovvv1987/so100_test3",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.064
+ },
+ {
+  "dataset": "rshoff/so101_test_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.019
+ },
+ {
+  "dataset": "ryanpennings/so100_pegcrate_c2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.185
+ },
+ {
+  "dataset": "ryanpennings/so100_pegcrate_c3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.158
+ },
+ {
+  "dataset": "ryanpennings/so100_pegcrate_d1b",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.181
+ },
+ {
+  "dataset": "s20000s/soarm100_data2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 75,
+  "video_gb": 0.256
+ },
+ {
+  "dataset": "samanthalhy/so100_herding_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 366,
+  "video_gb": 1.799
+ },
+ {
+  "dataset": "samanthalhy/so100_test_1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 51,
+  "video_gb": 0.132
+ },
+ {
+  "dataset": "samanthalhy/so100_test_2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 16,
+  "video_gb": 0.047
+ },
+ {
+  "dataset": "samanthalhy/so100_test_3_diff",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 200,
+  "video_gb": 0.919
+ },
+ {
+  "dataset": "samsitol/so100_PnP",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.828
+ },
+ {
+  "dataset": "samsitol/so100_PnPblock",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 1.106
+ },
+ {
+  "dataset": "samsitol/so100_PnPred",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.529
+ },
+ {
+  "dataset": "samsitol/so101_cube",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.726
+ },
+ {
+  "dataset": "sattgle/clean-test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.268
+ },
+ {
+  "dataset": "senjougi/so100_test3",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.034
+ },
+ {
+  "dataset": "seogenis/augmented_so101_test",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.241
+ },
+ {
+  "dataset": "seonixx/so100_test_v3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 100,
+  "video_gb": 0.319
+ },
+ {
+  "dataset": "sergiov2000/so100_test_yellow_3ep",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.04
+ },
+ {
+  "dataset": "sergiov2000/temp_test_yellow_2ep",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.034
+ },
+ {
+  "dataset": "sergiov2000/test_green_10_episodes",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.12
+ },
+ {
+  "dataset": "sergiov2000/test_red_50_episodes",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.807
+ },
+ {
+  "dataset": "shawntan72/pick_and_place_pill_bottle_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.316
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_000_009",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.026
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_010_019",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.023
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_090_099",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.03
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_100_109",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.027
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_120_129",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.026
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_160_169",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.029
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_170_179",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.036
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_180_189",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.033
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_230_239",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.039
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_240_249",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 10,
+  "video_gb": 0.031
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_310_319",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.034
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_400_409",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.033
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_410_419",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 10,
+  "video_gb": 0.036
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_420_429",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.033
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_470_479",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.029
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_500_509",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.038
+ },
+ {
+  "dataset": "shuohsuan/grasp_data_520_529",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.036
+ },
+ {
+  "dataset": "shylee/so100_2cam",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.104
+ },
+ {
+  "dataset": "shylee/so100_cube",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 200,
+  "video_gb": 0.844
+ },
+ {
+  "dataset": "shylee/so100_gauze_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 1,
+  "video_gb": 0.003
+ },
+ {
+  "dataset": "shylee/so100_pengrip",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 300,
+  "video_gb": 0.841
+ },
+ {
+  "dataset": "shylee/so100_pengripA",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 300,
+  "video_gb": 0.874
+ },
+ {
+  "dataset": "shylee/so100_pengripC",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 300,
+  "video_gb": 1.004
+ },
+ {
+  "dataset": "shylee/so100_pengripG",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 300,
+  "video_gb": 1.1
+ },
+ {
+  "dataset": "shylee/so100_testpi0data",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.019
+ },
+ {
+  "dataset": "sincostangerines/purple_dice",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.228
+ },
+ {
+  "dataset": "sincostangerines/six_dice",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.195
+ },
+ {
+  "dataset": "sincostangerines/stack_cubes_30",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 9,
+  "video_gb": 0.063
+ },
+ {
+  "dataset": "sincostangerines/stack_cubes_p1",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.177
+ },
+ {
+  "dataset": "sincostangerines/stack_cubes_p3",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 20,
+  "video_gb": 0.092
+ },
+ {
+  "dataset": "siqiLi/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.373
+ },
+ {
+  "dataset": "siqiLi/so100_test2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 45,
+  "video_gb": 0.442
+ },
+ {
+  "dataset": "siyavash/so101_test",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.241
+ },
+ {
+  "dataset": "slowturtle99/so100_pick_place",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 120,
+  "video_gb": 0.14
+ },
+ {
+  "dataset": "slowturtle99/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 57,
+  "video_gb": 0.09
+ },
+ {
+  "dataset": "squareoctopus/so101_dataset4",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 4,
+  "video_gb": 0.029
+ },
+ {
+  "dataset": "sshh11/so100_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.074
+ },
+ {
+  "dataset": "sshh11/so100_test_1",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 3,
+  "video_gb": 0.052
+ },
+ {
+  "dataset": "stsqitx/clean",
+  "camera": "observation.images.side",
+  "split": "test",
+  "episodes": 20,
+  "video_gb": 0.107
+ },
+ {
+  "dataset": "sucrammal/plant_pour_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.024
+ },
+ {
+  "dataset": "sucrammal/plant_pour_test_again",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.015
+ },
+ {
+  "dataset": "suoxd123/so100_test",
+  "camera": "observation.images.side_1",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.04
+ },
+ {
+  "dataset": "taxitain/so100_obj_to_bin_top0_180",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 62,
+  "video_gb": 0.372
+ },
+ {
+  "dataset": "taxitain/so100_obj_to_bin_v2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 60,
+  "video_gb": 0.398
+ },
+ {
+  "dataset": "tenkau/so101_color_block",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 35,
+  "video_gb": 0.383
+ },
+ {
+  "dataset": "tenkau/so101ver4",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.017
+ },
+ {
+  "dataset": "tfoldi/so100_glass_4",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.438
+ },
+ {
+  "dataset": "tobdeu/so100_block_to_bin",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.054
+ },
+ {
+  "dataset": "tobdeu/so100_test_setup",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.003
+ },
+ {
+  "dataset": "triton7777/cube_to_bowl_so100",
+  "camera": "observation.images.front_side",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.046
+ },
+ {
+  "dataset": "un1c0rnio/so101_box_pencil5",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 25,
+  "video_gb": 0.078
+ },
+ {
+  "dataset": "un1c0rnio/so101_eraser_mat1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.171
+ },
+ {
+  "dataset": "vadimitri/so101_eraser",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 5,
+  "video_gb": 0.017
+ },
+ {
+  "dataset": "wannrrr/etnai",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.125
+ },
+ {
+  "dataset": "wannrrr/etnai-record",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 50,
+  "video_gb": 0.087
+ },
+ {
+  "dataset": "wannrrr/so100_grab_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.249
+ },
+ {
+  "dataset": "wefio/so101_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.427
+ },
+ {
+  "dataset": "weidezhang/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.034
+ },
+ {
+  "dataset": "weiye11/0603_pi0_onlyright",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 31,
+  "video_gb": 0.053
+ },
+ {
+  "dataset": "weiye11/so100_410_zwy",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 101,
+  "video_gb": 0.278
+ },
+ {
+  "dataset": "willnorris/cylinder-in-box-hillside-1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.109
+ },
+ {
+  "dataset": "willnorris/cylinder-in-box-hillside-2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.142
+ },
+ {
+  "dataset": "wonhchoi/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.135
+ },
+ {
+  "dataset": "wu12581/so100_test_dtp",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 30,
+  "video_gb": 0.056
+ },
+ {
+  "dataset": "xhaka3456/so100_test_0510",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 90,
+  "video_gb": 0.191
+ },
+ {
+  "dataset": "xnny/so100_test",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.001
+ },
+ {
+  "dataset": "yadunund/so100_move_black_knight",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 104,
+  "video_gb": 0.374
+ },
+ {
+  "dataset": "ycdamn1988/so100_0420_3",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 200,
+  "video_gb": 0.233
+ },
+ {
+  "dataset": "ycdamn1988/so100_0517",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 150,
+  "video_gb": 0.269
+ },
+ {
+  "dataset": "yingliu-data/so101_Da_Pinchi_2",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 10,
+  "video_gb": 0.106
+ },
+ {
+  "dataset": "youjiang97/so100_test",
+  "camera": "observation.images.top",
+  "split": "test",
+  "episodes": 2,
+  "video_gb": 0.029
+ },
+ {
+  "dataset": "youjiang97/so100_tt",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 30,
+  "video_gb": 0.298
+ },
+ {
+  "dataset": "youliangtan/so100_strawberry_grape",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.213
+ },
+ {
+  "dataset": "yuk6ra/so101-onetape-cleanup",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 50,
+  "video_gb": 0.434
+ },
+ {
+  "dataset": "yyiiii/so101_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.052
+ },
+ {
+  "dataset": "yyiiii/so101_test1",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.052
+ },
+ {
+  "dataset": "yyiiii/so101_test2",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.055
+ },
+ {
+  "dataset": "zheng6677/new_so101_test1",
+  "camera": "observation.images.top",
+  "split": "train",
+  "episodes": 40,
+  "video_gb": 0.206
+ },
+ {
+  "dataset": "zuozhuan/so100_catch_test",
+  "camera": "observation.images.side",
+  "split": "train",
+  "episodes": 2,
+  "video_gb": 0.021
+ }
+]
