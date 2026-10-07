@@ -1,14 +1,15 @@
 """Offline tests of a trained world model on held-out episodes (no environment).
 
-    uv run python hjepa/offline.py CKPT EVAL_CONFIG DATA.h5 OUT.json [cases]
+    sh scripts/uvr python hjepa/offline.py CKPT EVAL_CONFIG DATA.h5 OUT.json [cases]
 
 1. Expert rank (k = 1, 5, 15 steps ahead; 0.2, 1, 3 s): the goal is the latent of the frame k
    steps later. Level 1 predicts the next latent for the expert's move and for 100 random moves
    (moves of other held-out steps). The rank is the share of random moves whose prediction is
    closer to the goal than the expert's (0 is perfect, 0.5 is chance). "Closer" is the planner's
    cost: the latent distance, or minus the learned value (cost: value).
-2. Plan direction (k = 5, 15): the planner plans from frame t to frame t + k. The score is the
-   cosine between its first move and the expert's move (normalized units; 0 is chance).
+2. Plan direction (k = 5, 15): the goal is frame t + k; the planner plans its configured horizon
+   (5 steps, 1 s; also for k = 15) toward it. The score is the cosine between its first move and the
+   expert's move (normalized units; 0 is chance).
 """
 
 import json

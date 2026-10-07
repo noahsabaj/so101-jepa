@@ -1,6 +1,6 @@
 """Long-horizon prediction with fixed steps against time-step jumps (PLAN.md A21).
 
-    uv run python hjepa/jump_test.py CKPT DATA.h5 OUT.json [STRIDES] [cases]
+    sh scripts/uvr python hjepa/jump_test.py CKPT DATA.h5 OUT.json [STRIDES] [cases]
 
 From 4 history frames at frame t, predict the latent of frame t + n (n = 1, 5, 10, 20 steps: 0.2 to
 4 s) with the true actions. A fixed-step model (STRIDES "1") rolls out n one-step predictions; a

@@ -1,6 +1,6 @@
 """Closed-loop trials in the sim: the planner drives the SO-101 to a goal observation.
 
-    uv run python sim/closed_loop.py TASK CKPT EVAL_CONFIG FIRST_SEED N OUT.jsonl
+    sh scripts/uvr python sim/closed_loop.py TASK CKPT EVAL_CONFIG FIRST_SEED N OUT.jsonl
 
 TASK reach (rung 1): the goal is the arm at a random reachable pose (the cube stays where it is).
     Success: the grasp point ends within 1 cm of the goal's. Budget 100 steps (20 s).

@@ -1,6 +1,6 @@
 """Self-collected data (PLAN.md A19): the planner plays toward goals sampled from earlier data.
 
-    uv run python sim/self_play.py CKPT EVAL_CONFIG GOALS.h5 OUT.h5 FIRST_SEED N
+    sh scripts/uvr python sim/self_play.py CKPT EVAL_CONFIG GOALS.h5 OUT.h5 FIRST_SEED N
 
 No expert and no task: each episode (300 steps, 60 s) starts from a random scene (the seed), and
 every 50 steps the goal becomes a random frame of GOALS.h5 (its arm joints and cube pose, rendered
@@ -20,7 +20,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "hjepa"))
 from collect import PHASES, STEPS, append, create  # noqa: E402
-from env import SO101Env  # noqa: E402
+from env import MAX_ACTION, SO101Env  # noqa: E402
 from expert import GRASP_POINT  # noqa: E402
 from planner import Planner  # noqa: E402
 
@@ -63,9 +63,10 @@ def main(ckpt, eval_config, goals, out, first_seed, n):
                 if step % GOAL_EVERY == 0:
                     k = int(rng.integers(len(g_joints)))
                     goal, buffer = goal_obs(env, g_joints[k], g_pos[k], g_quat[k]), []
+                    print(f"episode {i + 1}/{n} step {step} ({time.perf_counter() - t0:.0f} s)", flush=True)
                 if not buffer:
                     buffer = list(planner.plan(obs, goal, steps_taken=step % GOAL_EVERY, eval_budget=GOAL_EVERY))
-                action = np.asarray(buffer.pop(0), np.float32)
+                action = np.clip(np.asarray(buffer.pop(0), np.float32), -MAX_ACTION, MAX_ACTION)  # what env.step runs
                 pos, rot = env.site_pose()
                 cube = env.cube_pose()
                 cols["pixels"].append(obs["pixels"])

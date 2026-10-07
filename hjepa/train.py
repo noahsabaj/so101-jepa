@@ -1,6 +1,6 @@
 """Train an SO-101 world model with the H-JEPA code (third_party/H-JEPA, run from source).
 
-    uv run python hjepa/train.py CONFIG [hydra overrides ...]   # e.g. so101_hjepa_l2 seed=42
+    sh scripts/uvr python hjepa/train.py CONFIG [hydra overrides ...]   # e.g. so101_hjepa_l2 seed=42
 
 Datasets and checkpoints live in data/ (HJEPA_HOME): data/<name>.h5, data/ckpts/<env>/<model>/.
 """

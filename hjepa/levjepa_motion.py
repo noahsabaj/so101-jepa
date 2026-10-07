@@ -1,7 +1,7 @@
 """A2 step 1b: does LeVJEPA used as a video encoder (clips, as it was trained) show motion that one
 frame cannot show?
 
-    uv run python hjepa/levjepa_motion.py VAL_224.h5 OUT.json [K]
+    sh scripts/uvr python hjepa/levjepa_motion.py VAL_224.h5 OUT.json [K]
 
 For every 3rd val frame t that has K - 1 earlier frames in its episode, each view is encoded three
 ways, and the latent of t is the last temporal slot (its CLS and its 196 patch tokens per view;

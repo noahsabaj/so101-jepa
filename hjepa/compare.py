@@ -1,6 +1,6 @@
 """Paired comparisons (rule 6) of results on the same test trials.
 
-    uv run python hjepa/compare.py BASE OTHER...
+    sh scripts/uvr python hjepa/compare.py BASE OTHER...
 
 Closed loop (*.jsonl of sim/closed_loop.py): for each file, the successes with a 95% Wilson
 interval, the median error and the rung's pass mark. For each OTHER against BASE, on the seeds

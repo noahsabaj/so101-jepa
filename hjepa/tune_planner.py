@@ -1,6 +1,6 @@
 """Planner settings by search, not by hand (PLAN.md A22).
 
-    uv run python hjepa/tune_planner.py CKPT EVAL_CONFIG TASK TRIALS SETTINGS OUT.json [FIRST]
+    sh scripts/uvr python hjepa/tune_planner.py CKPT EVAL_CONFIG TASK TRIALS SETTINGS OUT.json [FIRST]
 
 Random search over the CEM settings: horizon, samples, kept samples, rounds and the replanning
 interval, drawn from wide ranges (numpy seed 0; settings FIRST.. of the sequence, so several

@@ -1,6 +1,6 @@
 """The first N episodes of a dataset, as a new dataset (PLAN.md A18: data scaling).
 
-    uv run python hjepa/subset.py DATA.h5 OUT.h5 N
+    sh scripts/uvr python hjepa/subset.py DATA.h5 OUT.h5 N
 """
 
 import sys
@@ -17,7 +17,7 @@ def main(data, out, n):
         end = int(f["ep_offset"][n - 1] + f["ep_len"][n - 1])
         for k in f:
             rows = n if k in ("ep_len", "ep_offset") else end
-            chunks = tuple(min(c, rows if i == 0 else c) for i, c in enumerate(f[k].chunks))
+            chunks = tuple(min(c, rows) if i == 0 else c for i, c in enumerate(f[k].chunks)) if f[k].chunks else None
             kw = dict(IMAGE_COMPRESSION) if f[k].ndim == 4 else {}  # pixels: the Blosc filter of sim/collect.py
             g.create_dataset(k, data=f[k][:rows], chunks=chunks, **kw)
     print(f"wrote {out}: {n} episodes, {end} frames", flush=True)

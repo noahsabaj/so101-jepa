@@ -17,5 +17,13 @@ while [ $((i * PER)) -lt "$N" ]; do
   [ -f $f.done ] || { uvr python sim/self_play.py "$CKPT" so101_flat_cem data/$DATA.h5 $f $((FIRST + i * PER)) $n > $f.log 2>&1 && touch $f.done; } &
   pids="$pids $!" i=$((i + 1))
 done
-for p in $pids; do wait $p; done
-cd sim && uvr python collect.py merge ../data/$OUT.h5 ../data/$DATA.h5 $(ls ../data/self/$OUT/*.h5 | sort -V)
+for p in $pids; do wait $p || echo "self_improve: a self-play shard ended with status $? (an interrupt keeps its finished episodes)" >&2; done
+shards=""
+for f in $(ls data/self/$OUT/*.h5 | sort -V); do  # a shard that does not open (killed while writing) is left out
+  if uvr python -c "import sys, h5py, hdf5plugin; h5py.File(sys.argv[1], 'r')['ep_len'][:]" $f 2> /dev/null; then
+    shards="$shards ../$f"
+  else
+    echo "self_improve: $f does not open; left out" >&2
+  fi
+done
+cd sim && uvr python collect.py merge ../data/$OUT.h5 ../data/$DATA.h5 $shards

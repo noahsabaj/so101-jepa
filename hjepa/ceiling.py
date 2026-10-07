@@ -1,6 +1,6 @@
 """Image ceiling: how well can a supervised CNN find the cube and the grasp point in our frames?
 
-    uv run python hjepa/ceiling.py TRAIN.h5 VAL.h5 OUT.json [epochs]
+    sh scripts/uvr python hjepa/ceiling.py TRAIN.h5 VAL.h5 OUT.json [epochs]
 
 The upper bound for any encoder at this resolution (64x128: scene | wrist). A small CNN (no global
 pooling, so it keeps where things are) regresses the cube and the grasp point from one frame;

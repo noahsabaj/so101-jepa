@@ -1,6 +1,6 @@
 """A2 step 1: does the frozen LeVJEPA encoder show the cube and the grasp point? (held-out episodes)
 
-    uv run python hjepa/levjepa_probe.py VAL_224.h5 OUT.json
+    sh scripts/uvr python hjepa/levjepa_probe.py VAL_224.h5 OUT.json
 
 LeVJEPA-VideoMix-Large (ViT-L/16, galilai-group on Hugging Face, revision pinned below; its model
 code was read before use) encodes each view (scene, wrist) of each frame at 224x224 as a one-frame

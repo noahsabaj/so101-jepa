@@ -1,14 +1,15 @@
 """Mix the community SO-100/SO-101 episodes into the sim training set (PLAN.md A24).
 
-    uv run python hjepa/mix_community.py SIM_TRAIN.h5 COMMUNITY_TRAIN.h5 OUT.h5
+    sh scripts/uvr python hjepa/mix_community.py SIM_TRAIN.h5 COMMUNITY_TRAIN.h5 OUT.h5
 
 The two sources differ in layout; the mix keeps each source's own meaning and adds no rule about
 what the cameras show:
 - pixels: a community frame (one camera, 64x64) fills the left half of a 64x128 frame and the
   right half is black; sim frames (scene | wrist) stay as they are. The model learns that a black
   wrist half means a one-camera robot.
-- action and proprio: each source is z-scored with its own statistics (community-1 already is,
-  per dataset), so neither source dominates the training normalizer.
+- action and proprio: sim stays in its own units (rad), so the training normalizer and the planner
+  stay in sim units; community-1 (z-scored per dataset by community/build.py) is mapped into sim
+  units (z * sim std + sim mean), so neither source dominates the normalizer.
 Columns: pixels, action, proprio, ep_len, ep_offset, ep_idx, source (0 sim, 1 community).
 """
 
@@ -37,8 +38,8 @@ def main(sim, community, out):
         for i in range(0, n_s, BLOCK):
             j = min(n_s, i + BLOCK)
             f["pixels"][i:j] = s["pixels"][i:j]
-            for k, (mu, sd) in stats.items():
-                f[k][i:j] = (s[k][i:j] - mu) / sd
+            for k in stats:
+                f[k][i:j] = s[k][i:j]
         f["ep_idx"][:n_s], f["source"][:n_s] = s["ep_idx"][:], 0
         e_s = len(s["ep_len"])
         for i in range(0, n_c, BLOCK):
@@ -46,8 +47,8 @@ def main(sim, community, out):
             px = np.zeros((j - i, 64, 128, 3), np.uint8)
             px[:, :, :64] = c["pixels"][i:j]
             f["pixels"][n_s + i:n_s + j] = px
-            for k in ("action", "proprio"):
-                f[k][n_s + i:n_s + j] = c[k][i:j]
+            for k, (mu, sd) in stats.items():
+                f[k][n_s + i:n_s + j] = c[k][i:j] * sd + mu
             print(f"FLEET_PROGRESS {j}/{n_c} community frames ({time.time() - t0:.0f} s)", flush=True)
         f["ep_idx"][n_s:], f["source"][n_s:] = c["ep_idx"][:] + e_s, 1
         f["ep_len"] = np.concatenate([s["ep_len"][:], c["ep_len"][:]]).astype(np.int32)

@@ -1,0 +1,5 @@
+# SO-JEPA v41 (MODELS.md): SO-JEPA v40 (ScheduleFree+, no clipping) trained with seed 43, a replicate.
+defaults:
+- sojepa-v40
+- _self_
+output_model_name: sojepa-v41

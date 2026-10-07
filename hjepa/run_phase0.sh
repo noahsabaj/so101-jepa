@@ -79,7 +79,8 @@ probe)
   done ;;
 value)
   for m in $MODELS; do
-    uvr python hjepa/value.py "$(ckpt "$m")" so101_flat data/so101_train.h5 data/so101_val.h5 \
+    case $m in hjepa_l2) cfg=so101_l2 ;; *) cfg=so101_flat ;; esac
+    uvr python hjepa/value.py "$(ckpt "$m")" $cfg data/so101_train.h5 data/so101_val.h5 \
       > "outputs/value_$m.log" 2>&1 || fail=1
     cp "$(dirname "$(ckpt "$m")")/value.json" "outputs/value_$m.json" 2>/dev/null
   done ;;

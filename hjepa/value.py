@@ -1,6 +1,6 @@
 """A learned goal-reaching value for the planner, in place of the hand-set latent distance.
 
-    uv run python hjepa/value.py CKPT EVAL_CONFIG TRAIN.h5 VAL.h5 [steps]
+    sh scripts/uvr python hjepa/value.py CKPT EVAL_CONFIG TRAIN.h5 VAL.h5 [steps]
 
 V(z, z_goal) estimates minus the discounted number of 0.2 s steps from state z to goal state z_goal
 (latents of the frozen world model's encoder). It learns from the training episodes with no task

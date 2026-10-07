@@ -1,6 +1,6 @@
 """Rewrite an H-JEPA HDF5 file with small image chunks, in place.
 
-    uv run python hjepa/rechunk.py DATA.h5 [FRAMES]   # default 10 frames per chunk
+    sh scripts/uvr python hjepa/rechunk.py DATA.h5 [FRAMES]   # default 10 frames per chunk
 
 The training loader reads short random clips. With 100-frame chunks each clip decompresses
 1-2 whole chunks (up to 5 MB); with 10-frame chunks, about 0.5 MB.

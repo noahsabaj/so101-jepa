@@ -1,6 +1,6 @@
 """Linear probes: does the level-1 latent show the cube and the grasp point? (held-out episodes)
 
-    uv run python hjepa/probe.py CKPT EVAL_CONFIG DATA.h5 OUT.json
+    sh scripts/uvr python hjepa/probe.py CKPT EVAL_CONFIG DATA.h5 OUT.json
 
 Ridge regression from a feature set to a target. Fit on the first 80% of the episodes (the ridge
 strength is selected on the last quarter of those), score on the other 20%: RMS error (cm) and R^2.
