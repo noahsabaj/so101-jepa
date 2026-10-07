@@ -4,45 +4,47 @@ Every trained model has a name and a version. Reports, PLAN.md and results use t
 
 ## Names and versions
 
-- **SO-JEPA X.Y** is a world model of this project (encoder, predictor and training losses).
+The convention of ML model registries (MLflow, SageMaker, Vertex AI, W&B): one registered name and
+integer versions in the order of registration, with the lineage in the registry.
+
+- **SO-JEPA vN** is a world model of this project (encoder, predictor, training losses and any
+  learned heads such as the value). N counts up by 1 for each new trained model: v1, v2, v3.
   The planner is not part of the version; results give the planner separately.
-- **X (major)** changes when the interface changes: the inputs (cameras, image size, joint
-  angles), the action space, the latent shape or the number of levels. A planner, probe or goal
-  set made for one major version may not work with another.
-- **Y (minor)** changes for every other change of the recipe: architecture, losses, data,
-  training length, a bug fix.
-- A version is one fixed recipe. After its first training, its recipe does not change. A change
-  gets a new version.
-- **Checkpoint ID:** version plus seed, for example `sojepa-2.1-s42`.
-- **File names:** the config is `hjepa/config/train/sojepa-X.Y.yaml` and its
-  `output_model_name` is `sojepa-X.Y`. Versions 1.0 to 2.1 keep their old file names (below).
+- N says nothing about quality or compatibility. The registry says what each version is: its
+  parent, the change from the parent, data, training, code and results. Siblings (two changes
+  from the same parent) are normal.
+- Why not SemVer: its promise is compatibility within a major version. A learned model cannot
+  keep it: any retraining changes the latent space, so value heads, probes, goal latents and
+  upper H-JEPA levels made for one version never carry over to another.
+- **One version is one trained artifact:** recipe, data, seed and code. It never changes. A new
+  seed, a longer training or a bug fix is a new version (parent: the old one).
+- **N is given when the training job is submitted.** A cancelled job's N is not used again.
+- **File names:** the config is `hjepa/config/train/sojepa-vN.yaml`, its `output_model_name` is
+  `sojepa-vN`, and results use `sojepa-vN` in their file names. v1 to v5 keep their old file names
+  (below): they were trained or queued before this rule.
 - **Code:** commit the repo and the H-JEPA fork before a training, and record both commits here.
   fleet pushes the working tree, so a dirty tree makes the record wrong.
 - **Datasets** have IDs too (table at the end).
-- Paper names (LeWM, LpWM, H-JEPA, EP-IDM) name recipes and losses, not our models.
+- Paper names (LeWM, LpWM, H-JEPA, EP-IDM, LeVJEPA) name recipes, losses and outside weights, not
+  our models.
 
 ## Models
 
 | Version | Parent | Recipe (change from the parent) | Data | Training | Code (repo, fork) | Config, checkpoint | Status and results |
 |---|---|---|---|---|---|---|---|
-| SO-JEPA 1.0 | — | LeWM recipe. Latent 384 = image 256 (ViT-tiny, 8×8 patches, CLS token, MLP) + joint angles 128 (MLP). Predictor: causal transformer, 6 layers, width 384, AdaLN actions, history 4. Losses: prediction, SIGReg 0.08, one-step inverse dynamics 100. | sim-2 | 10 epochs, 27,750 steps, batch 128, lr 5e-4, seed 42 | f614b50 to a147a93 (resumed), 106986f | so101_lewm; so101_lewm | Rung 1 97/100. Rung 2 0/50. Image latent blind (A15 killed). |
-| SO-JEPA 1.1 | 1.0 | LpWM recipe: RepReLU MLP heads on encoder and predictor; RDMReg (rectified Laplace, weight 10) in place of SIGReg. | sim-2 | 10 epochs, seed 42 | f614b50 to a147a93 (resumed), 106986f | so101_lpwm; so101_lpwm | Rung 1 100/100. Rung 2 0/50. Image latent blind. |
-| SO-JEPA 2.0 | 1.0 | Image only: no joint angles in the input. Latent 384 from the image. | sim-2 | 3 epochs, seed 42 | 5b51c03, 229e1c2 | so101_lewm_vis; so101_lewm_vis | Training (variant A of the A15 fix). |
-| SO-JEPA 2.1 | 2.0 | Endpoint inverse dynamics (EP-IDM): an MLP gets the 10 actions (2 s) back from z_t and z_t+10, weight 10. Clips of 11 frames. | sim-2 | 3 epochs, seed 42 | 492a961, f1577c4 | so101_lewm_vis_epidm; so101_lewm_vis_epidm | Training (variant E). The first tries (fork 7dcc7f4) crashed: clips were cut to 5 frames. |
+| v1 | — | LeWM recipe. Latent 384 = image 256 (ViT-tiny, 8×8 patches, CLS token, MLP) + joint angles 128 (MLP). Predictor: causal transformer, 6 layers, width 384, AdaLN actions, history 4. Losses: prediction, SIGReg 0.08, one-step inverse dynamics 100. | sim-2 | 10 epochs, 27,750 steps, batch 128, lr 5e-4, seed 42 | f614b50 to a147a93 (resumed), 106986f | so101_lewm; so101_lewm | Rung 1 97/100. Rung 2 0/50. Image latent blind (A15 killed). |
+| v2 | v1 | LpWM recipe: RepReLU MLP heads on encoder and predictor; RDMReg (rectified Laplace, weight 10) in place of SIGReg. | sim-2 | 10 epochs, seed 42 | f614b50 to a147a93 (resumed), 106986f | so101_lpwm; so101_lpwm | Rung 1 100/100. Rung 2 0/50. Image latent blind. |
+| v3 | v1 | Image only: no joint angles in the input. Latent 384 from the image. | sim-2 | 3 epochs, seed 42 | 5b51c03, 229e1c2 | so101_lewm_vis; so101_lewm_vis | Training (variant A of the A15 fix). |
+| v4 | v3 | Endpoint inverse dynamics (EP-IDM): an MLP gets the 10 actions (2 s) back from z_t and z_t+10, weight 10. Clips of 11 frames. | sim-2 | 3 epochs, seed 42 | 492a961, f1577c4 | so101_lewm_vis_epidm; so101_lewm_vis_epidm | Training (variant E). The first tries (fork 7dcc7f4) crashed: clips were cut to 5 frames. |
+| v5 | v4 | v4's world model plus a learned goal-reaching value (hjepa/value.py: hindsight goals, -1 per step, expectile regression, two heads). Planner cost -V(last predicted latent, goal latent). | sim-2 | value: 50,000 steps, batch 1,024, on frozen v4 latents | 7b01eff, 70063d2 | so101_flat_value / so101_flat_cem_value; value.pt beside v4's checkpoint | Queued |
+| v6 | v4 | Token latents: every ViT patch token (8×16 = 128 tokens of 64 numbers), no CLS summary. Predictor width 256, block-causal over the tokens. | sim-2 | 3 epochs, seed 42 | 7b01eff, 70063d2 | sojepa-v6; sojepa-v6 | Queued |
+| v7 | v6 | v6's world model plus its learned value (as v5). | sim-2 | as v5 | 7b01eff, 70063d2 | value.pt beside v6's checkpoint | Queued |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed42/` on the
 training computer (kat-pc: WSL home).
 
-Planned (the version is fixed at the first training):
-
-- SO-JEPA 2.2: the 2.1 world model plus a learned goal-reaching value (hjepa/value.py; value.pt
-  beside the 2.1 checkpoint). The planner cost is -V(last predicted latent, goal latent).
-- SO-JEPA 3.0: 2.1 with token latents (config sojepa-3.0): 128 patch tokens of 64 numbers per
-  frame, no CLS summary; predictor width 256, block-causal over the tokens.
-- SO-JEPA 3.1: 3.0 plus its learned value.
-
 Not trained yet, so no version: H-JEPA L2 (so101_hjepa_l2) and the community models
-(community_lewm, community_hjepa_l2). Each gets a version at its first training.
+(community_lewm, community_hjepa_l2). Each gets a version when its training job is submitted.
 
 ## Datasets
 
