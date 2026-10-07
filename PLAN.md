@@ -98,6 +98,7 @@ back into the data.
 | A12 | One arm and printed fixtures are sufficient. | Rungs 4 to 6 with fixtures. If they fail for lack of a second hand, we build a second follower. | Open |
 | A13 | Assembly videos with no actions improve the upper levels. | L3 prediction of step results, with and without video pretraining. | Open |
 | A14 | Dense Gaussian latents (SIGReg) are a good choice for planning; sparse latents (LpWM: RDMReg to a rectified Laplace, RepReLU heads) are not better. | LpWM against LeWM: same data, encoder, predictor and trials; each with gradient descent and CEM; offline tests and rungs 1 and 2 (rule 6, paired). If LpWM wins, a dense control with the same heads (Identity link, Gaussian target) tells if sparsity or the heads give the gain. | Open (set up 2026-10-06) |
+| A15 | The world-model loss makes the image latent keep what the actions change (the arm, and the cube when the arm moves it). | Linear probe of the image latent on held-out episodes (hjepa/probe.py). Pass mark (set 2026-10-07, before the variants): grasp point and resting cube both within 2 cm RMS. | Killed for LeWM and LpWM with joint angles in the latent (12 to 13 cm; chance 12.8). In test: variant A (vision only) and E (vision only plus endpoint inverse dynamics, arXiv 2610.07540). |
 
 ## 6. The ladder
 
@@ -162,6 +163,7 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 | 2026-10-06 | An actor is permitted, but only as a proposer. The world model and the cost select the action. |
 | 2026-10-06 | New repository (this one). The lessons of skunkworks carry over as methods, not as code. |
 | 2026-10-06 | Noah: try LpWM again. The skunkworks test (2026-10-03) was not decisive: frozen V-JEPA 2.1 encoder, 100 real episodes (it overfit), gradient planner only, offline tests only. Here it is trained end to end, in sim, with both planners and the closed-loop rungs (A14). |
+| 2026-10-07 | Rung 2 failed (try 1): the image latent is blind (probe, A15). H-JEPA and community training are held, since they share the encoder. Noah: the goal is an SO-101 that picks up a block and moves it to a target position, with a full JEPA stack (no VLM or VLA); I decide the experiments. Next: encoder variants against A15's pass mark, then rung 2, then H-JEPA. |
 
 ## 9. Results log
 
