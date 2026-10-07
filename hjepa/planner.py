@@ -10,8 +10,11 @@ A time-step model (PLAN.md A21, trained with level1 strides) plans with `strides
 `max_stride: K` in the eval config: one plan per stride k (each step k raw actions, padded to K plus
 k / K, as in training), the plan with the lowest cost wins, and the robot replans after the receding
 horizon in raw steps (plan far, act short).
+Speed (eval config or overrides): `precision: bf16` runs the model under bf16 autocast, as in
+training; `compile: true` compiles the level-1 predictor (torch.compile).
 """
 
+import contextlib
 import sys
 from pathlib import Path
 
@@ -67,6 +70,11 @@ class Planner:
             self.solvers[k] = solver
         self.solver = self.solvers[self.strides[0]]
         self.last_stride = self.strides[0]
+        bf16 = cfg.get("precision", "fp32") == "bf16"
+        self.autocast = (lambda: torch.autocast("cuda", dtype=torch.bfloat16)) if bf16 else contextlib.nullcontext
+        if cfg.get("compile", False):
+            level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
+            level1.predictor = torch.compile(level1.predictor)
 
     def _pixels(self, pixels):
         x = torch.from_numpy(pixels).permute(2, 0, 1).float() / 255.0
@@ -89,9 +97,13 @@ class Planner:
 
     def plan(self, obs, goal, steps_taken=0, eval_budget=100):
         """Planned actions (raw joint-target changes, rad), shape (receding horizon, 6)."""
+        with self.autocast():
+            return self._plan(obs, goal, steps_taken, eval_budget)
+
+    def _plan(self, obs, goal, steps_taken, eval_budget):
         if self.kmax == 1:
             actions = self.solver(self._info(obs, goal, 1), steps_taken=steps_taken, eval_budget=eval_budget)["actions"][0]
-            actions = actions[: self.receding].cpu().numpy().reshape(-1, 6)
+            actions = actions[: self.receding].float().cpu().numpy().reshape(-1, 6)
             return actions * self.action_std + self.action_mean
         level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
         best = None
@@ -104,7 +116,7 @@ class Planner:
             if best is None or cost < best[0]:
                 best = (cost, k, plan[0])
         _, self.last_stride, plan = best
-        actions = plan.cpu().numpy().reshape(-1, 6)[: self.receding]  # replan after the receding horizon (raw steps)
+        actions = plan.float().cpu().numpy().reshape(-1, 6)[: self.receding]  # replan after the receding horizon (raw steps)
         return actions * self.action_std + self.action_mean
 
     def _info(self, obs, goal, k):
