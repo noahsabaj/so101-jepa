@@ -26,9 +26,26 @@ copy_back() {
   mkdir -p "$SRC/outputs"
   rsync -a outputs/ "$SRC/outputs/"
 }
-# timeout(1) sends TERM to the whole process group: copy the outputs (partial results) back first.
-trap 'copy_back; echo "wsl_job: stopped, outputs copied back" >&2; exit 143' TERM INT
-"$@"
+# The command runs in its own session, so this script can end all of it: on TERM (timeout(1)), or
+# when the fleet job is stopped. A stop kills wsl.exe on Windows but not the Linux processes; then
+# the heartbeat cannot write to stdout, and the script ends the command. Outputs are copied back.
+setsid "$@" &
+pid=$!
+stop() {
+  kill -TERM -$pid 2>/dev/null
+  sleep 10
+  kill -KILL -$pid 2>/dev/null
+  copy_back
+  echo "wsl_job: $1; outputs copied back" >&2
+  exit 143
+}
+trap 'stop "stopped by a signal"' TERM INT HUP
+trap '' PIPE
+while kill -0 $pid 2>/dev/null; do
+  sleep 15
+  date '+wsl_job: running %H:%M:%S' 2>/dev/null || stop "stdout is closed (the fleet job was stopped)"
+done
+wait $pid
 status=$?
 copy_back
 exit $status

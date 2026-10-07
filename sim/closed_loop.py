@@ -8,7 +8,7 @@ TASK pick (rung 2): the goal is the cube at a new place (6 cm or more away) and 
     no sub-goals. Success: the cube ends within 2 cm (xy) of the goal place, resting on the table.
     Budget 300 steps (60 s).
 Seeds 1000-4999 are for tuning, 5000 and higher for the test (PLAN.md, rule 6).
-One JSON line per trial.
+One JSON line per trial. Seeds already in OUT are skipped, so a stopped run continues where it ended.
 """
 
 import json
@@ -84,10 +84,23 @@ def run(task, planner, env, seed):
     return result
 
 
+def done_seeds(out):
+    seeds = set()
+    for line in open(out) if Path(out).exists() else ():
+        try:
+            seeds.add(json.loads(line)["seed"])
+        except (ValueError, KeyError):  # a line cut short by a stop
+            pass
+    return seeds
+
+
 def main(task, ckpt, eval_config, first_seed, n, out):
+    done = done_seeds(out)
     planner, env = Planner(ckpt, eval_config), SO101Env(randomize=True)
     with open(out, "a") as fh:
         for i in range(int(n)):
+            if int(first_seed) + i in done:
+                continue
             r = run(task, planner, env, int(first_seed) + i)
             fh.write(json.dumps(r) + "\n")
             fh.flush()

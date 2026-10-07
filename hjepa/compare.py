@@ -40,9 +40,11 @@ def mcnemar(b, c):
 def trials(path):
     rows = {}
     for line in open(path):
-        if line.strip():
+        try:
             r = json.loads(line)
-            rows[r["seed"]] = r  # a repeated seed keeps its last run
+        except ValueError:  # a blank line, or a line cut short by a stop
+            continue
+        rows[r["seed"]] = r  # a repeated seed keeps its last run
     return rows
 
 
