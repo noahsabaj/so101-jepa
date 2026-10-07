@@ -7,6 +7,7 @@ Changes to the official model (assets/so101/so101_new_calib_camera.xml):
 - A wrist camera looks from the wrist camera module at the space between the fingers.
 """
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -16,7 +17,9 @@ from scipy.spatial.transform import Rotation
 
 MODEL = str(Path(__file__).resolve().parents[1] / "assets/so101/so101_new_calib_camera.xml")
 JOINTS = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper"]
-IMAGE = 64  # each view is IMAGE x IMAGE; the observation is the scene and wrist views side by side
+# each view is IMAGE x IMAGE; the observation is the scene and wrist views side by side.
+# SO101_IMAGE renders larger views (224 for LeVJEPA); the physics and the episodes do not change.
+IMAGE = int(os.environ.get("SO101_IMAGE", 64))
 CUBE_HALF = 0.0125
 
 # Pads in the gripperframe site frame (x along the fingers, z across the jaws, at gripper = 0 rad):
