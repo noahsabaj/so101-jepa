@@ -1,0 +1,10 @@
+# SO-101 sim: flat LeWM with a vision-only encoder (variant A of the blind-latent fix, 2026-10-07).
+# The joint angles are not an input, so the latent must show the arm (inverse dynamics needs it)
+# and the planner can match a goal only by what the cameras see. Everything else is so101_lewm.
+defaults:
+- so101_lewm
+- _self_
+output_model_name: so101_lewm_vis
+level1:
+  wm:
+    use_proprio: false
