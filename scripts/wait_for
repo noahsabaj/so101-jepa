@@ -1,0 +1,11 @@
+#!/bin/sh
+# Wait until FILE exists (scripts/run_lanes.sh): sh scripts/wait_for FILE LANE
+# Fails if lane LANE ends (outputs/lanes/LANE.end) without FILE.
+while [ ! -e "$1" ]; do
+  if [ -e "outputs/lanes/$2.end" ] && [ ! -e "$1" ]; then
+    echo "wait_for: lane $2 ended without $1" >&2
+    exit 1
+  fi
+  sleep 20
+done
+sleep 15  # let the writer finish the file

@@ -1,0 +1,5 @@
+#!/bin/sh
+# uv run with this computer's GPU build of torch (GPU.md): sh scripts/uvr python hjepa/train.py ...
+# On NVIDIA it is plain `uv run`; on AMD it adds --no-group cuda --group rocm.
+. "$(dirname "$0")/gpu.sh"
+uvr "$@"

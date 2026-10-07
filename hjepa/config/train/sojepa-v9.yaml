@@ -1,0 +1,6 @@
+# SO-JEPA v9 (MODELS.md): SO-JEPA v4 with seed 43, its seed-variance replicate (run with SEED=43).
+defaults:
+- so101_lewm_vis_epidm
+- _self_
+output_model_name: sojepa-v9
+seed: 43

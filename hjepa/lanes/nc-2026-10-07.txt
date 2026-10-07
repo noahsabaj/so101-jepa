@@ -1,0 +1,14 @@
+# National Compute node, 8x AMD MI355X, 2026-10-07 (MODELS.md v4 to v10): sh scripts/run_lanes.sh hjepa/lanes/nc-2026-10-07.txt
+# Lane 0: v4, its probe, its value (v5), the CEM offline test with the latent cost.
+0 | MODELS=lewm_vis_epidm TRAIN_ARGS=trainer.max_epochs=3 sh hjepa/run_phase0.sh train && MODELS=lewm_vis_epidm sh hjepa/run_phase0.sh probe && MODELS=lewm_vis_epidm sh hjepa/run_phase0.sh value && RUNS=lewm_vis_epidm:so101_flat_cem sh hjepa/run_phase0.sh offline
+# Lane 1: v6, its probe, its value (v7).
+1 | MODELS=sojepa-v6 TRAIN_ARGS=trainer.max_epochs=3 sh hjepa/run_phase0.sh train && MODELS=sojepa-v6 sh hjepa/run_phase0.sh probe && MODELS=sojepa-v6 sh hjepa/run_phase0.sh value
+# Lanes 2-4: the seed-43 replicates v8 (v3), v9 (v4), v10 (v6) and their probes.
+2 | SEED=43 MODELS=sojepa-v8 TRAIN_ARGS=trainer.max_epochs=3 sh hjepa/run_phase0.sh train && SEED=43 MODELS=sojepa-v8 sh hjepa/run_phase0.sh probe
+3 | SEED=43 MODELS=sojepa-v9 TRAIN_ARGS=trainer.max_epochs=3 sh hjepa/run_phase0.sh train && SEED=43 MODELS=sojepa-v9 sh hjepa/run_phase0.sh probe
+4 | SEED=43 MODELS=sojepa-v10 TRAIN_ARGS=trainer.max_epochs=3 sh hjepa/run_phase0.sh train && SEED=43 MODELS=sojepa-v10 sh hjepa/run_phase0.sh probe
+# Lane 5: v5 planning (CEM, learned value cost), after lane 0 writes v5's value.
+5 | sh scripts/wait_for data/ckpts/so101/so101_lewm_vis_epidm/seed42/value.pt 0 && RUNS=lewm_vis_epidm:so101_flat_cem_value sh hjepa/run_phase0.sh offline
+# Lanes 6-7: v6 planning with the latent cost (after v6) and v7 planning with the value cost (after v7).
+6 | sh scripts/wait_for data/ckpts/so101/sojepa-v6/seed42/sojepa-v6_object.ckpt 1 && RUNS=sojepa-v6:so101_flat_cem sh hjepa/run_phase0.sh offline
+7 | sh scripts/wait_for data/ckpts/so101/sojepa-v6/seed42/value.pt 1 && RUNS=sojepa-v6:so101_flat_cem_value sh hjepa/run_phase0.sh offline

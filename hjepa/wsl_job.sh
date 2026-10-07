@@ -4,9 +4,9 @@
 # The fleet copy (/mnt/c/fleet/so101-jepa) is synced to ext4 (~/so101-jepa), where the venv, data
 # and checkpoints stay (fast disk). Datasets come from the fleet folder so101-jepa-data, if it is
 # there. outputs/ is copied back to the fleet folder, for `fleet pull`.
-SRC=/mnt/c/fleet/so101-jepa
+SRC=$(cd "$(dirname "$0")/.." && pwd)  # the fleet copy, e.g. /mnt/c/fleet/so101-jepa
 DATA=/mnt/c/fleet/so101-jepa-data
-DST=$HOME/so101-jepa
+DST=$HOME/$(basename "$SRC")
 set -e
 missing=""
 for p in rsync libegl1 libgl1 libosmesa6; do

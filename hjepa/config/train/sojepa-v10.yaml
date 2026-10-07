@@ -1,0 +1,6 @@
+# SO-JEPA v10 (MODELS.md): SO-JEPA v6 with seed 43, its seed-variance replicate (run with SEED=43).
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v10
+seed: 43

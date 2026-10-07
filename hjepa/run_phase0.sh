@@ -9,13 +9,16 @@
 # Options (environment): MODELS (train; default: all three); RUNS (offline, closed_loop: model:eval
 # config pairs; default: each flat model with gradient descent and with CEM, H-JEPA with its
 # solver); SEQUENTIAL=1 trains one model after the other (a GPU with 8 GB); GPU_<model> chooses a
-# model's GPU (default 0); TRAIN_ARGS adds Hydra overrides (on a T4: "trainer.precision=16-mixed
-# num_workers=2"); MUJOCO_GL (default egl).
+# model's GPU ('-' in the name as '_'; default: CUDA_VISIBLE_DEVICES, else 0); SEED (default 42);
+# TRAIN_ARGS adds Hydra overrides (on a T4: "trainer.precision=16-mixed num_workers=2"); MUJOCO_GL
+# (default: egl on NVIDIA, osmesa on AMD). NVIDIA or AMD GPU: GPU.md.
 # A failed process does not stop the others; the exit status is 1 if any failed.
-export MUJOCO_GL=${MUJOCO_GL:-egl}
+. "$(dirname "$0")/../scripts/gpu.sh"  # GPU, uvr (uv run with this GPU's torch build), GL
+export MUJOCO_GL=${MUJOCO_GL:-$GL}
 MODELS=${MODELS:-lewm lpwm hjepa_l2}
 RUNS=${RUNS:-lewm:so101_flat lewm:so101_flat_cem lpwm:so101_flat lpwm:so101_flat_cem hjepa_l2:so101_l2}
 mkdir -p outputs
+SEED=${SEED:-42}
 fail=0 pids=""
 waitall() {  # wait for the processes in $pids
   for p in $pids; do wait "$p" || fail=1; done
@@ -25,12 +28,12 @@ name() {  # model -> its config and checkpoint name
   case $1 in sojepa-*) echo "$1" ;; *) echo "so101_$1" ;; esac
 }
 ckpt() {  # model -> its checkpoint
-  echo "data/ckpts/so101/$(name "$1")/seed42/$(name "$1")_object.ckpt"
+  echo "data/ckpts/so101/$(name "$1")/seed$SEED/$(name "$1")_object.ckpt"
 }
 train() {  # model; 3 tries: after a crash (e.g. a GPU reset), it resumes from lightning_resume/last.ckpt
-  gpu=$(eval echo "\${GPU_$1:-0}")
+  gpu=$(eval echo "\${GPU_$(echo "$1" | tr - _):-${CUDA_VISIBLE_DEVICES:-0}}")
   for try in 1 2 3; do
-    CUDA_VISIBLE_DEVICES=$gpu uv run python hjepa/train.py "$(name "$1")" seed=42 $TRAIN_ARGS >> "outputs/train_$1.log" 2>&1 \
+    CUDA_VISIBLE_DEVICES=$gpu uvr python hjepa/train.py "$(name "$1")" seed=$SEED $TRAIN_ARGS >> "outputs/train_$1.log" 2>&1 \
       && return 0
     echo "run_phase0: training $(name "$1") failed (try $try of 3)" >> "outputs/train_$1.log"
     sleep 60
@@ -50,7 +53,7 @@ train)
 offline)
   for run in $RUNS; do
     name=${run%%:*} cfg=${run##*:}
-    uv run python hjepa/offline.py "$(ckpt "$name")" "$cfg" data/so101_val.h5 "outputs/offline_${name}_$cfg.json" \
+    uvr python hjepa/offline.py "$(ckpt "$name")" "$cfg" data/so101_val.h5 "outputs/offline_${name}_$cfg.json" \
       > "outputs/offline_${name}_$cfg.log" 2>&1 & pids="$pids $!"
   done
   waitall ;;
@@ -58,12 +61,12 @@ closed_loop)
   for run in $RUNS; do
     name=${run%%:*} cfg=${run##*:}
     for c in 0 1 2 3 4 5 6 7 8 9; do
-      uv run python sim/closed_loop.py reach "$(ckpt "$name")" "$cfg" $((5000 + c * 10)) 10 \
+      uvr python sim/closed_loop.py reach "$(ckpt "$name")" "$cfg" $((5000 + c * 10)) 10 \
         "outputs/reach_${name}_$cfg.jsonl" > "outputs/reach_${name}_${cfg}_$c.log" 2>&1 & pids="$pids $!"
     done
     waitall
     for c in 0 1 2 3 4 5 6 7 8 9; do
-      uv run python sim/closed_loop.py pick "$(ckpt "$name")" "$cfg" $((5000 + c * 5)) 5 \
+      uvr python sim/closed_loop.py pick "$(ckpt "$name")" "$cfg" $((5000 + c * 5)) 5 \
         "outputs/pick_${name}_$cfg.jsonl" > "outputs/pick_${name}_${cfg}_$c.log" 2>&1 & pids="$pids $!"
     done
     waitall
@@ -71,12 +74,12 @@ closed_loop)
 probe)
   for m in $MODELS; do
     case $m in hjepa_l2) cfg=so101_l2 ;; *) cfg=so101_flat ;; esac
-    uv run python hjepa/probe.py "$(ckpt "$m")" $cfg data/so101_val.h5 "outputs/probe_$m.json" \
+    uvr python hjepa/probe.py "$(ckpt "$m")" $cfg data/so101_val.h5 "outputs/probe_$m.json" \
       > "outputs/probe_$m.log" 2>&1 || fail=1
   done ;;
 value)
   for m in $MODELS; do
-    uv run python hjepa/value.py "$(ckpt "$m")" so101_flat data/so101_train.h5 data/so101_val.h5 \
+    uvr python hjepa/value.py "$(ckpt "$m")" so101_flat data/so101_train.h5 data/so101_val.h5 \
       > "outputs/value_$m.log" 2>&1 || fail=1
     cp "$(dirname "$(ckpt "$m")")/value.json" "outputs/value_$m.json" 2>/dev/null
   done ;;
