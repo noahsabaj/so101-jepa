@@ -1,3 +1,4 @@
+# Historical: it diverged, and the fit code was removed afterwards; it runs only with fork f1eee9a.
 # SO-JEPA v39 (MODELS.md): SO-JEPA v38 with a fitted loss floor (fstar: fit); v38: ScheduleFree+ (Defazio, arXiv 2605.19095; h_jepa/sfplus.py, a port
 # of Meta's reference code): Polyak step size (no learning rate) and Schedule-Free averaging (no schedule).
 # Paper settings for a short run: 400 warmup steps, c_warmup 800, r 0, sf_beta1 0.9, AdamC weight decay 5.
