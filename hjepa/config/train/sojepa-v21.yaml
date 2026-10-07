@@ -1,0 +1,13 @@
+# SO-JEPA v21 (MODELS.md): SO-JEPA v6 trained on play data only (sim-3: motor babbling, no expert, no
+# task; A19). Probed on sim-2 val (expert episodes): does a model that never saw the expert see the cube?
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v21
+data:
+  dataset:
+    name: so101_train_play
+level1:
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

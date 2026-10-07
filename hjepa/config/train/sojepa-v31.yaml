@@ -1,0 +1,20 @@
+# SO-JEPA v31 (MODELS.md): SO-JEPA v6 with a time-step-conditioned predictor (A21): each clip draws a
+# stride k of 1, 2, 3, 5 or 10 steps (0.2 to 2 s); a step's action is its k raw actions padded to 10, plus
+# k / 10. One predictor for every time step, in place of fixed 5 Hz steps and H-JEPA's fixed levels.
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v31
+data:
+  dataset:
+    level1:
+      strides: [1, 2, 3, 5, 10]
+level1:
+  wm:
+    action_dim: 61
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}
+trainer:  # the same number of steps as v6 (longer clips give fewer clips per epoch)
+  max_epochs: 1000
+  max_steps: 8154

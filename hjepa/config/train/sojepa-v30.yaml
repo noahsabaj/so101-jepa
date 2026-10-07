@@ -1,0 +1,17 @@
+# SO-JEPA v30 (MODELS.md): SO-JEPA v6 trained on sim-2 + community-1 (A24: real SO-100/SO-101
+# teleoperation, hjepa/mix_community.py), the same number of steps as v6 (3 x 2,718), so the real data
+# replaces sim batches instead of adding compute. Probed on sim-2 val.
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v30
+data:
+  dataset:
+    name: so101_train_mix
+trainer:
+  max_epochs: 1000
+  max_steps: 8154
+level1:
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

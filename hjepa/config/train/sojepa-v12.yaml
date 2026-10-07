@@ -1,0 +1,10 @@
+# SO-JEPA v12 (MODELS.md): SO-JEPA v6 with a ViT-small encoder instead of ViT-tiny (a larger model; A15, A18).
+# Gradient checkpointing off: the same result, faster on a large GPU.
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v12
+level1:
+  encoder:
+    pixel_encoder:
+      encoder: {scale: small, gradient_checkpointing: false}

@@ -1,0 +1,12 @@
+# SO-JEPA v11 (MODELS.md): SO-JEPA v6 trained 10 epochs instead of 3 (more compute; A15, A18).
+# Gradient checkpointing off: the same result, faster on a large GPU.
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v11
+trainer:
+  max_epochs: 10
+level1:
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

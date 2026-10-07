@@ -24,6 +24,8 @@ dependencies = [
     "pillow",
     "trimesh",
     "coacd",                      # convex decomposition of CAD parts for contact
+    "prodigyopt",                 # learning-rate-free optimizer (PLAN.md A23)
+    "prodigy-plus-schedule-free", # learning-rate-free and schedule-free optimizer (A23)
 ]
 
 # The GPU build of torch (GPU.md): one group per GPU vendor, the same torch version in each.

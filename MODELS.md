@@ -42,6 +42,18 @@ integer versions in the order of registration, with the lineage in the registry.
 | v8 | v3 | Seed 43 (v3's seed-variance replicate). | sim-2 | as v3, seed 43 | (this commit) | sojepa-v8; sojepa-v8 | Queued |
 | v9 | v4 | Seed 43 (v4's seed-variance replicate). | sim-2 | as v4, seed 43 | (this commit) | sojepa-v9; sojepa-v9 | Queued |
 | v10 | v6 | Seed 43 (v6's seed-variance replicate). | sim-2 | as v6, seed 43 | (this commit) | sojepa-v10; sojepa-v10 | Queued |
+| v11 | v6 | 10 epochs instead of 3 (A18: compute). | sim-2 | 10 epochs, seed 42 | gpu-portable | sojepa-v11 | Training |
+| v12 | v6 | ViT-small encoder instead of ViT-tiny (A18: model size). | sim-2 | 3 epochs, seed 42 | gpu-portable | sojepa-v12 | Training |
+| v13-v20 | v6 | Loss-weight search, 8 trials (A23): SIGReg, inverse-dynamics and EP-IDM weights drawn log-uniform (numpy seed 0; values in each config). | sim-2 | 3 epochs, seed 42 | gpu-portable | sojepa-v13 ... sojepa-v20 | Training |
+| v21 | v6 | Play data only: no expert, no task (A19a). | sim-3 (play) | 3 epochs, seed 42 | gpu-portable | sojepa-v21 | Queued (data) |
+| v22 | v6 | Prodigy optimizer: no learning rate (A23). | sim-2 | 3 epochs, seed 42 | gpu-portable | sojepa-v22 | Training |
+| v23-v28 | v6 | Optimizer search, 6 trials (A23): learning rate, weight decay, batch size drawn log-uniform (numpy seed 1). | sim-2 | 3 epochs, seed 42 | gpu-portable | sojepa-v23 ... sojepa-v28 | Training |
+| v29 | v6 | Prodigy + ScheduleFree: no learning rate, no schedule (A23). | sim-2 | 3 epochs, seed 42 | gpu-portable | sojepa-v29 | Queued |
+| v30 | v6 | Trained on sim-2 + community-1 (real SO-100/SO-101 teleoperation), same steps as v6 (A24). | sim-2 + community-1 | 8,154 steps, seed 42 | gpu-portable | sojepa-v30 | Training |
+| v31 | v6 | Time-step-conditioned predictor: random stride 1-10 steps per clip, stride as input (A21). | sim-2 | 8,154 steps, seed 42 | gpu-portable | sojepa-v31 | Training |
+| v32 | v21 | Self-improvement round 1: play data + 1,200 episodes of v21 playing toward goals sampled from the play data (A19b). | sim-3 + self-play | 8,154 steps, seed 42 | gpu-portable | sojepa-v32 | Queued |
+| v33 | v6 | 25% of sim-2, same steps (A18: data). | sim-2 (300 episodes) | 8,154 steps, seed 42 | gpu-portable | sojepa-v33 | Training |
+| v34 | v6 | 50% of sim-2, same steps (A18: data). | sim-2 (600 episodes) | 8,154 steps, seed 42 | gpu-portable | sojepa-v34 | Training |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed<seed>/` on the
 training computer (kat-pc: WSL home).
@@ -58,4 +70,5 @@ Not trained yet, so no version: H-JEPA L2 (so101_hjepa_l2) and the community mod
 |---|---|---|
 | sim-1 | First MuJoCo build (1,300 episodes). Faulty expert. Retired. | — |
 | sim-2 | MuJoCo, fixed expert. 1,200 train episodes (seeds 1,000,000 and up), 100 val (2,000,000 and up), 300 steps at 5 Hz. 64×128 frames (scene and wrist), joints, actions, true state. | data/so101_train.h5, data/so101_val.h5 |
+| sim-3 | Play data: the same scenes as sim-2's train seeds, but motor babbling (sim/collect.py play: random joint targets held 1-15 steps), no expert, no task. 1,200 episodes. | data/so101_train_play.h5 |
 | community-1 | lerobot/community_dataset_v3 (revision ab92ac3f), 441 SO-100/SO-101 datasets, one camera, 64×64, 5 Hz. Test: 43 datasets not in training. | community/ (build.py) |

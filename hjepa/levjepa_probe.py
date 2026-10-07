@@ -22,15 +22,13 @@ import h5py
 import hdf5plugin  # noqa: F401
 import numpy as np
 import torch
-import torch.nn as nn
 from transformers import AutoModel
 
-from probe import CUBE_HALF, LAMBDAS, Ridge, score, within_share
+from probe import CUBE_HALF, LAMBDAS, TOKEN_EVERY, Ridge, attentive, score, within_share
 
 REPO, REVISION = "galilai-group/LeVJEPA-VideoMix-Large", "e831a0347737fcaa660b39c57d41c109de399845"
 MEAN = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
 STD = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
-TOKEN_EVERY = 3  # frames kept with all patch tokens (2 x 196 x 1024 fp16 = 0.8 MB each)
 
 
 @torch.no_grad()
@@ -50,50 +48,6 @@ def encode(f, model, batch=32):
         if i % (batch * 100) == 0:
             print(f"FLEET_PROGRESS {i}/{n}", flush=True)
     return torch.cat(cls), torch.cat(mean), torch.cat(tokens)
-
-
-class AttentiveProbe(nn.Module):
-    def __init__(self, n_tokens, dim=1024, width=256, out=6):
-        super().__init__()
-        self.inp = nn.Sequential(nn.LayerNorm(dim), nn.Linear(dim, width))
-        self.pos = nn.Parameter(0.02 * torch.randn(1, n_tokens, width))
-        self.query = nn.Parameter(0.02 * torch.randn(1, 1, width))
-        self.attn = nn.MultiheadAttention(width, 8, batch_first=True)
-        self.head = nn.Sequential(nn.LayerNorm(width), nn.Linear(width, width), nn.GELU(), nn.Linear(width, out))
-
-    def forward(self, t):
-        x = self.inp(t.float()) + self.pos
-        return self.head(self.attn(self.query.expand(len(x), -1, -1), x, x)[0][:, 0])
-
-
-def attentive(tokens, y, fit, sel, val, epochs=40):
-    """Train on the sel frames, keep the epoch with the best val error, refit nothing (the val
-    split is part of fit, as in probe.py's ridge selection). Returns predictions for all frames."""
-    torch.manual_seed(0)
-    mu, sd = y[sel].mean(0), y[sel].std(0)
-    yt = torch.as_tensor((y - mu) / sd, dtype=torch.float32)
-    probe = AttentiveProbe(tokens.shape[1], dim=tokens.shape[2], out=y.shape[1]).cuda()
-    opt = torch.optim.AdamW(probe.parameters(), lr=1e-3, weight_decay=0.05)
-    sched = torch.optim.lr_scheduler.OneCycleLR(opt, 1e-3, total_steps=epochs * (int(sel.sum()) // 128 + 1))
-    idx_sel, best, best_state = np.flatnonzero(sel), np.inf, None
-    predict = lambda rows: torch.cat([probe(tokens[rows[k:k + 512]].cuda()).cpu() for k in range(0, len(rows), 512)])  # noqa: E731
-    for _ in range(epochs):
-        probe.train()
-        for b in np.array_split(np.random.permutation(idx_sel), len(idx_sel) // 128 + 1):
-            loss = ((probe(tokens[b].cuda()) - yt[b].cuda()) ** 2).mean()
-            opt.zero_grad(set_to_none=True)
-            loss.backward()
-            opt.step()
-            sched.step()
-        probe.eval()
-        with torch.no_grad():
-            err = float(((predict(np.flatnonzero(val)) - yt[val]) ** 2).mean())
-        if err < best:
-            best, best_state = err, {k: v.clone() for k, v in probe.state_dict().items()}
-    probe.load_state_dict(best_state)
-    probe.eval()
-    with torch.no_grad():
-        return predict(np.arange(len(tokens))).numpy() * sd + mu
 
 
 def main(data, out):

@@ -1,0 +1,17 @@
+# SO-JEPA v32 (MODELS.md): self-improvement round 1 (A19): v21's recipe on the play data plus 1,200
+# episodes of v21 playing toward goals sampled from the play data (hjepa/self_improve.sh). No expert
+# anywhere. Same steps as v21 (3 epochs of the play data's size).
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v32
+data:
+  dataset:
+    name: so101_train_play_r1
+trainer:
+  max_epochs: 1000
+  max_steps: 8154
+level1:
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

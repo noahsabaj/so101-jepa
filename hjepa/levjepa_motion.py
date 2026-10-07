@@ -30,8 +30,8 @@ import numpy as np
 import torch
 from transformers import AutoModel
 
-from levjepa_probe import MEAN, REPO, REVISION, STD, attentive
-from probe import CUBE_HALF, LAMBDAS, Ridge
+from levjepa_probe import MEAN, REPO, REVISION, STD
+from probe import CUBE_HALF, LAMBDAS, Ridge, attentive
 
 DT = 0.2  # s per step (5 Hz)
 

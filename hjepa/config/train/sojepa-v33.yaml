@@ -1,0 +1,15 @@
+# SO-JEPA v33 (MODELS.md): SO-JEPA v6 on the first 25% of sim-2 (300 episodes), the same steps as v6 (A18: data scaling).
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v33
+data:
+  dataset:
+    name: so101_train_25pct
+trainer:
+  max_epochs: 1000
+  max_steps: 8154
+level1:
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

@@ -1,0 +1,17 @@
+# SO-JEPA v22 (MODELS.md): SO-JEPA v6 with the learning-rate-free Prodigy optimizer (A23): it sets
+# its own step size (lr 1.0 is its scale factor, not a step size); same weight decay and schedule.
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v22
+optimizer:
+  type: prodigyopt.Prodigy
+  lr: 1.0
+  weight_decay: 1.0e-04
+  safeguard_warmup: true
+  use_bias_correction: true
+level1:
+  lr: 1.0
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

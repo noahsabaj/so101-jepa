@@ -1,0 +1,16 @@
+# SO-JEPA v18 (MODELS.md): loss-weight search trial 6 of 8 (A23): SO-JEPA v6 with SIGReg 0.032,
+# inverse dynamics 219, EP-IDM 10.4 (v6: 0.08, 100, 10), drawn log-uniform (numpy seed 0).
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v18
+level1:
+  idm_coeff: 219
+  ep_idm_coeff: 10.4
+  loss:
+    embed:
+      sigreg:
+        weight: 0.032
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

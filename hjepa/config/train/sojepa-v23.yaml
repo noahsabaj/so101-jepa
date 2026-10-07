@@ -1,0 +1,16 @@
+# SO-JEPA v23 (MODELS.md): optimizer search trial 1 of 6 (A23): SO-JEPA v6 with learning rate 0.00057,
+# weight decay 0.0634, batch 64 (v6: 5e-4, 1e-4, 128), drawn log-uniform (numpy seed 1).
+defaults:
+- sojepa-v6
+- _self_
+output_model_name: sojepa-v23
+optimizer:
+  lr: 0.00057
+  weight_decay: 0.0634
+loader:
+  batch_size: 64
+level1:
+  lr: 0.00057
+  encoder:
+    pixel_encoder:
+      encoder: {gradient_checkpointing: false}

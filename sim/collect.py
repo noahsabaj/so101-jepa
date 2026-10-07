@@ -1,7 +1,10 @@
-"""Make scripted SO-101 episodes and write them in the H-JEPA HDF5 format.
+"""Make SO-101 episodes and write them in the H-JEPA HDF5 format.
 
-    collect.py shard OUT.h5 FIRST_SEED N   # N episodes, seeds FIRST_SEED.., one process
-    collect.py merge OUT.h5 SHARD.h5 ...   # concatenate shards into one file
+    collect.py shard OUT.h5 FIRST_SEED N [expert|play]   # N episodes, seeds FIRST_SEED.., one process
+    collect.py merge OUT.h5 SHARD.h5 ...                  # concatenate shards into one file
+
+Policies: expert (scripted pick-and-place, hand-written waypoints) or play (no task knowledge: hold a
+random joint target, uniform in the joint range, for 1 to 15 steps; PLAN.md A19).
 
 Columns per step (5 Hz): pixels (64x128x3 uint8: scene | wrist), proprio (6 joint angles, rad),
 action (6 joint-target changes, rad), and the true state for tests: ee (grasp point, m), cube_pos,
@@ -15,7 +18,7 @@ import h5py
 import hdf5plugin
 import numpy as np
 
-from env import SO101Env
+from env import MAX_ACTION, SO101Env
 from expert import GRASP_POINT, Expert
 
 STEPS = 300  # 60 s per episode
@@ -23,9 +26,26 @@ PHASES = ["start", "approach", "descend", "grasp", "lift", "carry", "lower", "re
 IMAGE_COMPRESSION = hdf5plugin.Blosc(cname="lz4", clevel=5, shuffle=hdf5plugin.Blosc.SHUFFLE)
 
 
-def episode(env, seed):
+class Play:
+    """Motor babbling: no task, no waypoints. A random joint target (uniform in the joint range) is
+    held for a random 1 to 15 steps; each step moves toward it as fast as the action limit allows."""
+
+    phase = "free"
+
+    def __init__(self, env, rng):
+        self.env, self.rng, self.left = env, rng, 0
+
+    def act(self):
+        if self.left == 0:
+            self.target = self.rng.uniform(self.env.ctrl_lo, self.env.ctrl_hi)
+            self.left = int(self.rng.integers(1, 16))
+        self.left -= 1
+        return np.clip(self.target - self.env.joints(), -MAX_ACTION, MAX_ACTION)
+
+
+def episode(env, seed, policy="expert"):
     obs = env.reset(seed)
-    expert = Expert(env, np.random.default_rng(seed))
+    expert = (Play if policy == "play" else Expert)(env, np.random.default_rng(seed))
     cols = {k: [] for k in ["pixels", "proprio", "action", "ee", "cube_pos", "cube_quat", "phase"]}
     for _ in range(STEPS):
         action = expert.act()
@@ -63,12 +83,12 @@ def append(f, ep):
         f[k][e] = v
 
 
-def shard(out, first_seed, n):
+def shard(out, first_seed, n, policy="expert"):
     env = SO101Env(randomize=True)
     t0 = time.perf_counter()
     with h5py.File(out, "w") as f:
         for i in range(n):
-            ep = episode(env, first_seed + i)
+            ep = episode(env, first_seed + i, policy)
             if i == 0:
                 create(f, ep)
             append(f, ep)
@@ -90,6 +110,6 @@ def merge(out, shards):
 
 if __name__ == "__main__":
     if sys.argv[1] == "shard":
-        shard(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]))
+        shard(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), *sys.argv[5:6])
     else:
         merge(sys.argv[2], sys.argv[3:])
