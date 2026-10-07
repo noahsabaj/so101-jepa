@@ -7,7 +7,8 @@ strength is selected on the last quarter of those), score on the other 20%: RMS 
 Features: the pixel latent (vision only), the full latent (what the planner compares), the joint
 angles (no vision: a baseline) and none (the mean: the spread of the target). Targets: the cube,
 the grasp point, the cube relative to the grasp point, and the cube on the frames where it rests on
-the table (there, only vision can show it).
+the table (there, only vision can show it). Also: the share of each latent's variance that is
+within episodes (near 0: the latent is mostly constant per episode, e.g. light and colours).
 """
 
 import json
@@ -32,7 +33,8 @@ def latents(planner, f, batch=256):
         px = torch.from_numpy(f["pixels"][i:i + batch]).permute(0, 3, 1, 2).float() / 255.0
         pr = (torch.as_tensor(f["proprio"][i:i + batch]).float() - planner.proprio_mean) / planner.proprio_std
         o = level1.encode({"pixels": ((px - MEAN) / STD)[:, None].cuda(), "proprio": pr[:, None].cuda()})
-        out["pixel"].append(o["pixel_embed_0"][:, 0].flatten(1).float().cpu())
+        pix = o.get("pixel_embed_0", o["embed_0"])  # a vision-only encoder has no fusion
+        out["pixel"].append(pix[:, 0].flatten(1).float().cpu())
         out["full"].append(o["embed_0"][:, 0].flatten(1).float().cpu())
     return {k: torch.cat(v).numpy().astype(np.float64) for k, v in out.items()}
 
@@ -42,6 +44,12 @@ def ridge(xf, yf, xt, lam):
     a, b, ym = (xf - mu) / sd, (xt - mu) / sd, yf.mean(0)
     w = np.linalg.solve(a.T @ a + lam * len(a) * np.eye(a.shape[1]), a.T @ (yf - ym))
     return b @ w + ym
+
+
+def within_share(x, ep):
+    """Share of the feature variance that is within episodes (1: all of it, 0: constant per episode)."""
+    within = sum(x[ep == e].var(0).sum() * (ep == e).sum() for e in np.unique(ep)) / len(ep)
+    return round(float(within / (x.var(0).sum() + 1e-12)), 3)
 
 
 def score(y, p):
@@ -63,6 +71,8 @@ def main(ckpt, eval_config, data, out):
     report = {"ckpt": ckpt, "data": data, "frames_fit": int(fit.sum()), "frames_test": int(test.sum()),
               "frames_test_cube_on_table": int(table.sum())}
     for fname, x in feats.items():
+        if fname != "none":
+            report[f"{fname}_within_episode_var_share"] = within_share(x, ep)
         for tname, y in targets.items():
             errs = [((y[val] - ridge(x[sel], y[sel], x[val], lam)) ** 2).sum(1).mean() for lam in LAMBDAS]
             lam = float(LAMBDAS[int(np.argmin(errs))])
