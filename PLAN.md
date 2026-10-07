@@ -45,6 +45,8 @@ An SO-101 arm learns to assemble another SO-101 arm.
 
 ## 4. Architecture
 
+Every trained model has a name and a version (SO-JEPA X.Y). The registry is MODELS.md.
+
 ```mermaid
 flowchart TB
   G["Goal: CAD state + step order"]
@@ -98,7 +100,7 @@ back into the data.
 | A12 | One arm and printed fixtures are sufficient. | Rungs 4 to 6 with fixtures. If they fail for lack of a second hand, we build a second follower. | Open |
 | A13 | Assembly videos with no actions improve the upper levels. | L3 prediction of step results, with and without video pretraining. | Open |
 | A14 | Dense Gaussian latents (SIGReg) are a good choice for planning; sparse latents (LpWM: RDMReg to a rectified Laplace, RepReLU heads) are not better. | LpWM against LeWM: same data, encoder, predictor and trials; each with gradient descent and CEM; offline tests and rungs 1 and 2 (rule 6, paired). If LpWM wins, a dense control with the same heads (Identity link, Gaussian target) tells if sparsity or the heads give the gain. | Open. Flat models, 2026-10-07: LpWM a little better at short horizons (offline rank at 0.2 and 1 s; rung 1 100/100 against 97/100, p = 0.25), a little worse at 3 s; rung 2 0/50 for both. Confounded: both image latents are blind (A15). Test again with the A15 fix. |
-| A15 | The world-model loss makes the image latent keep what the actions change (the arm, and the cube when the arm moves it). | Linear probe of the image latent on held-out episodes (hjepa/probe.py). Pass mark (set 2026-10-07, before the variants): grasp point and resting cube both within 2 cm RMS. | Killed for LeWM and LpWM with joint angles in the latent (12 to 13 cm; chance 12.8). In test: variant A (vision only) and E (vision only plus endpoint inverse dynamics, arXiv 2610.07540). |
+| A15 | The world-model loss makes the image latent keep what the actions change (the arm, and the cube when the arm moves it). | Linear probe of the image latent on held-out episodes (hjepa/probe.py). Pass mark (set 2026-10-07, before the variants): grasp point and resting cube both within 2 cm RMS. | Killed for LeWM and LpWM with joint angles in the latent (12 to 13 cm; chance 12.8). In test: SO-JEPA 2.0 (variant A, vision only) and 2.1 (variant E, vision only plus endpoint inverse dynamics, arXiv 2610.07540). |
 | A16 | The predictor keeps the cube when the gripper holds and hides it (grasp and carry), not only the encoder. | After A15 passes: roll the predictor 1 to 5 steps (0.2 to 1 s) with the true actions from held-out frames, and apply the probe fitted on encoder latents to the predicted latents, on the frames where the cube is lifted. Control: the same probe on a copy of the last latent (no motion). Pass mark: at 1 s, the cube error from predicted latents is below the copy control and within 1.5 times the encoder's own error. | Open (arXiv 2610.07355: a frozen V-JEPA 2 predictor loses a carried object although its encoder has it) |
 
 ## 6. The ladder
@@ -165,6 +167,7 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 | 2026-10-06 | New repository (this one). The lessons of skunkworks carry over as methods, not as code. |
 | 2026-10-06 | Noah: try LpWM again. The skunkworks test (2026-10-03) was not decisive: frozen V-JEPA 2.1 encoder, 100 real episodes (it overfit), gradient planner only, offline tests only. Here it is trained end to end, in sim, with both planners and the closed-loop rungs (A14). |
 | 2026-10-07 | Rung 2 failed (try 1): the image latent is blind (probe, A15). H-JEPA and community training are held, since they share the encoder. Noah: the goal is an SO-101 that picks up a block and moves it to a target position, with a full JEPA stack (no VLM or VLA); I decide the experiments. Next: encoder variants against A15's pass mark, then rung 2, then H-JEPA. |
+| 2026-10-07 | Noah: name and version every model. Family SO-JEPA X.Y: X changes with the interface (inputs, actions, latent shape, levels), Y with any other recipe change. Registry and dataset IDs: MODELS.md. LeWM and LpWM are 1.0 and 1.1; variants A and E are 2.0 and 2.1. |
 
 ## 9. Results log
 
