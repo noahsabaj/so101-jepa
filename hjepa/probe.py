@@ -39,11 +39,19 @@ def latents(planner, f, batch=256):
     return {k: torch.cat(v).numpy().astype(np.float64) for k, v in out.items()}
 
 
-def ridge(xf, yf, xt, lam):
-    mu, sd = xf.mean(0), xf.std(0) + 1e-6
-    a, b, ym = (xf - mu) / sd, (xt - mu) / sd, yf.mean(0)
-    w = np.linalg.solve(a.T @ a + lam * len(a) * np.eye(a.shape[1]), a.T @ (yf - ym))
-    return b @ w + ym
+class Ridge:
+    """Ridge regression on standardized features. One eigendecomposition of the Gram matrix serves
+    every target and strength (token latents have 8,192 features)."""
+
+    def __init__(self, x):
+        self.mu, self.sd = x.mean(0), x.std(0) + 1e-6
+        self.a = (x - self.mu) / self.sd
+        self.e, self.v = np.linalg.eigh(self.a.T @ self.a)
+
+    def predict(self, y, xt, lam):
+        ym = y.mean(0)
+        w = self.v @ ((self.v.T @ (self.a.T @ (y - ym))) / (self.e + lam * len(self.a))[:, None])
+        return ((xt - self.mu) / self.sd) @ w + ym
 
 
 def within_share(x, ep):
@@ -64,19 +72,25 @@ def main(ckpt, eval_config, data, out):
     fit, sel = np.isin(ep, eps[: int(0.8 * len(eps))]), np.isin(ep, eps[: int(0.6 * len(eps))])
     test, val = ~fit, fit & ~sel
     feats = latents(planner, f)
+    if np.array_equal(feats["pixel"], feats["full"]):  # a vision-only model: one feature set
+        feats["full"] = feats["pixel"]
     feats["joints"] = f["proprio"][:].astype(np.float64)
     feats["none"] = np.zeros((len(ep), 1))
     targets = {"cube": cube, "grasp_point": gp, "cube_rel_grasp": cube - gp}
     table = test & (cube[:, 2] < CUBE_HALF + 0.003)
     report = {"ckpt": ckpt, "data": data, "frames_fit": int(fit.sum()), "frames_test": int(test.sum()),
               "frames_test_cube_on_table": int(table.sum())}
+    fitted = {}
     for fname, x in feats.items():
         if fname != "none":
             report[f"{fname}_within_episode_var_share"] = within_share(x, ep)
+        if id(x) not in fitted:
+            fitted[id(x)] = Ridge(x[sel]), Ridge(x[fit])
+        r_sel, r_fit = fitted[id(x)]
         for tname, y in targets.items():
-            errs = [((y[val] - ridge(x[sel], y[sel], x[val], lam)) ** 2).sum(1).mean() for lam in LAMBDAS]
+            errs = [((y[val] - r_sel.predict(y[sel], x[val], lam)) ** 2).sum(1).mean() for lam in LAMBDAS]
             lam = float(LAMBDAS[int(np.argmin(errs))])
-            p = ridge(x[fit], y[fit], x, lam)
+            p = r_fit.predict(y[fit], x, lam)
             report[f"{fname}->{tname}"] = dict(score(y[test], p[test]), lam=lam)
             if tname == "cube":
                 report[f"{fname}->cube_on_table"] = dict(score(y[table], p[table]), lam=lam)

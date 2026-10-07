@@ -33,6 +33,14 @@ Every trained model has a name and a version. Reports, PLAN.md and results use t
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed42/` on the
 training computer (kat-pc: WSL home).
 
+Planned (the version is fixed at the first training):
+
+- SO-JEPA 2.2: the 2.1 world model plus a learned goal-reaching value (hjepa/value.py; value.pt
+  beside the 2.1 checkpoint). The planner cost is -V(last predicted latent, goal latent).
+- SO-JEPA 3.0: 2.1 with token latents (config sojepa-3.0): 128 patch tokens of 64 numbers per
+  frame, no CLS summary; predictor width 256, block-causal over the tokens.
+- SO-JEPA 3.1: 3.0 plus its learned value.
+
 Not trained yet, so no version: H-JEPA L2 (so101_hjepa_l2) and the community models
 (community_lewm, community_hjepa_l2). Each gets a version at its first training.
 

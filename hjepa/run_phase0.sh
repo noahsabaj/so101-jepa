@@ -3,8 +3,9 @@
 # Trains flat LeWM, flat LpWM and 2-level H-JEPA, then runs the offline tests and the closed-loop
 # rung 1 and 2 test trials (seeds 5000-5099 and 5000-5049) for each model and planner, 10
 # processes at a time. probe: linear probes of each model's latent for the cube and the grasp point
-# (hjepa/probe.py).
-# Usage: sh hjepa/run_phase0.sh train|offline|closed_loop|probe
+# (hjepa/probe.py). value: the learned goal-reaching value of each model (hjepa/value.py).
+# Models are versioned names (sojepa-X.Y, MODELS.md) or the old keys (lewm: so101_lewm).
+# Usage: sh hjepa/run_phase0.sh train|offline|closed_loop|probe|value
 # Options (environment): MODELS (train; default: all three); RUNS (offline, closed_loop: model:eval
 # config pairs; default: each flat model with gradient descent and with CEM, H-JEPA with its
 # solver); SEQUENTIAL=1 trains one model after the other (a GPU with 8 GB); GPU_<model> chooses a
@@ -20,15 +21,18 @@ waitall() {  # wait for the processes in $pids
   for p in $pids; do wait "$p" || fail=1; done
   pids=""
 }
+name() {  # model -> its config and checkpoint name
+  case $1 in sojepa-*) echo "$1" ;; *) echo "so101_$1" ;; esac
+}
 ckpt() {  # model -> its checkpoint
-  echo "data/ckpts/so101/so101_$1/seed42/so101_$1_object.ckpt"
+  echo "data/ckpts/so101/$(name "$1")/seed42/$(name "$1")_object.ckpt"
 }
 train() {  # model; 3 tries: after a crash (e.g. a GPU reset), it resumes from lightning_resume/last.ckpt
   gpu=$(eval echo "\${GPU_$1:-0}")
   for try in 1 2 3; do
-    CUDA_VISIBLE_DEVICES=$gpu uv run python hjepa/train.py "so101_$1" seed=42 $TRAIN_ARGS >> "outputs/train_$1.log" 2>&1 \
+    CUDA_VISIBLE_DEVICES=$gpu uv run python hjepa/train.py "$(name "$1")" seed=42 $TRAIN_ARGS >> "outputs/train_$1.log" 2>&1 \
       && return 0
-    echo "run_phase0: training so101_$1 failed (try $try of 3)" >> "outputs/train_$1.log"
+    echo "run_phase0: training $(name "$1") failed (try $try of 3)" >> "outputs/train_$1.log"
     sleep 60
   done
   return 1
@@ -70,8 +74,14 @@ probe)
     uv run python hjepa/probe.py "$(ckpt "$m")" $cfg data/so101_val.h5 "outputs/probe_$m.json" \
       > "outputs/probe_$m.log" 2>&1 || fail=1
   done ;;
+value)
+  for m in $MODELS; do
+    uv run python hjepa/value.py "$(ckpt "$m")" so101_flat data/so101_train.h5 data/so101_val.h5 \
+      > "outputs/value_$m.log" 2>&1 || fail=1
+    cp "$(dirname "$(ckpt "$m")")/value.json" "outputs/value_$m.json" 2>/dev/null
+  done ;;
 *)
-  echo "usage: sh hjepa/run_phase0.sh train|offline|closed_loop|probe" >&2
+  echo "usage: sh hjepa/run_phase0.sh train|offline|closed_loop|probe|value" >&2
   exit 2 ;;
 esac
 exit $fail

@@ -1,0 +1,18 @@
+# so101_flat_cem with the learned goal-reaching value (hjepa/value.py) as the cost, not the latent distance.
+cost: value
+policy: ???
+seed: 1234
+solver:
+  _target_: stable_worldmodel.solver.CEMSolver
+  n_steps: 30
+  num_samples: 300
+  topk: 30
+  var_scale: 1.0
+  batch_size: 1
+  action_clip_sigma: 2.0
+  device: cuda
+  seed: ${seed}
+plan_config:
+  horizon: 5
+  receding_horizon: 2
+  cost_last_n: 1

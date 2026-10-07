@@ -5,7 +5,8 @@
 1. Expert rank (k = 1, 5, 15 steps ahead; 0.2, 1, 3 s): the goal is the latent of the frame k
    steps later. Level 1 predicts the next latent for the expert's move and for 100 random moves
    (moves of other held-out steps). The rank is the share of random moves whose prediction is
-   closer to the goal than the expert's (0 is perfect, 0.5 is chance).
+   closer to the goal than the expert's (0 is perfect, 0.5 is chance). "Closer" is the planner's
+   cost: the latent distance, or minus the learned value (cost: value).
 2. Plan direction (k = 5, 15): the planner plans from frame t to frame t + k. The score is the
    cosine between its first move and the expert's move (normalized units; 0 is chance).
 """
@@ -54,8 +55,11 @@ def expert_rank(planner, f, picks, k, decoy_actions):
         act = np.repeat(acts[None], len(cands), axis=0)
         act[:, -1] = cands
         act = torch.as_tensor(act, dtype=torch.float32, device="cuda")
-        pred = level1.predict(hist.expand(len(cands), -1, -1), level1.action_embed(act))[:, -1]
-        cost = ((pred - goal) ** 2).mean(-1).cpu().numpy()
+        pred = level1.predict(hist.expand(len(cands), *hist.shape[1:]), level1.action_embed(act))[:, -1]
+        if getattr(level1, "value_fn", None) is not None:  # the planner's learned cost (cost: value)
+            cost = -level1.value_fn(pred, goal.expand_as(pred)).cpu().numpy()
+        else:
+            cost = ((pred - goal) ** 2).flatten(1).mean(1).cpu().numpy()
         ranks.append(float((cost[1:] < cost[0]).mean()))
     return ranks
 

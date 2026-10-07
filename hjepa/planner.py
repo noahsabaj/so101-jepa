@@ -4,6 +4,8 @@ The solver code is H-JEPA's: multi-start gradient descent per level (hierarchica
 cross-entropy method (stable_worldmodel/solver/cem.py, added in our fork).
 This module only converts our observations (uint8 64x128 pixels, 6 joint angles) the way the
 training pipeline did, and the planned actions back to raw joint-target changes (rad).
+The cost is the latent distance to the goal, or, with `cost: value` in the eval config, the learned
+goal-reaching value of hjepa/value.py (value.pt beside the checkpoint).
 """
 
 import sys
@@ -31,6 +33,10 @@ class Planner:
         cfg = OmegaConf.merge(cfg, OmegaConf.from_dotlist([f"policy={ckpt}", f"seed={seed}", *overrides]))
         self.cfg = cfg
         self.model = load_model(cfg)
+        if cfg.get("cost", "latent") == "value":
+            from value import load_value
+            level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
+            level1.value_fn = load_value(Path(ckpt).parent / "value.pt")
         stats = load_normalizer_artifact(Path(ckpt).parent / "normalizer.pt")["stats"]
         self.proprio_mean, self.proprio_std = (torch.tensor(stats["proprio"][k]).float().view(-1) for k in ("mean", "std"))
         self.action_mean, self.action_std = (np.asarray(stats["action"][k]).reshape(-1) for k in ("mean", "std"))

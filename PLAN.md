@@ -29,6 +29,10 @@ An SO-101 arm learns to assemble another SO-101 arm.
    the power switch when the real arm can move.
 9. Lean code. When an experiment concludes, we record the result in section 9 and delete its code.
 10. The fleet first. I tell you the cost before I rent a GPU.
+11. Learning and search before human knowledge (the bitter lesson; Noah, 2026-10-07). Each
+    hand-made part (a cost, a state, a sub-goal, a skill, a data source) is a debt: it has an entry
+    in section 5 with a test that replaces it by a learned part. Safety checks (rule 8) and test
+    measures stay hand-made.
 
 ## 3. Task facts
 
@@ -88,7 +92,7 @@ back into the data.
 |---|---|---|---|
 | A1 | A hierarchy helps assembly. | Flat LeWM against 2- and 3-level H-JEPA, same sim trials, rungs 2 to 6. | Open |
 | A2 | A trainable encoder is better for control than a frozen one. | Frozen V-JEPA 2.1 tokens against a trainable ViT-S, rung 2. | Open |
-| A3 | A few latent tokens are better than one vector when many parts are present. | One CLS vector against K tokens, rungs 2 and 6. | Open |
+| A3 | Token latents (every patch token of a frame) are better than one summary vector: they keep where things are, and more resolution gives more tokens. | SO-JEPA 3.0 (tokens) against 2.1 (one vector), same recipe otherwise: probe (A15 mark), offline tests, rung 2 (paired). | Open. 3.0 built and tested on the CPU (2026-10-07); trains after 2.1. |
 | A4 | Servo current adds contact information. | With and without current, rung 3. | Open |
 | A5 | Models trained in sim transfer to the real SO-101. | Offline on community real data; then real rungs 1 and 2. | Open |
 | A6 | CAD renders are good goals for real images. | Latent distance between a render and a photo of the same state, against a 1 cm change. | Open |
@@ -105,6 +109,7 @@ back into the data.
 | A17 | Vision only is enough: the model needs no joint angles as input (Noah's default bet, 2026-10-07: the bitter lesson). | After A15 passes: the vision-only model against the same model with joint angles added (with EP-IDM, and joint angles dropped in part of the batches so vision cannot be bypassed), rungs 2 and 3. Rung 3 also tests if 64x128 images give the precision insertion needs. | Open. Default: vision only (SO-JEPA 2.x). |
 | A18 | Our methods get better with scale (the bitter lesson): more data, a larger model and more planning compute give more success. | After A15 passes: SO-JEPA 2.x on 25, 50 and 100% of sim-2; ViT-tiny against ViT-small; CEM with 100, 300 and 1,000 samples. Probe and rung 2 for each. A flat curve kills it: something hand-built caps the method. | Open |
 | A19 | Data from the planner's own trials (successes and failures) improves the model more than more expert data. | Same compute: add N episodes of planner trials against N more expert episodes, then rung 2. | Open |
+| A20 | A learned goal-reaching value (hjepa/value.py: hindsight goals, -1 per step, expectile regression, no task labels) is a better planning cost than the latent distance to the goal image. | Same world model, same trials: latent distance against the value (SO-JEPA 2.2 against 2.1, 3.1 against 3.0): offline expert rank at 1 and 3 s, then rung 2. Val checks of the value: rank correlation with the true steps to the goal, and the nearer state has the larger value. | Open. Code ready (2026-10-07). |
 
 ## 6. The ladder
 
@@ -172,6 +177,7 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 | 2026-10-07 | Rung 2 failed (try 1): the image latent is blind (probe, A15). H-JEPA and community training are held, since they share the encoder. Noah: the goal is an SO-101 that picks up a block and moves it to a target position, with a full JEPA stack (no VLM or VLA); I decide the experiments. Next: encoder variants against A15's pass mark, then rung 2, then H-JEPA. |
 | 2026-10-07 | Noah: name and version every model. Family SO-JEPA X.Y: X changes with the interface (inputs, actions, latent shape, levels), Y with any other recipe change. Registry and dataset IDs: MODELS.md. LeWM and LpWM are 1.0 and 1.1; variants A and E are 2.0 and 2.1. |
 | 2026-10-07 | Noah: vision only is the default bet (the bitter lesson). The model sees only the cameras; the joint encoders stay in the servo loop that does the actions (A17). |
+| 2026-10-07 | Noah: remove human knowledge and structure wherever we can (rule 11). First: token latents in place of the CLS summary (A3, SO-JEPA 3.0) and a learned goal-reaching value in place of the hand-set latent distance (A20). Next debts: the scripted expert as the data source (A19) and hand sub-goals (A1, H-JEPA). |
 
 ## 9. Results log
 

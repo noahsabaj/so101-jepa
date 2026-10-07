@@ -1,0 +1,20 @@
+# SO-JEPA 3.0 (MODELS.md): SO-JEPA 2.1 with token latents. The latent of a frame is every ViT patch
+# token (8x16 = 128 tokens, no CLS summary), each projected to 64 numbers, so the model keeps where
+# things are and more resolution gives more tokens. The predictor attends over all tokens of the
+# history (block-causal in time; each frame's action conditions its tokens). SIGReg, inverse
+# dynamics and EP-IDM see the flattened tokens of a frame (8,192 numbers).
+defaults:
+- so101_lewm_vis_epidm
+- _self_
+output_model_name: sojepa-3.0
+level1:
+  wm:
+    embed_dim: 64
+    num_tokens: 128
+  encoder:
+    pixel_encoder:
+      projector: {type: mlp, hidden_dim: 512}  # one row per token
+  predictor:
+    predictor_dim: 256
+    heads: 4
+    dim_head: 64
