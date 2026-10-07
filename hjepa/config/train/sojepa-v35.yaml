@@ -1,0 +1,20 @@
+# SO-JEPA v35 (MODELS.md): the best parts so far together: the time-step predictor of v31, the ViT-small
+# encoder of v12 and the Prodigy + ScheduleFree optimizer of v29 (no learning rate, no schedule), trained
+# 3x longer (24,462 steps).
+defaults:
+- sojepa-v31
+- _self_
+output_model_name: sojepa-v35
+optimizer:
+  type: prodigyplus.prodigy_plus_schedulefree.ProdigyPlusScheduleFree
+  lr: 1.0
+  weight_decay: 1.0e-04
+  schedule_free: true
+trainer:
+  max_epochs: 1000
+  max_steps: 24462
+level1:
+  lr: 1.0
+  encoder:
+    pixel_encoder:
+      encoder: {scale: small, gradient_checkpointing: false}

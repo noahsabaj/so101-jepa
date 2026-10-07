@@ -1,0 +1,9 @@
+# SO-JEPA v40 (MODELS.md): SO-JEPA v38 (ScheduleFree+) without gradient clipping. Clipping (norm 1.0)
+# shrank the gradient that the Polyak step divides by, so v38's steps were 30-90x too large and it
+# diverged; with the raw gradient the step is ~1e-3 to 2e-4 with no learning rate and no schedule.
+defaults:
+- sojepa-v38
+- _self_
+output_model_name: sojepa-v40
+trainer:
+  gradient_clip_val: null
