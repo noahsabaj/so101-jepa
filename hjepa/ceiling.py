@@ -26,7 +26,11 @@ torch.set_num_threads(int(float(os.environ.get("FLEET_CPUS", os.cpu_count()))))
 def load(path, step):
     f = h5py.File(path, "r")
     n = len(f["pixels"])
-    px = np.concatenate([f["pixels"][i:i + 30000][::step] for i in range(0, n, 30000)])
+    px, k = np.empty((len(range(0, n, step)), *f["pixels"].shape[1:]), np.uint8), 0
+    for i in range(0, n, 3000 * step):  # one copy in memory: fill block by block
+        blk = f["pixels"][i:i + 3000 * step][::step]
+        px[k:k + len(blk)] = blk
+        k += len(blk)
     y = np.concatenate([f["cube_pos"][::step], f["ee"][::step]], 1).astype(np.float32)
     return px, y
 
