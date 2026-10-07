@@ -24,7 +24,7 @@ img_size: 64  # per view; frames are 64x128 (scene | wrist), the 8x8 position gr
 patch_size: 8
 dump_object: true
 save_every_n_epochs: 1
-resume_every_n_steps: 500  # kat-pc: higher-ranked jobs stop ours; a stop loses at most ~4 min
+resume_every_n_steps: 100  # kat-pc: higher-ranked jobs stop ours every few minutes; a save takes 0.5 s
 trainer:
   max_epochs: 10
   devices: 1

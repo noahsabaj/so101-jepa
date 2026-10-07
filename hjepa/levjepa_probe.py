@@ -72,7 +72,7 @@ def attentive(tokens, y, fit, sel, val, epochs=40):
     torch.manual_seed(0)
     mu, sd = y[sel].mean(0), y[sel].std(0)
     yt = torch.as_tensor((y - mu) / sd, dtype=torch.float32)
-    probe = AttentiveProbe(tokens.shape[1]).cuda()
+    probe = AttentiveProbe(tokens.shape[1], dim=tokens.shape[2], out=y.shape[1]).cuda()
     opt = torch.optim.AdamW(probe.parameters(), lr=1e-3, weight_decay=0.05)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, 1e-3, total_steps=epochs * (int(sel.sum()) // 128 + 1))
     idx_sel, best, best_state = np.flatnonzero(sel), np.inf, None
