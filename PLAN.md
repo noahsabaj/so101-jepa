@@ -208,5 +208,16 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 - LpWM ([2608.22764](https://arxiv.org/abs/2608.22764)): sparse latents help small predictors;
   plans with CEM. In skunkworks, an LpWM-type model overfit 100 real episodes.
 - The planning-limits paper (2609.39235): a latent distance plans reliably only 5 to 10 steps ahead.
+- EP-IDM ([2610.07540](https://arxiv.org/abs/2610.07540), Toso, LeCun et al.): prediction plus
+  SIGReg can reach its minimum while the encoder drops directions the actions control (Lemma 2; our
+  probe shows this). Reconstructing the H actions from the first and last latents keeps every
+  direction reachable in H steps. CartPole latent LQR 0 to 100%; Walker2D 0.08 to 2.91 m/s. Same
+  small architecture as ours (ViT-tiny from scratch, AdaLN predictor, CEM 300/30). Our variant E.
+- EpicWorldModel ([2610.05996](https://arxiv.org/abs/2610.05996)): stochastic predictor (flow
+  matching, 1-2 steps) samples several futures; CEM adds an exploration bonus from their spread.
+  Big gains under occlusion (RoboCasa navigation 45 to 72-90%, PointMaze Giant 65 to 86%), none on
+  the OGBench manipulation scene (64 vs 60-62%). Its encoder objective is LeWM's, so it does not fix
+  A15. Later use: one-model uncertainty (planner cost, A9 practice selection) and grasps that can
+  succeed or slip.
 - NVIDIA Factory, IndustReal and AutoMate: contact-rich assembly learned in sim transferred to real
   arms (reinforcement learning policies).
