@@ -1,0 +1,21 @@
+# SO-101: flat CEM planning with a time-step model (PLAN.md A21, SO-JEPA v31): one plan per stride
+# (0.2, 0.4, 1 and 2 s steps; horizon 5 steps: 1 to 10 s), the lowest-cost plan wins; replan after
+# 2 raw steps (0.4 s). Otherwise so101_flat_cem (the planner loads eval configs without Hydra defaults).
+policy: ???
+seed: 1234
+solver:
+  _target_: stable_worldmodel.solver.CEMSolver
+  n_steps: 30
+  num_samples: 300
+  topk: 30
+  var_scale: 1.0
+  batch_size: 1
+  action_clip_sigma: 2.0
+  device: cuda
+  seed: ${seed}
+plan_config:
+  horizon: 5
+  receding_horizon: 2
+  cost_last_n: 1
+strides: [1, 2, 5, 10]
+max_stride: 10
