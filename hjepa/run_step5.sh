@@ -10,8 +10,15 @@ fail=0
 for m in $MODELS; do
   ckpt=data/ckpts/community/community_$m/seed42/community_${m}_object.ckpt
   case $1 in
-  train)
-    uv run python hjepa/train.py "community_$m" seed=42 $TRAIN_ARGS > "outputs/train_community_$m.log" 2>&1 || fail=1 ;;
+  train)  # 3 tries: after a crash (e.g. a GPU reset), it resumes from lightning_resume/last.ckpt
+    ok=0
+    for try in 1 2 3; do
+      uv run python hjepa/train.py "community_$m" seed=42 $TRAIN_ARGS >> "outputs/train_community_$m.log" 2>&1 \
+        && { ok=1; break; }
+      echo "run_step5: training community_$m failed (try $try of 3)" >> "outputs/train_community_$m.log"
+      sleep 60
+    done
+    [ $ok = 1 ] || fail=1 ;;
   offline)
     case $m in hjepa_l2) cfg=so101_l2 ;; *) cfg=so101_flat ;; esac
     uv run python hjepa/offline.py "$ckpt" $cfg data/community_test.h5 "outputs/offline_community_$m.json" \

@@ -23,9 +23,15 @@ waitall() {  # wait for the processes in $pids
 ckpt() {  # model -> its checkpoint
   echo "data/ckpts/so101/so101_$1/seed42/so101_$1_object.ckpt"
 }
-train() {  # model
+train() {  # model; 3 tries: after a crash (e.g. a GPU reset), it resumes from lightning_resume/last.ckpt
   gpu=$(eval echo "\${GPU_$1:-0}")
-  CUDA_VISIBLE_DEVICES=$gpu uv run python hjepa/train.py "so101_$1" seed=42 $TRAIN_ARGS > "outputs/train_$1.log" 2>&1
+  for try in 1 2 3; do
+    CUDA_VISIBLE_DEVICES=$gpu uv run python hjepa/train.py "so101_$1" seed=42 $TRAIN_ARGS >> "outputs/train_$1.log" 2>&1 \
+      && return 0
+    echo "run_phase0: training so101_$1 failed (try $try of 3)" >> "outputs/train_$1.log"
+    sleep 60
+  done
+  return 1
 }
 case $1 in
 train)
