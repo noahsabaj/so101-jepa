@@ -6,7 +6,9 @@
 import sys
 
 import h5py
-import hdf5plugin  # noqa: F401
+import hdf5plugin
+
+IMAGE_COMPRESSION = hdf5plugin.Blosc(cname="lz4", clevel=5, shuffle=hdf5plugin.Blosc.SHUFFLE)
 
 
 def main(data, out, n):
@@ -15,8 +17,9 @@ def main(data, out, n):
         end = int(f["ep_offset"][n - 1] + f["ep_len"][n - 1])
         for k in f:
             rows = n if k in ("ep_len", "ep_offset") else end
-            g.create_dataset(k, data=f[k][:rows], chunks=f[k].chunks, compression=f[k].compression,
-                             compression_opts=f[k].compression_opts)
+            chunks = tuple(min(c, rows if i == 0 else c) for i, c in enumerate(f[k].chunks))
+            kw = dict(IMAGE_COMPRESSION) if f[k].ndim == 4 else {}  # pixels: the Blosc filter of sim/collect.py
+            g.create_dataset(k, data=f[k][:rows], chunks=chunks, **kw)
     print(f"wrote {out}: {n} episodes, {end} frames", flush=True)
 
 
