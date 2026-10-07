@@ -4,7 +4,7 @@
 # rung 1 and 2 test trials (seeds 5000-5099 and 5000-5049) for each model and planner, 10
 # processes at a time. probe: linear probes of each model's latent for the cube and the grasp point
 # (hjepa/probe.py). value: the learned goal-reaching value of each model (hjepa/value.py).
-# Models are versioned names (sojepa-X.Y, MODELS.md) or the old keys (lewm: so101_lewm).
+# Models are versioned names (sojepa-vN, MODELS.md) or the old keys (lewm: so101_lewm).
 # Usage: sh hjepa/run_phase0.sh train|offline|closed_loop|probe|value
 # Options (environment): MODELS (train; default: all three); RUNS (offline, closed_loop: model:eval
 # config pairs; default: each flat model with gradient descent and with CEM, H-JEPA with its

@@ -1,4 +1,4 @@
-# SO-101 sim: vision-only LeWM plus endpoint inverse dynamics (variant E of the blind-latent fix,
+# SO-101 sim: vision-only LeWM plus endpoint inverse dynamics (SO-JEPA v4, the blind-latent fix,
 # 2026-10-07; EP-IDM from arXiv 2610.07540). From z_t and z_t+10 alone, an MLP reconstructs the 10
 # actions between them (2 s), so the latent must keep what those actions changed: the arm, and the
 # cube when the arm moves it. Clips grow from 5 to 11 frames. Everything else is so101_lewm_vis.
