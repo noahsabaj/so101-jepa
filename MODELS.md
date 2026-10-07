@@ -37,8 +37,8 @@ integer versions in the order of registration, with the lineage in the registry.
 | v3 | v1 | Image only: no joint angles in the input. Latent 384 from the image. | sim-2 | 3 epochs, seed 42 | 5b51c03, 229e1c2 | so101_lewm_vis; so101_lewm_vis | Training (variant A of the A15 fix). |
 | v4 | v3 | Endpoint inverse dynamics (EP-IDM): an MLP gets the 10 actions (2 s) back from z_t and z_t+10, weight 10. Clips of 11 frames. | sim-2 | 3 epochs, seed 42 | 492a961, f1577c4 | so101_lewm_vis_epidm; so101_lewm_vis_epidm | Training (variant E). The first tries (fork 7dcc7f4) crashed: clips were cut to 5 frames. |
 | v5 | v4 | v4's world model plus a learned goal-reaching value (hjepa/value.py: hindsight goals, -1 per step, expectile regression, two heads). Planner cost -V(last predicted latent, goal latent). | sim-2 | value: 50,000 steps, batch 1,024, on frozen v4 latents | 7b01eff, 70063d2 | so101_flat_value / so101_flat_cem_value; value.pt beside v4's checkpoint | Queued |
-| v6 | v4 | Token latents: every ViT patch token (8×16 = 128 tokens of 64 numbers), no CLS summary. Predictor width 256, block-causal over the tokens. | sim-2 | 3 epochs, seed 42 | 7b01eff, 70063d2 | sojepa-v6; sojepa-v6 | Queued |
-| v7 | v6 | v6's world model plus its learned value (as v5). | sim-2 | as v5 | 7b01eff, 70063d2 | value.pt beside v6's checkpoint | Queued |
+| v6 | v4 | Token latents: every ViT patch token (8×16 = 128 tokens of 64 numbers), no CLS summary. Predictor width 256, block-causal over the tokens. | sim-2 | 3 epochs, seed 42 | 1181b0c, 70063d2 | sojepa-v6; sojepa-v6 | Queued |
+| v7 | v6 | v6's world model plus its learned value (as v5). | sim-2 | as v5 | 1181b0c, 70063d2 | value.pt beside v6's checkpoint | Queued |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed42/` on the
 training computer (kat-pc: WSL home).
