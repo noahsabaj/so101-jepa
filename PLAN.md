@@ -99,6 +99,7 @@ back into the data.
 | A13 | Assembly videos with no actions improve the upper levels. | L3 prediction of step results, with and without video pretraining. | Open |
 | A14 | Dense Gaussian latents (SIGReg) are a good choice for planning; sparse latents (LpWM: RDMReg to a rectified Laplace, RepReLU heads) are not better. | LpWM against LeWM: same data, encoder, predictor and trials; each with gradient descent and CEM; offline tests and rungs 1 and 2 (rule 6, paired). If LpWM wins, a dense control with the same heads (Identity link, Gaussian target) tells if sparsity or the heads give the gain. | Open. Flat models, 2026-10-07: LpWM a little better at short horizons (offline rank at 0.2 and 1 s; rung 1 100/100 against 97/100, p = 0.25), a little worse at 3 s; rung 2 0/50 for both. Confounded: both image latents are blind (A15). Test again with the A15 fix. |
 | A15 | The world-model loss makes the image latent keep what the actions change (the arm, and the cube when the arm moves it). | Linear probe of the image latent on held-out episodes (hjepa/probe.py). Pass mark (set 2026-10-07, before the variants): grasp point and resting cube both within 2 cm RMS. | Killed for LeWM and LpWM with joint angles in the latent (12 to 13 cm; chance 12.8). In test: variant A (vision only) and E (vision only plus endpoint inverse dynamics, arXiv 2610.07540). |
+| A16 | The predictor keeps the cube when the gripper holds and hides it (grasp and carry), not only the encoder. | After A15 passes: roll the predictor 1 to 5 steps (0.2 to 1 s) with the true actions from held-out frames, and apply the probe fitted on encoder latents to the predicted latents, on the frames where the cube is lifted. Control: the same probe on a copy of the last latent (no motion). Pass mark: at 1 s, the cube error from predicted latents is below the copy control and within 1.5 times the encoder's own error. | Open (arXiv 2610.07355: a frozen V-JEPA 2 predictor loses a carried object although its encoder has it) |
 
 ## 6. The ladder
 
@@ -220,5 +221,14 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   the OGBench manipulation scene (64 vs 60-62%). Its encoder objective is LeWM's, so it does not fix
   A15. Later use: one-model uncertainty (planner cost, A9 practice selection) and grasps that can
   succeed or slip.
+- Tracking Is Not Permanence ([2610.07355](https://arxiv.org/abs/2610.07355), Xie and Alanwar):
+  the frozen V-JEPA 2 predictor loses a hidden moving object within 0.3 s and keeps a stationary
+  one in only 13 to 41% of scenes, but a linear probe reads the object from the encoder at 1.00.
+  V-JEPA 2 and Cosmos both lose an object carried inside a moving container. 3,000 predictor-only
+  steps on synthetic container scenes fix this (0.05 to 1.00). IntPhys scores rose with other
+  curricula too, so the benchmark does not measure this belief. Only the mask predictor was tested,
+  not V-JEPA 2-AC. For us: a cube in a closed gripper is a carried object; test the predictor, not
+  only the encoder (A16). Their minimal pairs (two worlds that differ only at the object) are a
+  cleaner test than a regression probe.
 - NVIDIA Factory, IndustReal and AutoMate: contact-rich assembly learned in sim transferred to real
   arms (reinforcement learning policies).
