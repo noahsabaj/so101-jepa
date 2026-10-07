@@ -91,7 +91,7 @@ back into the data.
 | # | Assumption | Test that can kill it | Status |
 |---|---|---|---|
 | A1 | A hierarchy helps assembly. | Flat LeWM against 2- and 3-level H-JEPA, same sim trials, rungs 2 to 6. | Open |
-| A2 | A trainable encoder is better for control than a frozen one. | Frozen V-JEPA 2.1 tokens against a trainable ViT-S, rung 2. | Open |
+| A2 | A large encoder pretrained on video (LeVJEPA ViT-L/16, public weights, frozen) is better for control than our small encoders trained from scratch. | Step 1: re-render the val episodes at 224x224 per view and probe frozen LeVJEPA tokens for the grasp point and the resting cube (A15 mark: 2 cm). Step 2, if it passes: a predictor and value on frozen LeVJEPA latents against our best from-scratch version, offline tests and rung 2. Then fine-tuned against frozen. | Open. Waits for Noah's OK to download the weights (2026-10-07). The skunkworks result (frozen V-JEPA 2.1 tokens did not show a 2.5 cm cube) is weak evidence: Noah doubts its method. |
 | A3 | Token latents (every patch token of a frame) are better than one summary vector: they keep where things are, and more resolution gives more tokens. | SO-JEPA v6 (tokens) against v4 (one vector), same recipe otherwise: probe (A15 mark), offline tests, rung 2 (paired). | Open. v6 built and tested on the CPU (2026-10-07); trains after v4. |
 | A4 | Servo current adds contact information. | With and without current, rung 3. | Open |
 | A5 | Models trained in sim transfer to the real SO-101. | Offline on community real data; then real rungs 1 and 2. | Open |
@@ -211,7 +211,8 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 
 ## 10. Prior evidence
 
-- Skunkworks (frozen V-JEPA 2.1, WidowX AI, sim): the bilinear model with Gauss-Newton reached 97
+- Skunkworks (frozen V-JEPA 2.1, WidowX AI, sim; Noah doubts its methods and results, so we treat it as
+  weak evidence and test its claims again here): the bilinear model with Gauss-Newton reached 97
   of 100 (1-move plans); 3-move plans 24 of 100. Pick-and-place grasped in 9 of 17 trials, with
   hand-made sub-goals. With only the final goal, the gripper never came near the cube. The L1 token
   distance does not measure progress. The frozen tokens do not show a 2.5 cm cube.
