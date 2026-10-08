@@ -65,6 +65,13 @@ EXCLUDE = {
 }
 
 
+def identity(row):
+    """What a shard stands for: the source revision, dataset, camera and split of its sample row, and the
+    conversion settings. A shard is reused and merged only if this matches the row it is read for."""
+    return dict(revision=REVISION, dataset=row["dataset"], camera=row["camera"], split=row["split"],
+                settings=SETTINGS)
+
+
 def load_sample():
     return json.loads((HERE / "sample.json").read_text())
 
@@ -164,7 +171,7 @@ def convert_dataset(i, row):
     if shard.exists():  # written by an earlier run that stopped before the merge; reused if made the same way
         with np.load(shard) as z:
             info = json.loads(str(z["info"]))
-        if info.get("settings") == SETTINGS:
+        if info.get("identity") == identity(row):
             return info
     root, cam, v = RAW / row["dataset"], row["camera"], f"videos/{row['camera']}/"
     info = json.loads((root / "meta/info.json").read_text())
@@ -220,7 +227,7 @@ def convert_dataset(i, row):
                 else:
                     drop["video"] += 1
 
-    summary = dict(name=row["dataset"], camera=cam, split=row["split"], fps=fps, settings=SETTINGS,
+    summary = dict(name=row["dataset"], camera=cam, split=row["split"], fps=fps, settings=SETTINGS, identity=identity(row),
                    robot_type=info.get("robot_type"), state_names=info["features"]["observation.state"].get("names"), video=video,
                    episodes=dict(source=len(eps), kept=len(kept), **drop), steps=m)
     arrays = {}
@@ -258,6 +265,8 @@ def merge(rows, summaries):
             row = ep = 0
             for i in ids:
                 with np.load(SHARDS / f"{i:04d}.npz") as z:
+                    if json.loads(str(z["info"])).get("identity") != identity(rows[i]):
+                        raise RuntimeError(f"shard {i:04d} is not the shard of {rows[i]['dataset']} ({rows[i]['split']}); delete {SHARDS} and convert again")
                     lens = z["ep_len"]
                     m, e = int(lens.sum()), len(lens)
                     for k in ("pixels", "proprio", "action", "state_raw", "action_raw"):
