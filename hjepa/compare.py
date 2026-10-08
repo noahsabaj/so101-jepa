@@ -61,13 +61,17 @@ def verdict(rows):
     tasks = {x["task"] for x in rows.values()}
     if len(tasks) != 1 or next(iter(tasks)) not in PASS:
         return f"no verdict: tasks {sorted(tasks)}"
-    need, full = PASS[tasks.pop()]
+    task = tasks.pop()
+    need, full = PASS[task]
     test, seeds = set(range(TEST_FIRST, TEST_FIRST + full)), set(rows)
     if not seeds <= test:
         return f"{need}/{full}: no verdict, {len(seeds - test)} seeds outside the test seeds {TEST_FIRST}-{TEST_FIRST + full - 1}"
     if seeds != test:
         return f"{need}/{full}: incomplete ({len(seeds)} of {full} test seeds)"
-    return f"{need}/{full}: " + ("PASS" if sum(rows[s]["success"] for s in test) >= need else "fail")
+    key = "success_strict" if task == "pick" else "success"  # rung 2: a real pick (Noah, 2026-10-08)
+    if any(key not in rows[s] for s in test):
+        return f"{need}/{full}: no verdict, rows without {key} (run before 2026-10-08)"
+    return f"{need}/{full}: " + ("PASS" if sum(rows[s][key] for s in test) >= need else "fail")
 
 
 def closed_loop(paths):

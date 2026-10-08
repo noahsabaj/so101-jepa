@@ -139,6 +139,11 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
 - Rung 2: the goal is an observation of the cube at a new place (6 cm or more away) and the arm at
   its rest pose. No sub-goals. Success: after 300 steps (60 s) the cube is within 2 cm (xy) of the
   goal place and rests on the table. Test trials: seeds 5000 to 5049.
+  Deviation (2026-10-08, Noah's decision, rule 5): the mark also requires a real pick and place
+  (success_strict in sim/closed_loop.py): the cube was held off the table, then released, and it
+  rests, settled, on the table at the end. A cube pushed along the table into the goal place passed
+  the old definition (Codex audit, finding 8). The mark stays 30 of 50. Earlier rung 2 results (0 of
+  50, never lifted) fail both definitions, so none changes.
 - We tune on seeds 1000 to 4999. We compare flat LeWM and 2-level H-JEPA on the same test trials.
 - Change (2026-10-06, before any test): cubes and goal places are 15 to 25 cm from the arm's base
   (was 15 to 28 cm), within +-60 degrees. Past 26 cm the arm is almost straight, and the scripted

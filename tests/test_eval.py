@@ -113,8 +113,13 @@ def test_sliding_cube_is_not_settled(env):
 
 # --- 7: rung verdicts ------------------------------------------------------------------------
 
-def _rows(task, seeds, successes):
-    return {s: dict(task=task, seed=s, success=i < successes, error_cm=0.5) for i, s in enumerate(seeds)}
+def _rows(task, seeds, successes, strict=None):
+    """strict: how many of the successes are real picks (success_strict); None leaves the field out."""
+    rows = {s: dict(task=task, seed=s, success=i < successes, error_cm=0.5) for i, s in enumerate(seeds)}
+    if strict is not None:
+        for i, s in enumerate(seeds):
+            rows[s]["success_strict"] = i < strict
+    return rows
 
 
 def test_verdict_only_on_the_exact_test_seeds():
@@ -123,7 +128,10 @@ def test_verdict_only_on_the_exact_test_seeds():
     assert "no verdict" in compare.verdict(_rows("reach", range(5000, 5200), 90))  # 90/200 is not 90/100
     assert "no verdict" in compare.verdict(_rows("reach", range(1000, 1100), 100))  # tuning seeds
     assert "incomplete" in compare.verdict(_rows("pick", range(5000, 5030), 30))
-    assert compare.verdict(_rows("pick", range(5000, 5050), 30)).endswith("PASS")
+    # rung 2 counts real picks only (Noah, 2026-10-08): 30 pushes into the goal place do not pass
+    assert compare.verdict(_rows("pick", range(5000, 5050), 30, strict=30)).endswith("PASS")
+    assert compare.verdict(_rows("pick", range(5000, 5050), 50, strict=29)).endswith("fail")
+    assert "no verdict" in compare.verdict(_rows("pick", range(5000, 5050), 30))  # rows from before the field
     mixed = {**_rows("reach", range(5000, 5050), 50), **_rows("pick", range(5050, 5100), 50)}
     assert "no verdict" in compare.verdict(mixed)
 
