@@ -5,7 +5,8 @@ same observations).
     sh scripts/uvr python hjepa/bench_plan.py CKPT EVAL_CONFIG PLANS OUT.json
 
 Observations and goals: the first frames of reach trials on the tuning seeds 1000.. (rule 6). The
-first 3 plans of each mode are warm-up (compilation) and are not timed.
+first 3 plans of each mode are warm-up (compilation) and are not timed. Each mode sets precision and
+compile itself; OUT records the resolved settings of each.
 """
 
 import json
@@ -15,14 +16,17 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from omegaconf import OmegaConf
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "sim"))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "sim"))
 from closed_loop import make_trial  # noqa: E402
 from env import SO101Env  # noqa: E402
 from planner import Planner  # noqa: E402
 
-MODES = {
-    "fp32": [], "bf16": ["precision=bf16"], "fp16": ["precision=fp16"],
+MODES = {  # every mode sets both precision and compile: none inherits them from the eval config
+    "fp32": ["precision=fp32", "compile=false"], "bf16": ["precision=bf16", "compile=false"],
+    "fp16": ["precision=fp16", "compile=false"],
     "bf16_compile": ["precision=bf16", "compile=true"], "fp16_compile": ["precision=fp16", "compile=true"],
     "bf16_graphs": ["precision=bf16", "compile=reduce-overhead"],
 }
@@ -45,7 +49,10 @@ def main(ckpt, eval_config, plans, out):
             planner.seed(i)
             acts.append(planner.plan(obs, goal))
         torch.cuda.synchronize()
-        row = {"seconds_per_plan": round((time.perf_counter() - t0) / plans, 4)}
+        cfg = OmegaConf.merge(OmegaConf.load(ROOT / "hjepa/config/eval" / f"{eval_config}.yaml"),
+                              OmegaConf.from_dotlist(overrides))
+        row = {"seconds_per_plan": round((time.perf_counter() - t0) / plans, 4),
+               "precision": cfg.get("precision", "fp32"), "compile": cfg.get("compile", False)}  # as the planner resolved them
         acts = np.stack(acts[WARMUP:])
         if ref is None:
             ref = acts
