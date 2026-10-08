@@ -17,10 +17,14 @@ in raw steps (plan far, act short).
 Speed (eval config or overrides): `precision: bf16` (as in training) or `fp16` runs the model under
 autocast; `compile: true` (or a torch.compile mode, e.g. reduce-overhead for CUDA graphs) compiles
 the level-1 predictor.
+Level 1 plans only actions within the env's MAX_ACTION (sim/env.py), so the model scores what the
+robot runs. A value head must record the sha256 of the checkpoint it was trained on (hjepa/value.py).
 """
 
 import contextlib
+import hashlib
 import sys
+import warnings
 from collections import deque
 from pathlib import Path
 
@@ -31,13 +35,35 @@ from omegaconf import OmegaConf
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "third_party/H-JEPA/h_jepa"))
+sys.path.append(str(ROOT / "sim"))  # last: sim's modules shadow nothing
 
-from data import IMAGENET_STATS, load_normalizer_artifact  # noqa: E402
+from data import IMAGENET_STATS, load_normalizer_artifact, safe_std  # noqa: E402
+from env import MAX_ACTION  # noqa: E402
 from eval_config_utils import _build_policy_plan_config  # noqa: E402
 from planning_eval import build_solver, load_model  # noqa: E402
 
 MEAN = torch.tensor(IMAGENET_STATS["mean"]).view(3, 1, 1)
 STD = torch.tensor(IMAGENET_STATS["std"]).view(3, 1, 1)
+
+
+def sha256_file(path, block=1 << 24):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        while chunk := f.read(block):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def check_value_binding(value_path, ckpt):
+    """A value head is trained on one encoder checkpoint's latents: refuse it with any other one."""
+    blob = torch.load(value_path, map_location="cpu", weights_only=False)
+    bound = blob.get("encoder_ckpt_sha256")
+    if bound is None:
+        warnings.warn(f"{value_path} does not record its encoder checkpoint (made before the binding); "
+                      f"cannot check that it was trained on {ckpt}")
+    elif bound != sha256_file(ckpt):
+        raise ValueError(f"{value_path} was trained on another encoder checkpoint (sha256 {bound[:12]}...) "
+                         f"than {ckpt}: train a value head for this checkpoint (hjepa/value.py)")
 
 
 class StrideEmbed(torch.nn.Module):
@@ -61,10 +87,14 @@ class Planner:
         if cfg.get("cost", "latent") == "value":
             from value import load_value
             level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
+            check_value_binding(Path(ckpt).parent / "value.pt", ckpt)
             level1.value_fn = load_value(Path(ckpt).parent / "value.pt")
+        # as training normalizes (h_jepa/data.py): a constant column (std 0) is centred, not divided by 0
         stats = load_normalizer_artifact(Path(ckpt).parent / "normalizer.pt")["stats"]
         self.proprio_mean, self.proprio_std = (torch.tensor(stats["proprio"][k]).float().view(-1) for k in ("mean", "std"))
+        self.proprio_std = safe_std(self.proprio_std)
         self.action_mean, self.action_std = (np.asarray(stats["action"][k]).reshape(-1) for k in ("mean", "std"))
+        self.action_std = safe_std(self.action_std)
         self.receding = int(cfg.get("plan_config", cfg.get("hierarchical_plan_config")).receding_horizon)
         self.strides, self.kmax = list(cfg.get("strides", [1])), int(cfg.get("max_stride", 1))
         if self.kmax > 1:
@@ -76,12 +106,18 @@ class Planner:
         self.history = int(cfg.get("plan_history", train_cfg.level1.wm.history_size))
         level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
         level1.plan_history = self.history
+        for lv in range(2, getattr(self.model, "num_levels", 1) + 1):  # upper levels: their training history
+            self.model.get_level(lv).plan_history = int(train_cfg[f"level{lv}"].wm.history_size)
         self.past = deque(maxlen=(self.history - 1) * self.kmax)  # (observation, raw action run from it)
+        # the env runs at most MAX_ACTION (sim/env.py): level 1 scores only actions it will execute
+        lo, hi = self.normalize_action(-MAX_ACTION), self.normalize_action(MAX_ACTION)
         self.solvers = {}
         for k in self.strides:
             solver = build_solver(cfg, self.model)
             solver.configure(action_space=gymnasium.spaces.Box(-1.0, 1.0, shape=(1, 6 * k)), n_envs=1,
                              config=_build_policy_plan_config(cfg))
+            s1 = getattr(solver, "level_solvers", {1: solver})[1]
+            s1.action_bounds = (np.tile(lo, s1.action_dim // 6), np.tile(hi, s1.action_dim // 6))
             self.solvers[k] = solver
         self.solver = self.solvers[self.strides[0]]
         self.last_stride = self.strides[0]
@@ -122,7 +158,10 @@ class Planner:
     def plan(self, obs, goal, steps_taken=0, eval_budget=100):
         """Planned actions (raw joint-target changes, rad), shape (receding horizon, 6)."""
         with self.autocast():
-            return self._plan(obs, goal, steps_taken, eval_budget)
+            actions = self._plan(obs, goal, steps_taken, eval_budget)
+        if not np.isfinite(actions).all():
+            raise FloatingPointError(f"the planner returned non-finite actions: {actions.tolist()}")
+        return actions
 
     def _plan(self, obs, goal, steps_taken, eval_budget):
         if self.kmax == 1:
@@ -137,6 +176,8 @@ class Planner:
             info = solver._expand_info_dict_for_samples(self._info(obs, goal, k), start_idx=0, end_idx=1, num_samples=1)
             with torch.no_grad():
                 cost = float(self.model.get_cost(info, plan.to("cuda")[:, None]).min())
+            if not np.isfinite(cost):
+                raise FloatingPointError(f"non-finite model cost {cost} for the stride-{k} plan")
             if best is None or cost < best[0]:
                 best = (cost, k, plan[0])
         _, self.last_stride, plan = best
@@ -161,4 +202,4 @@ class Planner:
         return info
 
     def normalize_action(self, action):
-        return (np.asarray(action) - self.action_mean) / self.action_std
+        return (np.asarray(action) - self.action_mean) / self.action_std  # action_std: safe_std, as in training

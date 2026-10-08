@@ -9,7 +9,12 @@
    cost: the latent distance, or minus the learned value (cost: value).
 2. Plan direction (k = 5, 15): the goal is frame t + k; the planner plans its configured horizon
    (5 steps, 1 s; also for k = 15) toward it. The score is the cosine between its first move and the
-   expert's move (normalized units; 0 is chance).
+   expert's move (normalized units; 0 is chance). As in closed_loop.py, the planner starts each case
+   from a reset with the case's preceding real frames and actions recorded (up to its history).
+A non-finite cost counts against the model: an expert's makes its rank 1, a random move's counts as
+closer ("*_nonfinite" counts them). The report keeps the identity of the cases: "case_ids" ([episode,
+frame], in the order of every "*_cases" array; plan_cosine uses the first cases only) and
+"data_fingerprint" (size and sha256 of the first and last MB of DATA.h5).
 """
 
 import json
@@ -21,20 +26,23 @@ import numpy as np
 import torch
 
 from planner import Planner, StrideEmbed
+from data import file_fingerprint  # noqa: E402  (H-JEPA's data.py, on the path from planner)
 
 RANKS_K, PLAN_K, DECOYS = (1, 5, 15), (5, 15), 100
 
 
 def load(path, rng, cases, max_k):
-    """Random (episode, t) cases with 3 steps of history and max_k steps ahead."""
+    """Random (episode, t) cases with 3 steps of history and max_k steps ahead: (offset, t) picks and
+    [episode, t] ids."""
     f = h5py.File(path, "r")
     lens, offs = f["ep_len"][:], f["ep_offset"][:]
     eps = np.flatnonzero(lens > max_k + 4)
-    picks = []
+    picks, ids = [], []
     for _ in range(cases):
         e = rng.choice(eps)
         picks.append((offs[e], int(rng.integers(3, lens[e] - max_k))))
-    return f, picks
+        ids.append([int(e), picks[-1][1]])
+    return f, picks, ids
 
 
 def mean_ci(x):
@@ -46,7 +54,7 @@ def mean_ci(x):
 def expert_rank(planner, f, picks, k, decoy_actions):
     level1 = planner.model.get_level(1) if hasattr(planner.model, "get_level") else planner.model
     embed = StrideEmbed(1, planner.kmax) if planner.kmax > 1 else level1.action_embed  # a time-step model: stride 1
-    ranks = []
+    ranks, nonfinite = [], 0
     for off, t in picks:
         rows = slice(off + t - 3, off + t + 1)
         obs = [dict(pixels=p, proprio=q) for p, q in zip(f["pixels"][rows], f["proprio"][rows])]
@@ -62,14 +70,30 @@ def expert_rank(planner, f, picks, k, decoy_actions):
             cost = -level1.value_fn(pred, goal.expand_as(pred)).cpu().numpy()
         else:
             cost = ((pred - goal) ** 2).flatten(1).mean(1).cpu().numpy()
-        ranks.append(float((cost[1:] < cost[0]).mean()))
-    return ranks
+        ranks.append(rank_of_expert(cost))
+        nonfinite += int(not np.isfinite(cost).all())
+    return ranks, nonfinite
+
+
+def rank_of_expert(cost):
+    """Share of random moves (cost[1:]) closer than the expert's (cost[0]); a non-finite cost counts
+    against the model (NaN compares false, which would make the rank look perfect)."""
+    bad = ~np.isfinite(cost)
+    return 1.0 if bad[0] else float(((cost[1:] < cost[0]) | bad[1:]).mean())
+
+
+def record_history(planner, f, off, t):
+    """Reset the planner and record the case's preceding real frames and actions (up to its history)."""
+    planner.reset()
+    for j in range(max(0, t - (planner.past.maxlen or 0)), t):
+        planner.record(dict(pixels=f["pixels"][off + j], proprio=f["proprio"][off + j]), f["action"][off + j])
 
 
 def plan_direction(planner, f, picks, k):
     cos = []
     for i, (off, t) in enumerate(picks):
         planner.seed(i)
+        record_history(planner, f, off, t)
         obs = dict(pixels=f["pixels"][off + t], proprio=f["proprio"][off + t])
         goal = dict(pixels=f["pixels"][off + t + k], proprio=f["proprio"][off + t + k])
         a = planner.normalize_action(planner.plan(obs, goal, eval_budget=k)[0])
@@ -81,12 +105,13 @@ def plan_direction(planner, f, picks, k):
 def main(ckpt, eval_config, data, out, cases=500):
     rng = np.random.default_rng(0)
     planner = Planner(ckpt, eval_config)
-    f, picks = load(data, rng, cases, max(RANKS_K))
+    f, picks, ids = load(data, rng, cases, max(RANKS_K))
     decoys = planner.normalize_action(f["action"][: min(len(f["action"]), 200000): 7])
-    report = {"ckpt": ckpt, "planner": eval_config, "data": data, "cases": cases}
+    report = {"ckpt": ckpt, "planner": eval_config, "data": data, "cases": cases,
+              "case_ids": ids, "data_fingerprint": file_fingerprint(data)}
     # The cases are the same for each model (fixed seeds): "_cases" keeps the values for paired tests.
     for k in RANKS_K:
-        x = expert_rank(planner, f, picks, k, decoys)
+        x, report[f"expert_rank_k{k}_nonfinite"] = expert_rank(planner, f, picks, k, decoys)
         report[f"expert_rank_k{k}"], report[f"expert_rank_k{k}_cases"] = mean_ci(x), [round(v, 4) for v in x]
         print(k, report[f"expert_rank_k{k}"], flush=True)
     for k in PLAN_K:
