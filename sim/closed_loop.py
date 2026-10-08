@@ -104,10 +104,14 @@ def run(task, planner, env, seed):
     planner.seed(seed)
     planner.reset()
     obs, buffer, budget = env.observe(), [], BUDGET[task]
-    track, picked_up, replans, t0 = [], False, 0, time.perf_counter()
+    track, picked_up, replans, nonfinite, t0 = [], False, 0, False, time.perf_counter()
     for step in range(budget):
         if not buffer:
-            buffer = list(planner.plan(obs, goal["obs"], steps_taken=step, eval_budget=budget))
+            try:
+                buffer = list(planner.plan(obs, goal["obs"], steps_taken=step, eval_budget=budget))
+            except FloatingPointError:  # no finite plan: the trial ends here and is scored as it stands
+                nonfinite = True
+                break
             replans += 1
         action = np.clip(np.asarray(buffer.pop(0), np.float32), -MAX_ACTION, MAX_ACTION)  # what env.step runs
         planner.record(obs, action)
@@ -116,7 +120,8 @@ def run(task, planner, env, seed):
             track.append(env.cube_pose()[:3])
             on_table, touched = cube_contacts(env)
             picked_up |= touched and not on_table and track[-1][2] > CUBE_HALF + 0.01  # held off the table
-    result = dict(task=task, seed=seed, seconds=round(time.perf_counter() - t0, 1), replans=replans)
+    result = dict(task=task, seed=seed, seconds=round(time.perf_counter() - t0, 1), replans=replans,
+                  nonfinite_plan=nonfinite)
     if task == "reach":
         err = float(np.linalg.norm(grasp_point(env) - goal["grasp_point"]))
         result.update(error_cm=round(err * 100, 2), success=err < 0.01)

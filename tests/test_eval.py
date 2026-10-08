@@ -82,6 +82,27 @@ def test_pushed_cube_passes_the_fixed_mark_but_not_the_strict_one(env):
     assert r["success_strict"]
 
 
+class _NonfinitePlanner:
+    """The planner raises when no candidate has a finite cost (hjepa/planner.py)."""
+
+    def seed(self, seed):
+        pass
+
+    def reset(self):
+        pass
+
+    def record(self, obs, action):
+        pass
+
+    def plan(self, *args, **kwargs):
+        raise FloatingPointError("no finite plan")
+
+
+def test_a_nonfinite_plan_is_a_failed_trial_not_a_crash(env):
+    r = closed_loop.run("reach", _NonfinitePlanner(), env, 1000)
+    assert r["nonfinite_plan"] and r["replans"] == 0 and not r["success"]
+
+
 def test_sliding_cube_is_not_settled(env):
     xy = np.array([0.2, 0.0])
     track = _place_and_wait(env, xy)

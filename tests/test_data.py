@@ -25,13 +25,20 @@ needs_sh = pytest.mark.skipif(SH is None, reason="needs a POSIX sh")
 
 
 def _load_build():
-    if "av" not in sys.modules:  # build.py imports av (video decoding); these tests never decode
-        av = types.ModuleType("av")
-        av.error = types.SimpleNamespace(FFmpegError=Exception)
-        sys.modules["av"] = av
+    stub = None
+    try:  # build.py imports av (video decoding); these tests never decode
+        import av  # noqa: F401
+    except ImportError:
+        stub = types.ModuleType("av")
+        stub.error = types.SimpleNamespace(FFmpegError=Exception)
+        sys.modules["av"] = stub
     spec = importlib.util.spec_from_file_location("community_build", ROOT / "community" / "build.py")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    finally:  # other modules guard `import av` with ImportError: the stub must not outlive build.py's import
+        if stub is not None and sys.modules.get("av") is stub:
+            del sys.modules["av"]
     return module
 
 

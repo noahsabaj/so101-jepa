@@ -180,6 +180,31 @@ def test_resume_refuses_changed_data_or_normalizer():
             pass
 
 
+def test_resume_checks_code_in_a_copy_without_git():
+    """Fleet nodes get the fork's files without .git: the code identity must still change with the code."""
+    import tempfile
+    import data
+    from data import fork_files_sha256
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        (tmp / "h_jepa").mkdir()
+        (tmp / "h_jepa" / "loss.py").write_text("x = 1\n")
+        (tmp / "h_jepa" / "__pycache__").mkdir()
+        (tmp / "h_jepa" / "__pycache__" / "loss.py").write_text("ignored\n")
+        before = fork_files_sha256(tmp)
+        (tmp / "h_jepa" / "__pycache__" / "loss.py").write_text("still ignored\n")
+        assert fork_files_sha256(tmp) == before
+        (tmp / "h_jepa" / "loss.py").write_text("x = 2\n")
+        assert fork_files_sha256(tmp) != before
+    git = data._git
+    try:
+        data._git = lambda *a: None  # no git: the files decide
+        assert "fork_files_sha256" in data.run_identity([], _artifact(0.01))["code"]
+    finally:
+        data._git = git
+
+
 def test_atomic_save_keeps_the_old_file():
     """Finding 19: a failed save left a partial file at the final name."""
     import tempfile
