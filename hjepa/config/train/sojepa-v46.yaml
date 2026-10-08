@@ -1,0 +1,12 @@
+# SO-JEPA v46 (MODELS.md): SO-JEPA v44 (2-level H-JEPA, vision only) on the community data.
+defaults:
+- sojepa-v44
+- _self_
+output_model_name: sojepa-v46
+env: community
+data:
+  dataset:
+    name: community_train
+    val_name: community_test
+trainer:
+  max_epochs: 5

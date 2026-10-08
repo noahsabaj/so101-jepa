@@ -1,0 +1,21 @@
+# SO-JEPA v44 (MODELS.md): 2-level H-JEPA on the vision-only recipe of SO-JEPA v4: level 1 sees no
+# joint angles and has the endpoint inverse dynamics (EP-IDM, 2 s); level 2 is so101_hjepa_l2's
+# (stride 5 = 1 s, history 3, MLP encoder of the 384-number level-1 latent). The first H-JEPA config
+# (so101_hjepa_l2) was built on SO-JEPA v1's blind recipe and never trained.
+defaults:
+- so101_hjepa_l2
+- _self_
+output_model_name: sojepa-v44
+data:
+  dataset:
+    level1:
+      num_steps: 11  # EP-IDM: clips of horizon + 1 frames
+level1:
+  wm:
+    use_proprio: false
+  ep_idm_coeff: 10
+  ep_idm:
+    hidden_dim: 256
+    horizon: 10
+trainer:
+  max_epochs: 3  # as v4

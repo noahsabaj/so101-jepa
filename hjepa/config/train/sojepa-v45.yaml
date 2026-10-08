@@ -1,0 +1,13 @@
+# SO-JEPA v45 (MODELS.md): community SO-100/SO-101 data (real robots, one 64x64 scene view, 5 Hz;
+# community-1) with SO-JEPA v4's vision-only recipe (A5, A24). Validation: the held-out setups.
+defaults:
+- so101_lewm_vis_epidm
+- _self_
+output_model_name: sojepa-v45
+env: community
+data:
+  dataset:
+    name: community_train
+    val_name: community_test
+trainer:
+  max_epochs: 5

@@ -63,6 +63,9 @@ integer versions in the order of registration, with the lineage in the registry.
 | v41 | v40 | Seed 43 (v40's replicate). | sim-2 | as v40, seed 43 | 23998e4, 3645eb9 | sojepa-v41; sojepa-v41 | Ridge table 7.60, grasp 2.89; attentive table 3.64 cm (v40: 4.57). |
 | v42 | v31 | The new default recipe: v31 (time-step predictor) with Prodigy (no learning rate, v22), SIGReg in fp32 and stride-1 clips from every start. Also Prodigy's seed replicate. | sim-2 | 8,154 steps, seed 42 | 80d6242+, 4a486a6 | sojepa-v42; sojepa-v42 | Queued (kat-pc) |
 | v43 | v21 | Self-improvement round 1 (A19b): play data + the episodes of v21 playing toward goals from the play data (round 1c, kat-pc; rounds 1 and 1b were lost). | sim-3 + self-play | 8,154 steps, seed 42 | 80d6242+, 4a486a6 | sojepa-v43; sojepa-v43 | Queued (kat-pc) |
+| v44 | v4 | 2-level H-JEPA on v4's vision-only recipe (EP-IDM); level 2 of so101_hjepa_l2 (stride 5, history 3). The first H-JEPA config was built on v1's blind recipe and never trained. | sim-2 | 3 epochs, seed 42 | (this commit) | sojepa-v44; sojepa-v44 | Queued (kat-pc) |
+| v45 | v4 | v4's recipe on the community data (real SO-100/SO-101, one 64x64 view; A5, A24). | community-1 | 5 epochs, seed 42 | (this commit) | sojepa-v45; sojepa-v45 | Queued (kat-pc) |
+| v46 | v44 | v44 (2-level, vision only) on the community data. | community-1 | 5 epochs, seed 42 | (this commit) | sojepa-v46; sojepa-v46 | Queued (kat-pc) |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed<seed>/` on the
 training computer (kat-pc: WSL home).
@@ -70,8 +73,8 @@ training computer (kat-pc: WSL home).
 Hardware and torch (GPU.md): v1 to v3 train on kat-pc (RTX 4060 Ti, torch 2.7.1+cu128). v4 to v10
 train on a National Compute node (8x AMD MI355X, torch 2.11.0+rocm7.2), one GPU per model.
 
-Not trained yet, so no version: H-JEPA L2 (so101_hjepa_l2) and the community models
-(community_lewm, community_hjepa_l2). Each gets a version when its training job is submitted.
+H-JEPA L2 and the community models are v44 to v46 (vision only); the earlier configs on v1's
+blind recipe (so101_hjepa_l2 alone, community_lewm, community_hjepa_l2) were never trained.
 
 ## Datasets
 

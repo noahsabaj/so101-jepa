@@ -27,6 +27,9 @@ waitall() {  # wait for the processes in $pids
 name() {  # model -> its config and checkpoint name
   case $1 in sojepa-*) echo "$1" ;; *) echo "so101_$1" ;; esac
 }
+levels_cfg() {  # model -> the planner config for its number of levels (from its training config)
+  if grep -q "^num_levels: 2" "$(dirname "$(ckpt "$1")")/config.yaml" 2> /dev/null; then echo so101_l2; else echo so101_flat; fi
+}
 ckpt() {  # model -> its checkpoint
   echo "data/ckpts/so101/$(name "$1")/seed$SEED/$(name "$1")_object.ckpt"
 }
@@ -73,13 +76,13 @@ closed_loop)
   done ;;
 probe)
   for m in $MODELS; do
-    case $m in hjepa_l2) cfg=so101_l2 ;; *) cfg=so101_flat ;; esac
+    cfg=$(levels_cfg "$m")
     uvr python hjepa/probe.py "$(ckpt "$m")" $cfg data/so101_val.h5 "outputs/probe_$m.json" \
       > "outputs/probe_$m.log" 2>&1 || fail=1
   done ;;
 value)
   for m in $MODELS; do
-    case $m in hjepa_l2) cfg=so101_l2 ;; *) cfg=so101_flat ;; esac
+    cfg=$(levels_cfg "$m")
     uvr python hjepa/value.py "$(ckpt "$m")" $cfg data/so101_train.h5 data/so101_val.h5 \
       > "outputs/value_$m.log" 2>&1 || fail=1
     cp "$(dirname "$(ckpt "$m")")/value.json" "outputs/value_$m.json" 2>/dev/null
