@@ -5,6 +5,8 @@ An action is the change of the 6 joint targets (rad) relative to the measured jo
 the per-episode joint offset of the domain (calibration error, backlash) is added to them.
 """
 
+from concurrent.futures import ThreadPoolExecutor
+
 import mujoco
 import numpy as np
 
@@ -89,11 +91,21 @@ class SO101Env:
 
     # --- observation -------------------------------------------------------------------------
     def render(self):
-        """Scene view and wrist view side by side: uint8 (IMAGE, 2 * IMAGE, 3)."""
-        views = []
-        for cam in ("scene", "wrist"):
-            self.renderer.update_scene(self.data, camera=cam)
-            views.append(self.renderer.render())
+        """Scene view and wrist view side by side: uint8 (IMAGE, 2 * IMAGE, 3).
+
+        The wrist view renders on a second GL context in a worker thread while this thread renders
+        the scene view (mjr_render releases the GIL). Both scenes are updated here, as
+        mjv_updateScene may use the MjData stack. The pixels are the same as rendering the two views
+        one after the other; 1.07x faster on llvmpipe (RENDER_HILLCLIMB.md)."""
+        if getattr(self, "_wrist", None) is None:
+            pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="wrist-render")
+            # made in the worker thread, so that its GL context is current there
+            self._wrist = pool, pool.submit(mujoco.Renderer, self.model, IMAGE, IMAGE).result()
+        pool, wrist = self._wrist
+        self.renderer.update_scene(self.data, camera="scene")
+        wrist.update_scene(self.data, camera="wrist")
+        job = pool.submit(wrist.render)
+        views = [self.renderer.render(), job.result()]
         return np.concatenate(views, axis=1)
 
     def observe(self):
