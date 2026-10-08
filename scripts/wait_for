@@ -1,19 +1,27 @@
 #!/bin/sh
-# Wait until FILE exists (scripts/run_lanes.sh): sh scripts/wait_for FILE LANE [AFTER]
-# Fails if lane LANE ends (outputs/lanes/LANE.end) without FILE. Only a FILE newer than AFTER (default:
-# outputs/lanes/start, the start of this lanes run) counts, so a file left by an old run does not.
-# FILE is ready when its size has not changed for 15 s (the writer has finished).
+# Wait until FILE exists (scripts/run_lanes.sh): sh scripts/wait_for FILE LANE [AFTER [PID]]
+# Fails if lane LANE ends (outputs/lanes/LANE.end) without FILE, or if process PID (the producer, when
+# the caller knows it) is gone without FILE. Only a FILE newer than AFTER (default: outputs/lanes/start,
+# the start of this lanes run) counts, so a file left by an old run does not.
+# The writers publish a file whole: they write FILE.tmp and rename it, so FILE is ready when it exists
+# and FILE.tmp does not. (A file that is only the right size is not enough: a killed writer leaves a short one.)
 after=${3:-outputs/lanes/start}
 [ -e "$after" ] || after=""
-while [ ! -e "$1" ] || { [ -n "$after" ] && [ ! "$1" -nt "$after" ]; }; do
+ready() {
+  [ -e "$1" ] && [ ! -e "$1.tmp" ] && { [ -z "$after" ] || [ "$1" -nt "$after" ]; }
+}
+until ready "$1"; do
   if [ -e "outputs/lanes/$2.end" ]; then
+    sleep 2  # the rename may have come just before the lane's end
+    ready "$1" && exit 0
     echo "wait_for: lane $2 ended without $1" >&2
     exit 1
   fi
+  if [ -n "$4" ] && ! kill -0 "$4" 2> /dev/null; then
+    sleep 2
+    ready "$1" && exit 0
+    echo "wait_for: process $4 ended without $1" >&2
+    exit 1
+  fi
   sleep 20
-done
-size=-1
-while [ "$(wc -c < "$1")" != "$size" ]; do
-  size=$(wc -c < "$1")
-  sleep 15
 done
