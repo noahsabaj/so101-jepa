@@ -3,7 +3,7 @@
 # through hjepa/wsl_job.sh. 8 GB GPU: the encoder uses gradient checkpointing.
 #   check     planner checks (hjepa/check_planner.sh)
 #   v42       train SO-JEPA v42 (the new default recipe), probe, jump test
-#   selfplay  self-improvement round 1c: v21 plays 96 episodes (4 processes, fast planner), merged
+#   selfplay  self-improvement round 1c: v21 plays up to 96 episodes for 6 h (4 processes, fast planner), merged
 #             with the play data into data/so101_train_play_r1.h5
 #   v43       train SO-JEPA v43 on it, probe
 #   v44       train SO-JEPA v44 (2-level H-JEPA, vision only), offline tests, probe, rungs 1 and 2
@@ -19,7 +19,7 @@ v42)
     uvr python hjepa/jump_test.py $K/sojepa-v42/seed42/sojepa-v42_object.ckpt data/so101_val.h5 \
       outputs/jump_sojepa-v42.json 1,2,3,5,10 300 ;;
 selfplay)
-  GPUS=0 EVAL=so101_flat_cem_fast sh hjepa/self_improve.sh $K/sojepa-v21/seed42/sojepa-v21_object.ckpt \
+  STOP_AT="$(date -d "+6 hours" "+%F %T")" GPUS=0 EVAL=so101_flat_cem_fast sh hjepa/self_improve.sh $K/sojepa-v21/seed42/sojepa-v21_object.ckpt \
     so101_train_play so101_train_play_r1 96 4 3300000 ;;
 v43) MODELS=sojepa-v43 TRAIN_ARGS="$CKPT_ON" sh hjepa/run_phase0.sh train && MODELS=sojepa-v43 sh hjepa/run_phase0.sh probe ;;
 v44)
