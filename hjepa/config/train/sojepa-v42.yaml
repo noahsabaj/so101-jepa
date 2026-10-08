@@ -1,0 +1,15 @@
+# SO-JEPA v42 (MODELS.md): the new default recipe. SO-JEPA v31 (time-step predictor, A21) with the
+# learning-rate-free Prodigy optimizer of v22 (A23), and the code fixes of 2026-10-07: SIGReg in fp32,
+# stride-1 clips from every start. Also the seed replicate of Prodigy (v22 had one seed).
+defaults:
+- sojepa-v31
+- _self_
+output_model_name: sojepa-v42
+optimizer:
+  type: prodigyopt.Prodigy
+  lr: 1.0
+  weight_decay: 1.0e-04
+  safeguard_warmup: true
+  use_bias_correction: true
+level1:
+  lr: 1.0

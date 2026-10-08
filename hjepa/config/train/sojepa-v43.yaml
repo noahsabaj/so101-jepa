@@ -1,0 +1,13 @@
+# SO-JEPA v43 (MODELS.md): self-improvement round 1 (A19b) on kat-pc. SO-JEPA v21 (play data only)
+# plus the episodes of v21 playing toward goals sampled from the play data (hjepa/self_improve.sh,
+# round 1c; rounds 1 and 1b were lost). Same steps as v21 (3 epochs of sim-3 = 8,154 steps).
+defaults:
+- sojepa-v21
+- _self_
+output_model_name: sojepa-v43
+data:
+  dataset:
+    name: so101_train_play_r1
+trainer:
+  max_epochs: 1000
+  max_steps: 8154

@@ -61,6 +61,8 @@ integer versions in the order of registration, with the lineage in the registry.
 | v39 | v38 | f* fitted during training instead of 0. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v39; sojepa-v39 | Diverged, but it inherited gradient clipping (only v40 turns it off), so it does not test the fit. Not needed: f* = 0 trains without clipping (v40). The fit code is removed. |
 | v40 | v38 | No gradient clipping. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v40; sojepa-v40 | Ridge table 6.58, grasp 2.51; attentive table 4.57 cm (rerun 4.69): trains, 0.5 cm behind v6 and v22. |
 | v41 | v40 | Seed 43 (v40's replicate). | sim-2 | as v40, seed 43 | 23998e4, 3645eb9 | sojepa-v41; sojepa-v41 | Ridge table 7.60, grasp 2.89; attentive table 3.64 cm (v40: 4.57). |
+| v42 | v31 | The new default recipe: v31 (time-step predictor) with Prodigy (no learning rate, v22), SIGReg in fp32 and stride-1 clips from every start. Also Prodigy's seed replicate. | sim-2 | 8,154 steps, seed 42 | 80d6242+, 4a486a6 | sojepa-v42; sojepa-v42 | Queued (kat-pc) |
+| v43 | v21 | Self-improvement round 1 (A19b): play data + the episodes of v21 playing toward goals from the play data (round 1c, kat-pc; rounds 1 and 1b were lost). | sim-3 + self-play | 8,154 steps, seed 42 | 80d6242+, 4a486a6 | sojepa-v43; sojepa-v43 | Queued (kat-pc) |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed<seed>/` on the
 training computer (kat-pc: WSL home).
