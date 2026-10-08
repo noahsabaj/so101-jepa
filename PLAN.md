@@ -265,3 +265,18 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   cleaner test than a regression probe.
 - NVIDIA Factory, IndustReal and AutoMate: contact-rich assembly learned in sim transferred to real
   arms (reinforcement learning policies).
+- RoboJEPA ([2610.10515](https://arxiv.org/abs/2610.10515), FAIR): action-conditioned predictors
+  (22M to 8B) on a frozen V-JEPA 2.1-G encoder, 15,022 h of robot video (LeRobot SO-101 included),
+  CEM to one goal image. Imagination error follows a second-order power law in compute and tracks
+  planning success. Real Franka, 30 episodes per task: 8B pick and place 27%, the 22M model 17%,
+  so pick needs no huge model there (blocking end-effector control, 3D translation and gripper only).
+  Short training rollouts (2 steps) broke long-horizon planning; 10-step rollouts fixed it. A V-JEPA
+  2 encoder made the predictor collapse; V-JEPA 2.1's dense features scaled (A2). Inputs always
+  include proprioception, so A17 is untested there. Weights: not released yet (2026-10-08).
+- DSReg ([2610.09457](https://arxiv.org/abs/2610.09457), Zheng, Klindt, Balestriero, Schölkopf):
+  a SIGReg JEPA identifies the latent state only up to a rotation, so each latent mixes world
+  factors. A post-hoc rotation, chosen to make the local Jacobians d(observation)/d(latent) sparse,
+  recovers individual factors when their pixel footprints differ (proof; synthetic and 64x64
+  rendered scenes, N = 8 factors). For us: a rotation changes no L2 or L1 latent distance and no
+  dense probe, so our CEM cost and probes stay the same; it helps only modules that read a few
+  latents (a sparse cost, monitor or few-shot readout). It adds no information the latents lack (A15).
