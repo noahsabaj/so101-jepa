@@ -33,10 +33,11 @@ import torch.nn.functional as F
 from probe import CUBE_HALF, LAMBDAS, TOKEN_EVERY, Ridge, attentive, score, within_share
 
 LEVJEPA = ("galilai-group/LeVJEPA-VideoMix-Large", "e831a0347737fcaa660b39c57d41c109de399845")
-VJEPA21 = {  # name: (architecture, checkpoint file, checkpoint key), as in vjepa2's src/hub/backbones.py
-    "vjepa21_L": ("vit_large", "vjepa2_1_vitl_dist_vitG_384.pt", "ema_encoder"),
-    "vjepa21_g": ("vit_giant_xformers", "vjepa2_1_vitg_384.pt", "target_encoder"),
-    "vjepa21_G": ("vit_gigantic_xformers", "vjepa2_1_vitG_384.pt", "target_encoder"),
+VJEPA21 = {  # name: (architecture, local file, checkpoint key), as in vjepa2's src/hub/backbones.py.
+    # Local names differ in more than case: Meta's vitg and vitG files collide on Windows (NTFS).
+    "vjepa21_L": ("vit_large", "vjepa21_vitl_300m.pt", "ema_encoder"),
+    "vjepa21_g": ("vit_giant_xformers", "vjepa21_vitg_1b.pt", "target_encoder"),
+    "vjepa21_G": ("vit_gigantic_xformers", "vjepa21_vitG_2b.pt", "target_encoder"),
 }
 MEAN = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
 STD = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)

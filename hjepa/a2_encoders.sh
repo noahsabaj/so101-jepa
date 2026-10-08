@@ -15,17 +15,17 @@ if [ ! -f data/vjepa2_src/.sha ] || [ "$(cat data/vjepa2_src/.sha)" != $SHA ]; t
   curl -sSL https://codeload.github.com/facebookresearch/vjepa2/tar.gz/$SHA | tar -xz -C data/vjepa2_src --strip-components 1 &&
     echo $SHA > data/vjepa2_src/.sha || { echo "a2_encoders: could not fetch the vjepa2 code" >&2; exit 1; }
 fi
-fetch() {  # file expected-bytes
-  [ "$(stat -c %s "data/weights/$1" 2> /dev/null)" = "$2" ] && return 0
-  echo "a2_encoders: downloading $1" >&2
-  curl -sSL --retry 5 -C - -o "data/weights/$1" "$URL/$1" && [ "$(stat -c %s "data/weights/$1")" = "$2" ]
+fetch() {  # Meta-file local-file expected-bytes (local names differ in more than case: vitg and vitG)
+  [ "$(stat -c %s "data/weights/$2" 2> /dev/null)" = "$3" ] && return 0
+  echo "a2_encoders: downloading $1 to data/weights/$2" >&2
+  curl -sSL --retry 5 -C - -o "data/weights/$2" "$URL/$1" && [ "$(stat -c %s "data/weights/$2")" = "$3" ]
 }
 fail=0
 for e in $ENCODERS; do
   case $e in
-    vjepa21_L) fetch vjepa2_1_vitl_dist_vitG_384.pt 5151198524 || { fail=1; continue; } ;;
-    vjepa21_g) fetch vjepa2_1_vitg_384.pt 16878318788 || { fail=1; continue; } ;;
-    vjepa21_G) fetch vjepa2_1_vitG_384.pt 30238058912 || { fail=1; continue; } ;;
+    vjepa21_L) fetch vjepa2_1_vitl_dist_vitG_384.pt vjepa21_vitl_300m.pt 5151198524 || { fail=1; continue; } ;;
+    vjepa21_g) fetch vjepa2_1_vitg_384.pt vjepa21_vitg_1b.pt 16878318788 || { fail=1; continue; } ;;
+    vjepa21_G) fetch vjepa2_1_vitG_384.pt vjepa21_vitG_2b.pt 30238058912 || { fail=1; continue; } ;;
   esac
   echo "a2_encoders: $e" >&2
   uvr python hjepa/encoder_probe.py data/so101_val_224.h5 outputs/a2_probe_$e.json $e \
