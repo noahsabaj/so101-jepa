@@ -47,6 +47,9 @@ MIN_STEPS = 16  # 3.2 s: one H-JEPA clip (level 2: 4 steps x frameskip 5)
 # Per-dataset z-scores. A joint that hardly moves in a dataset has a tiny std, and its rare moves
 # then get z of 30 or more, so the std has a floor (degrees; gripper units), and z is clipped.
 STATE_STD_FLOOR, DELTA_STD_FLOOR, Z_CLIP = 5.0, 1.0, 10.0
+# A shard is reused only if it was made with these constants.
+SETTINGS = dict(stride=STRIDE, size=SIZE, min_steps=MIN_STEPS, state_std_floor=STATE_STD_FLOOR,
+                delta_std_floor=DELTA_STD_FLOOR, z_clip=Z_CLIP)
 # Source datasets with data errors, found by the first build (2026-10-06) and left out of the files.
 EXCLUDE = {
     "Ryosei2/0704_donut3": "100% black frames",
@@ -158,9 +161,11 @@ def normalize(s, a):
 def convert_dataset(i, row):
     """Convert one dataset's episodes to 5 Hz steps in shards/<i>.npz and return its summary."""
     shard = SHARDS / f"{i:04d}.npz"
-    if shard.exists():  # written by an earlier run that stopped before the merge
+    if shard.exists():  # written by an earlier run that stopped before the merge; reused if made the same way
         with np.load(shard) as z:
-            return json.loads(str(z["info"]))
+            info = json.loads(str(z["info"]))
+        if info.get("settings") == SETTINGS:
+            return info
     root, cam, v = RAW / row["dataset"], row["camera"], f"videos/{row['camera']}/"
     info = json.loads((root / "meta/info.json").read_text())
     fps = info["fps"]
@@ -215,8 +220,8 @@ def convert_dataset(i, row):
                 else:
                     drop["video"] += 1
 
-    summary = dict(name=row["dataset"], camera=cam, split=row["split"], fps=fps, robot_type=info.get("robot_type"),
-                   state_names=info["features"]["observation.state"].get("names"), video=video,
+    summary = dict(name=row["dataset"], camera=cam, split=row["split"], fps=fps, settings=SETTINGS,
+                   robot_type=info.get("robot_type"), state_names=info["features"]["observation.state"].get("names"), video=video,
                    episodes=dict(source=len(eps), kept=len(kept), **drop), steps=m)
     arrays = {}
     if kept:

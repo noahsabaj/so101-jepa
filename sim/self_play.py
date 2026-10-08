@@ -57,6 +57,7 @@ def main(ckpt, eval_config, goals, out, first_seed, n):
             rng = np.random.default_rng(seed + 555)
             obs = env.reset(seed)
             planner.seed(seed)
+            planner.reset()
             cols = {k: [] for k in ["pixels", "proprio", "action", "ee", "cube_pos", "cube_quat", "phase"]}
             buffer = []
             for step in range(STEPS):
@@ -76,6 +77,7 @@ def main(ckpt, eval_config, goals, out, first_seed, n):
                 cols["cube_pos"].append(cube[:3].astype(np.float32))
                 cols["cube_quat"].append(cube[3:].astype(np.float32))
                 cols["phase"].append(PHASES.index("free"))
+                planner.record(obs, action)
                 obs = env.step(action)
             ep = {k: np.asarray(v) for k, v in cols.items()}
             if i == 0:

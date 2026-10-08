@@ -16,11 +16,15 @@ import sys
 import time
 from pathlib import Path
 
+try:
+    import fcntl  # Linux: lock the shared output file while appending
+except ImportError:
+    fcntl = None
 import mujoco
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "hjepa"))
-from env import REST, SO101Env, sample_cube_xy  # noqa: E402
+from env import MAX_ACTION, REST, SO101Env, sample_cube_xy  # noqa: E402
 from expert import CLOSED, DOWN, GRASP_POINT, OPEN, ik, jaw_dir_for  # noqa: E402
 from planner import Planner  # noqa: E402
 from scene import CUBE_HALF  # noqa: E402
@@ -64,12 +68,15 @@ def make_trial(env, task, seed):
 def run(task, planner, env, seed):
     goal = make_trial(env, task, seed)
     planner.seed(seed)
+    planner.reset()
     obs, buffer, budget = env.observe(), [], BUDGET[task]
     max_cube_z, t0 = 0.0, time.perf_counter()
     for step in range(budget):
         if not buffer:
             buffer = list(planner.plan(obs, goal["obs"], steps_taken=step, eval_budget=budget))
-        obs = env.step(buffer.pop(0))
+        action = np.clip(np.asarray(buffer.pop(0), np.float32), -MAX_ACTION, MAX_ACTION)  # what env.step runs
+        planner.record(obs, action)
+        obs = env.step(action)
         max_cube_z = max(max_cube_z, float(env.cube_pose()[2]))
     result = dict(task=task, seed=seed, seconds=round(time.perf_counter() - t0, 1))
     if task == "reach":
@@ -105,8 +112,12 @@ def main(task, ckpt, eval_config, first_seed, n, out):
             if int(first_seed) + i in done:
                 continue
             r = run(task, planner, env, int(first_seed) + i)
+            if fcntl:  # several processes append to one file (run_phase0.sh): one whole line at a time
+                fcntl.flock(fh, fcntl.LOCK_EX)
             fh.write(json.dumps(r) + "\n")
             fh.flush()
+            if fcntl:
+                fcntl.flock(fh, fcntl.LOCK_UN)
             print(f"FLEET_PROGRESS {i + 1}/{n} {r}", flush=True)
 
 

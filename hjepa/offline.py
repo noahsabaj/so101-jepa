@@ -20,7 +20,7 @@ import hdf5plugin  # noqa: F401
 import numpy as np
 import torch
 
-from planner import Planner
+from planner import Planner, StrideEmbed
 
 RANKS_K, PLAN_K, DECOYS = (1, 5, 15), (5, 15), 100
 
@@ -45,6 +45,7 @@ def mean_ci(x):
 @torch.no_grad()
 def expert_rank(planner, f, picks, k, decoy_actions):
     level1 = planner.model.get_level(1) if hasattr(planner.model, "get_level") else planner.model
+    embed = StrideEmbed(1, planner.kmax) if planner.kmax > 1 else level1.action_embed  # a time-step model: stride 1
     ranks = []
     for off, t in picks:
         rows = slice(off + t - 3, off + t + 1)
@@ -56,7 +57,7 @@ def expert_rank(planner, f, picks, k, decoy_actions):
         act = np.repeat(acts[None], len(cands), axis=0)
         act[:, -1] = cands
         act = torch.as_tensor(act, dtype=torch.float32, device="cuda")
-        pred = level1.predict(hist.expand(len(cands), *hist.shape[1:]), level1.action_embed(act))[:, -1]
+        pred = level1.predict(hist.expand(len(cands), *hist.shape[1:]), embed(act))[:, -1]
         if getattr(level1, "value_fn", None) is not None:  # the planner's learned cost (cost: value)
             cost = -level1.value_fn(pred, goal.expand_as(pred)).cpu().numpy()
         else:

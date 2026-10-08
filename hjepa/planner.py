@@ -6,17 +6,22 @@ This module only converts our observations (uint8 64x128 pixels, 6 joint angles)
 training pipeline did, and the planned actions back to raw joint-target changes (rad).
 The cost is the latent distance to the goal, or, with `cost: value` in the eval config, the learned
 goal-reaching value of hjepa/value.py (value.pt beside the checkpoint).
-A time-step model (PLAN.md A21, trained with level1 strides) plans with `strides: [...]` and
-`max_stride: K` in the eval config: one plan per stride k (each step k raw actions, padded to K plus
-k / K, as in training), the plan with the lowest cost wins, and the robot replans after the receding
-horizon in raw steps (plan far, act short).
-Speed (eval config or overrides): `precision: bf16` runs the model under bf16 autocast, as in
-training; `compile: true` (or a torch.compile mode, e.g. reduce-overhead for CUDA graphs) compiles
+History: the predictor sees up to the training history (level1.wm.history_size; `plan_history: N`
+in the eval config overrides it) of observed frames and the actions run between them. Call reset()
+at the start of an episode and record(obs, action) for every action the robot runs.
+A time-step model (PLAN.md A21, trained with level1 strides) plans with `strides: [...]`,
+`max_stride: K` and `plan_steps: P` in the eval config: one plan per stride k, each P / k steps of k
+raw actions (padded to K plus k / K, as in training), so every plan ends P raw steps ahead and their
+costs compare; the plan with the lowest cost wins, and the robot replans after the receding horizon
+in raw steps (plan far, act short).
+Speed (eval config or overrides): `precision: bf16` (as in training) or `fp16` runs the model under
+autocast; `compile: true` (or a torch.compile mode, e.g. reduce-overhead for CUDA graphs) compiles
 the level-1 predictor.
 """
 
 import contextlib
 import sys
+from collections import deque
 from pathlib import Path
 
 import gymnasium
@@ -63,6 +68,16 @@ class Planner:
         self.action_mean, self.action_std = (np.asarray(stats["action"][k]).reshape(-1) for k in ("mean", "std"))
         self.receding = int(cfg.get("plan_config", cfg.get("hierarchical_plan_config")).receding_horizon)
         self.strides, self.kmax = list(cfg.get("strides", [1])), int(cfg.get("max_stride", 1))
+        if self.kmax > 1:
+            self.plan_steps = int(cfg.plan_steps)  # every stride plans to the same time
+            bad = [k for k in self.strides if self.plan_steps % k]
+            if bad:
+                raise ValueError(f"plan_steps={self.plan_steps} is not a multiple of strides {bad}")
+        train_cfg = OmegaConf.load(Path(ckpt).parent / "config.yaml")
+        self.history = int(cfg.get("plan_history", train_cfg.level1.wm.history_size))
+        level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
+        level1.plan_history = self.history
+        self.past = deque(maxlen=(self.history - 1) * self.kmax)  # (observation, raw action run from it)
         self.solvers = {}
         for k in self.strides:
             solver = build_solver(cfg, self.model)
@@ -71,8 +86,8 @@ class Planner:
             self.solvers[k] = solver
         self.solver = self.solvers[self.strides[0]]
         self.last_stride = self.strides[0]
-        bf16 = cfg.get("precision", "fp32") == "bf16"
-        self.autocast = (lambda: torch.autocast("cuda", dtype=torch.bfloat16)) if bf16 else contextlib.nullcontext
+        dtype = {"fp32": None, "bf16": torch.bfloat16, "fp16": torch.float16}[cfg.get("precision", "fp32")]
+        self.autocast = (lambda: torch.autocast("cuda", dtype=dtype)) if dtype else contextlib.nullcontext
         mode = cfg.get("compile", False)
         if mode:
             level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
@@ -84,6 +99,14 @@ class Planner:
 
     def _proprio(self, proprio):
         return ((torch.as_tensor(proprio).float() - self.proprio_mean) / self.proprio_std)[None, None].cuda()
+
+    def reset(self):
+        """Start of an episode: no observed history."""
+        self.past.clear()
+
+    def record(self, obs, action):
+        """The robot ran raw `action` (rad) from `obs`."""
+        self.past.append((obs, np.asarray(action, np.float32)))
 
     def seed(self, seed):
         for solver in self.solvers.values():
@@ -111,7 +134,7 @@ class Planner:
         best = None
         for k, solver in self.solvers.items():  # one plan per stride; the lowest model cost wins
             level1.action_embed = StrideEmbed(k, self.kmax)
-            plan = solver(self._info(obs, goal, k), steps_taken=steps_taken, eval_budget=eval_budget)["actions"]
+            plan = solver(self._info(obs, goal, k), planning_horizon=self.plan_steps // k)["actions"]
             info = solver._expand_info_dict_for_samples(self._info(obs, goal, k), start_idx=0, end_idx=1, num_samples=1)
             with torch.no_grad():
                 cost = float(self.model.get_cost(info, plan.to("cuda")[:, None]).min())
@@ -122,11 +145,21 @@ class Planner:
         return actions * self.action_std + self.action_mean
 
     def _info(self, obs, goal, k):
-        return {
-            "pixels": self._pixels(obs["pixels"]), "proprio": self._proprio(obs["proprio"]),
+        """Observed frames k raw steps apart (as in training at stride k), oldest first, the actions run
+        between them (k normalized raw actions each), the current observation and the goal."""
+        n, past = min(self.history - 1, len(self.past) // k), list(self.past)
+        frames = [past[len(past) - j * k][0] for j in range(n, 0, -1)] + [obs]
+        info = {
+            "pixels": torch.cat([self._pixels(o["pixels"]) for o in frames], 1),
+            "proprio": torch.cat([self._proprio(o["proprio"]) for o in frames], 1),
             "goal": self._pixels(goal["pixels"]), "goal_proprio": self._proprio(goal["proprio"]),
-            "action": torch.zeros(1, 1, 6 * k, device="cuda"),
+            "action": torch.zeros(1, n + 1, 6 * k, device="cuda"),
         }
+        if n:
+            acts = [np.concatenate([self.normalize_action(past[len(past) - j * k + i][1]) for i in range(k)])
+                    for j in range(n, 0, -1)]
+            info["history_action"] = torch.as_tensor(np.stack(acts), dtype=torch.float32, device="cuda")[None]
+        return info
 
     def normalize_action(self, action):
         return (np.asarray(action) - self.action_mean) / self.action_std

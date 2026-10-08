@@ -22,7 +22,6 @@ num_workers: 10
 seed: 42
 img_size: 64  # per view; frames are 64x128 (scene | wrist), the 8x8 position grid is stretched to 8x16
 patch_size: 8
-dump_object: true
 save_every_n_epochs: 1
 resume_every_n_steps: 100  # kat-pc: higher-ranked jobs stop ours every few minutes; a save takes 0.5 s
 trainer:

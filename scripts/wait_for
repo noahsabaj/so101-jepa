@@ -1,11 +1,19 @@
 #!/bin/sh
-# Wait until FILE exists (scripts/run_lanes.sh): sh scripts/wait_for FILE LANE
-# Fails if lane LANE ends (outputs/lanes/LANE.end) without FILE.
-while [ ! -e "$1" ]; do
-  if [ -e "outputs/lanes/$2.end" ] && [ ! -e "$1" ]; then
+# Wait until FILE exists (scripts/run_lanes.sh): sh scripts/wait_for FILE LANE [AFTER]
+# Fails if lane LANE ends (outputs/lanes/LANE.end) without FILE. Only a FILE newer than AFTER (default:
+# outputs/lanes/start, the start of this lanes run) counts, so a file left by an old run does not.
+# FILE is ready when its size has not changed for 15 s (the writer has finished).
+after=${3:-outputs/lanes/start}
+[ -e "$after" ] || after=""
+while [ ! -e "$1" ] || { [ -n "$after" ] && [ ! "$1" -nt "$after" ]; }; do
+  if [ -e "outputs/lanes/$2.end" ]; then
     echo "wait_for: lane $2 ended without $1" >&2
     exit 1
   fi
   sleep 20
 done
-sleep 15  # let the writer finish the file
+size=-1
+while [ "$(wc -c < "$1")" != "$size" ]; do
+  size=$(wc -c < "$1")
+  sleep 15
+done
