@@ -33,6 +33,9 @@ dependencies = [
 # `uv run --no-group cuda --group rocm` when the computer has an AMD GPU and no NVIDIA GPU.
 [dependency-groups]
 cuda = ["torch==2.11.0", "torchvision==0.26.0", "torchaudio==2.11.0"]
+dev = [
+    "pytest>=9.1.1",
+]
 rocm = [
     "torch==2.11.0", "torchvision==0.26.0", "torchaudio==2.11.0",
     "triton-rocm==3.6.0; sys_platform == 'linux'",  # torch's compiler; on the ROCm index only
@@ -40,7 +43,7 @@ rocm = [
 
 [tool.uv]
 package = false
-default-groups = ["cuda"]
+default-groups = ["cuda", "dev"]  # dev: pytest for tests/
 conflicts = [[{ group = "cuda" }, { group = "rocm" }]]
 
 [tool.uv.sources]
