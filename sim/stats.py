@@ -18,7 +18,7 @@ from env import MAX_ACTION
 from scene import CUBE_HALF
 
 PICK = [PHASES.index(p) for p in ("approach", "descend", "grasp", "lift", "carry", "lower", "release", "retreat")]
-DESCEND, GRASP, LIFT, CARRY, LOWER, RETREAT = (PHASES.index(p) for p in ("descend", "grasp", "lift", "carry", "lower", "retreat"))
+LIFT, CARRY, LOWER, RETREAT = (PHASES.index(p) for p in ("lift", "carry", "lower", "retreat"))
 FRAMES = 600  # sampled frames per file
 
 
@@ -51,10 +51,8 @@ def pick_outcomes(phase, cube, ee):
         placed = lifted and resting and err < 0.02
         kind = ("not_lifted" if not lifted else "dropped_in_carry" if not held else
                 "not_resting" if not resting else "placed" if placed else "placed_off_target")
-        grasp = np.flatnonzero(p == GRASP)
         out.append(dict(kind=kind, lifted=lifted, placed=placed, place_err=err,
-                        start_r=float(np.linalg.norm(c[0, :2])),
-                        grasp_offset=(g[grasp[-1]] - c[grasp[-1]]).tolist() if grasp.size else None))
+                        start_r=float(np.linalg.norm(c[0, :2]))))
     return out
 
 

@@ -56,11 +56,11 @@ integer versions in the order of registration, with the lineage in the registry.
 | v34 | v6 | 50% of sim-2, same steps (A18: data). | sim-2 (600 episodes) | 8,154 steps, seed 42 | gpu-portable | sojepa-v34 | Attentive table 5.23 cm. With v6 (4.06): -1.3 cm per doubling of the data. |
 | v35 | v31 | Best parts together: v31's time-step predictor, ViT-small (v12), Prodigy + ScheduleFree (v29), 3x the steps. | sim-2 | 24,462 steps, seed 42 | a19f4e4, f1eee9a | sojepa-v35; sojepa-v35 | Ridge table 3.99, grasp 2.04; attentive table 3.32 cm. Jump test 0.96 s at 2 s, 2.13 s at 4 s. Equal to v31 and v36: the extras add nothing. |
 | v36 | v31 | Seed 43 (v31's replicate). | sim-2 | as v31, seed 43 | a19f4e4, f1eee9a | sojepa-v36; sojepa-v36 | Ridge table 4.16, grasp 2.05; attentive table 3.22 cm. Jump test 0.68 s at 2 s, 1.76 s at 4 s. Confirms v31. |
-| v37 | v29 | Seed 43 (v29's replicate). | sim-2 | as v29, seed 43 | a19f4e4, f1eee9a | sojepa-v37; sojepa-v37 | Training |
+| v37 | v29 | Seed 43 (v29's replicate). | sim-2 | as v29, seed 43 | a19f4e4, f1eee9a | sojepa-v37; sojepa-v37 | Ridge table 6.90, grasp 2.44; attentive table 4.89 cm (v29: 4.04): schedule-free spreads ~0.9 cm between seeds. |
 | v38 | v6 | ScheduleFree+ (h_jepa/sfplus.py, a port of Meta's reference, Apache-2.0): Polyak step with f* = 0, schedule-free averaging, AdamC weight decay. No learning rate, no schedule. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v38; sojepa-v38 | Diverged (NaN): gradient clipping ran before the Polyak step, so steps were 30-90x too large. |
 | v39 | v38 | f* fitted during training instead of 0. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v39; sojepa-v39 | Diverged, but it inherited gradient clipping (only v40 turns it off), so it does not test the fit. Not needed: f* = 0 trains without clipping (v40). The fit code is removed. |
 | v40 | v38 | No gradient clipping. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v40; sojepa-v40 | Ridge table 6.58, grasp 2.51; attentive table 4.57 cm (rerun 4.69): trains, 0.5 cm behind v6 and v22. |
-| v41 | v40 | Seed 43 (v40's replicate). | sim-2 | as v40, seed 43 | 23998e4, 3645eb9 | sojepa-v41; sojepa-v41 | Training |
+| v41 | v40 | Seed 43 (v40's replicate). | sim-2 | as v40, seed 43 | 23998e4, 3645eb9 | sojepa-v41; sojepa-v41 | Ridge table 7.60, grasp 2.89; attentive table 3.64 cm (v40: 4.57). |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed<seed>/` on the
 training computer (kat-pc: WSL home).

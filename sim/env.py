@@ -50,19 +50,16 @@ class SO101Env:
         mujoco.mj_forward(self.model, self.data)
 
     # --- episode -----------------------------------------------------------------------------
-    def reset(self, seed, joints=None, cube_xy=None, cube_yaw=None, domain=None):
-        """Start an episode. The domain, the cube pose and the joints come from `seed` unless given."""
+    def reset(self, seed):
+        """Start an episode. The domain, the cube pose and the joints come from `seed`."""
         rng = np.random.default_rng(seed)
-        self.domain = domain or (sample_domain(rng) if self.randomize else None)
+        self.domain = sample_domain(rng) if self.randomize else None
         if self.domain is not None:
             apply_domain(self.model, self.domain, self.base_kp)
         mujoco.mj_resetData(self.model, self.data)
-        if cube_xy is None:
-            cube_xy = sample_cube_xy(rng)
-        if cube_yaw is None:
-            cube_yaw = rng.uniform(-np.pi / 4, np.pi / 4)
-        self.set_cube(cube_xy, cube_yaw)
-        q = REST + rng.uniform(-0.1, 0.1, 6) if joints is None else np.asarray(joints, float)
+        cube_xy = sample_cube_xy(rng)
+        self.set_cube(cube_xy, rng.uniform(-np.pi / 4, np.pi / 4))
+        q = REST + rng.uniform(-0.1, 0.1, 6)
         self.data.qpos[self.qadr] = q
         self.target = q.copy()
         self.data.ctrl[:] = self._command(q)

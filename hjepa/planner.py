@@ -57,7 +57,6 @@ class Planner:
     def __init__(self, ckpt, eval_config, seed=1234, overrides=()):
         cfg = OmegaConf.load(ROOT / "hjepa/config/eval" / f"{eval_config}.yaml")
         cfg = OmegaConf.merge(cfg, OmegaConf.from_dotlist([f"policy={ckpt}", f"seed={seed}", *overrides]))
-        self.cfg = cfg
         self.model = load_model(cfg).requires_grad_(False)  # planning differentiates the actions only
         if cfg.get("cost", "latent") == "value":
             from value import load_value

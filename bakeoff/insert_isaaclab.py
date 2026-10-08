@@ -21,7 +21,7 @@ app = AppLauncher(headless=True, enable_cameras=True).app
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
 import trimesh  # noqa: E402
-from pxr import Gf, PhysxSchema, Sdf, UsdGeom, UsdPhysics  # noqa: E402
+from pxr import Gf, PhysxSchema, UsdGeom, UsdPhysics  # noqa: E402
 
 import isaaclab.sim as sim_utils  # noqa: E402
 from isaaclab.assets import RigidObject, RigidObjectCfg  # noqa: E402

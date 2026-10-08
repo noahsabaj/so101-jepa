@@ -1,14 +1,19 @@
 """Self-collected data (PLAN.md A19): the planner plays toward goals sampled from earlier data.
 
-    sh scripts/uvr python sim/self_play.py CKPT EVAL_CONFIG GOALS.h5 OUT.h5 FIRST_SEED N
+    sh scripts/uvr python sim/self_play.py CKPT EVAL_CONFIG GOALS.h5 OUT_DIR FIRST_SEED N
 
 No expert and no task: each episode (300 steps, 60 s) starts from a random scene (the seed), and
 every 50 steps the goal becomes a random frame of GOALS.h5 (its arm joints and cube pose, rendered
 in this scene). The planner drives toward it; every step is recorded in the H-JEPA HDF5 format of
 sim/collect.py, so the episodes merge with the training data. Successes and failures both teach
 the world model; the value learns from them with hindsight goals.
+Each episode is its own file, OUT_DIR/SEED.h5, written whole and then renamed, so a stop (Ctrl-C or
+SIGTERM, also when started in the background) loses at most the episode in progress; a rerun skips
+the seeds already there.
 """
 
+import os
+import signal
 import sys
 import time
 from pathlib import Path
@@ -45,45 +50,55 @@ def goal_obs(env, joints, cube_pos, cube_quat):
     return obs
 
 
+def stop(signum, frame):
+    raise KeyboardInterrupt
+
+
 def main(ckpt, eval_config, goals, out, first_seed, n):
     first_seed, n = int(first_seed), int(n)
+    signal.signal(signal.SIGTERM, stop)  # a background job of sh ignores SIGINT; both end the run
+    signal.signal(signal.SIGINT, stop)
+    os.makedirs(out, exist_ok=True)
     with h5py.File(goals, "r") as g:
         g_joints, g_pos, g_quat = g["proprio"][:], g["cube_pos"][:], g["cube_quat"][:]
     planner, env = Planner(ckpt, eval_config), SO101Env(randomize=True)
     t0 = time.perf_counter()
-    with h5py.File(out, "w") as f:
-        for i in range(n):
-            seed = first_seed + i
-            rng = np.random.default_rng(seed + 555)
-            obs = env.reset(seed)
-            planner.seed(seed)
-            planner.reset()
-            cols = {k: [] for k in ["pixels", "proprio", "action", "ee", "cube_pos", "cube_quat", "phase"]}
-            buffer = []
-            for step in range(STEPS):
-                if step % GOAL_EVERY == 0:
-                    k = int(rng.integers(len(g_joints)))
-                    goal, buffer = goal_obs(env, g_joints[k], g_pos[k], g_quat[k]), []
-                    print(f"episode {i + 1}/{n} step {step} ({time.perf_counter() - t0:.0f} s)", flush=True)
-                if not buffer:
-                    buffer = list(planner.plan(obs, goal, steps_taken=step % GOAL_EVERY, eval_budget=GOAL_EVERY))
-                action = np.clip(np.asarray(buffer.pop(0), np.float32), -MAX_ACTION, MAX_ACTION)  # what env.step runs
-                pos, rot = env.site_pose()
-                cube = env.cube_pose()
-                cols["pixels"].append(obs["pixels"])
-                cols["proprio"].append(obs["proprio"])
-                cols["action"].append(action)
-                cols["ee"].append((pos + rot @ GRASP_POINT).astype(np.float32))
-                cols["cube_pos"].append(cube[:3].astype(np.float32))
-                cols["cube_quat"].append(cube[3:].astype(np.float32))
-                cols["phase"].append(PHASES.index("free"))
-                planner.record(obs, action)
-                obs = env.step(action)
-            ep = {k: np.asarray(v) for k, v in cols.items()}
-            if i == 0:
-                create(f, ep)
+    for i in range(n):
+        seed = first_seed + i
+        path = os.path.join(out, f"{seed}.h5")
+        if os.path.exists(path):
+            continue
+        rng = np.random.default_rng(seed + 555)
+        obs = env.reset(seed)
+        planner.seed(seed)
+        planner.reset()
+        cols = {k: [] for k in ["pixels", "proprio", "action", "ee", "cube_pos", "cube_quat", "phase"]}
+        buffer = []
+        for step in range(STEPS):
+            if step % GOAL_EVERY == 0:
+                k = int(rng.integers(len(g_joints)))
+                goal, buffer = goal_obs(env, g_joints[k], g_pos[k], g_quat[k]), []
+                print(f"episode {i + 1}/{n} step {step} ({time.perf_counter() - t0:.0f} s)", flush=True)
+            if not buffer:
+                buffer = list(planner.plan(obs, goal, steps_taken=step % GOAL_EVERY, eval_budget=GOAL_EVERY))
+            action = np.clip(np.asarray(buffer.pop(0), np.float32), -MAX_ACTION, MAX_ACTION)  # what env.step runs
+            pos, rot = env.site_pose()
+            cube = env.cube_pose()
+            cols["pixels"].append(obs["pixels"])
+            cols["proprio"].append(obs["proprio"])
+            cols["action"].append(action)
+            cols["ee"].append((pos + rot @ GRASP_POINT).astype(np.float32))
+            cols["cube_pos"].append(cube[:3].astype(np.float32))
+            cols["cube_quat"].append(cube[3:].astype(np.float32))
+            cols["phase"].append(PHASES.index("free"))
+            planner.record(obs, action)
+            obs = env.step(action)
+        ep = {k: np.asarray(v) for k, v in cols.items()}
+        with h5py.File(path + ".tmp", "w") as f:
+            create(f, ep)
             append(f, ep)
-            print(f"FLEET_PROGRESS {i + 1}/{n} ({(i + 1) * STEPS / (time.perf_counter() - t0):.1f} steps/s)", flush=True)
+        os.replace(path + ".tmp", path)
+        print(f"FLEET_PROGRESS {i + 1}/{n} ({(i + 1) * STEPS / (time.perf_counter() - t0):.1f} steps/s)", flush=True)
 
 
 if __name__ == "__main__":

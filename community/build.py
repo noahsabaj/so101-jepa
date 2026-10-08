@@ -304,25 +304,5 @@ def convert():
     print(f"convert: {time.time() - t0:.0f} s")
 
 
-def renormalize():
-    """Rewrite the proprio and action columns of community_{train,test}.h5 from state_raw and
-    action_raw with the current normalize(), and their stats in community_meta.json (no video decode)."""
-    meta_path = OUT / "community_meta.json"
-    meta = json.loads(meta_path.read_text())
-    for split in ("train", "test"):
-        with h5py.File(OUT.parent / f"community_{split}.h5", "r+") as f:
-            ds, s, a = f["dataset_id"][:], f["state_raw"][:].astype(np.float64), f["action_raw"][:].astype(np.float64)
-            proprio, action = np.empty_like(s, np.float32), np.empty_like(s, np.float32)
-            for i in np.unique(ds):
-                rows = ds == i
-                proprio[rows], action[rows], st, dt = normalize(s[rows], a[rows])
-                meta["datasets"][str(i)].update(state_stats=st, delta_stats=dt)
-            f["proprio"][:], f["action"][:] = proprio, action
-        print(f"{split}: renormalized {len(ds)} steps")
-    meta.pop("std_floor", None)
-    meta.update(state_std_floor=STATE_STD_FLOOR, delta_std_floor=DELTA_STD_FLOOR, z_clip=Z_CLIP)
-    meta_path.write_text(json.dumps(meta, indent=1) + "\n")
-
-
 if __name__ == "__main__":
-    {"sample": sample, "download": download, "convert": convert, "renormalize": renormalize}[sys.argv[1]]()
+    {"sample": sample, "download": download, "convert": convert}[sys.argv[1]]()
