@@ -1,7 +1,8 @@
 """Make SO-101 episodes and write them in the H-JEPA HDF5 format.
 
     collect.py shard OUT.h5 FIRST_SEED N [expert|play]   # N episodes, seeds FIRST_SEED.., one process
-    collect.py merge OUT.h5 SHARD.h5 ...                  # concatenate shards into one file
+    collect.py merge OUT.h5 SHARD.h5 ...                  # concatenate shards into one file (not into an input)
+    collect.py count FILE.h5 ...                          # print the episode count of each file
 
 Policies: expert (scripted pick-and-place, hand-written waypoints) or play (no task knowledge: hold a
 random joint target, uniform in the joint range, for 1 to 15 steps; PLAN.md A19).
@@ -11,6 +12,7 @@ action (6 joint-target changes, rad), and the true state for tests: ee (grasp po
 cube_quat, phase (index into PHASES). Plus ep_len, ep_offset, ep_idx (H-JEPA layout).
 """
 
+import os
 import sys
 import time
 
@@ -88,7 +90,7 @@ def append(f, ep):
 def shard(out, first_seed, n, policy="expert"):
     env = SO101Env(randomize=True)
     t0 = time.perf_counter()
-    with h5py.File(out, "w") as f:
+    with h5py.File(out + ".tmp", "w") as f:  # published below, so a stopped shard has no final name
         for i in range(n):
             ep = episode(env, first_seed + i, policy)
             if i == 0:
@@ -96,10 +98,28 @@ def shard(out, first_seed, n, policy="expert"):
             append(f, ep)
             print(f"FLEET_PROGRESS {i + 1}/{n} ({(i + 1) * STEPS / (time.perf_counter() - t0):.0f} steps/s)", flush=True)
     env.renderer.close()
+    os.replace(out + ".tmp", out)
+
+
+def count(path):
+    """Episodes in a dataset file."""
+    with h5py.File(path, "r") as f:
+        return f["ep_len"].shape[0]
 
 
 def merge(out, shards):
-    with h5py.File(out, "w") as f:
+    """Concatenate shards into out. Written to out.tmp, counted, then published with os.replace."""
+    if not shards:
+        raise ValueError("merge: no input")
+    if os.path.exists(out) and any(os.path.samefile(p, out) for p in shards):
+        raise ValueError(f"merge: the output {out} is also an input")
+    expect_ep = expect_steps = 0
+    for path in shards:
+        with h5py.File(path, "r") as s:
+            expect_ep += s["ep_len"].shape[0]
+            expect_steps += int(s["ep_len"][:].sum())
+    tmp = out + ".tmp"
+    with h5py.File(tmp, "w") as f:
         for i, path in enumerate(shards):
             with h5py.File(path, "r") as s:
                 for e, (start, n) in enumerate(zip(s["ep_offset"][:], s["ep_len"][:])):
@@ -108,10 +128,18 @@ def merge(out, shards):
                         create(f, ep)
                     append(f, ep)
             print(f"merged {path}", flush=True)
+        got_ep, got_steps = f["ep_len"].shape[0], f["action"].shape[0]
+    if (got_ep, got_steps) != (expect_ep, expect_steps):
+        os.remove(tmp)
+        raise RuntimeError(f"merge: {got_ep} episodes, {got_steps} steps; the shards hold {expect_ep}, {expect_steps}")
+    os.replace(tmp, out)
+    print(f"{out}: {got_ep} episodes", flush=True)
 
 
 if __name__ == "__main__":
     if sys.argv[1] == "shard":
         shard(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), *sys.argv[5:6])
+    elif sys.argv[1] == "count":
+        print(*(count(p) for p in sys.argv[2:]))
     else:
         merge(sys.argv[2], sys.argv[3:])

@@ -22,10 +22,23 @@ for split in train val; do
     i=$((i + PER))
   done
 done
-echo $jobs | tr ' ' '\n' | xargs -P "$P" -I{} sh -c 'IFS=:; set -- $(echo {}); f=../'"$SHARDS"'/$1_$2.h5; [ -f $f.done ] || { sh ../scripts/uvr python collect.py shard $f $2 $3 $POLICY > $f.log 2>&1 && touch $f.done; }'
+# A shard counts as done only if its .done marker exists and it holds the episodes asked for
+echo $jobs | tr ' ' '
+' | xargs -P "$P" -I{} sh -c 'IFS=:; set -- $(echo {}); f=../'"$SHARDS"'/$1_$2.h5; { [ -f $f.done ] && [ "$(sh ../scripts/uvr python collect.py count $f 2>/dev/null)" = "$3" ]; } || { rm -f $f.done; sh ../scripts/uvr python collect.py shard $f $2 $3 $POLICY > $f.log 2>&1 && touch $f.done; }'
 for split in train val; do
   if [ $split = train ]; then n=$TRAIN; else n=$VAL; fi
   [ "$n" -gt 0 ] || continue
-  uvr python collect.py merge ../data/so101_$split$SUFFIX.h5 $(ls ../$SHARDS/${split}_*.h5 | sort)  # seeds have the same width
+  # Merge exactly the shards scheduled above (not every ${split}_*.h5 left by an earlier, different run)
+  list="" want=""
+  for j in $jobs; do
+    case $j in $split:*) ;; *) continue ;; esac
+    rest=${j#*:}
+    list="$list ../$SHARDS/${split}_${rest%%:*}.h5" want="$want ${rest##*:}"
+  done
+  got=$(uvr python collect.py count $list)
+  [ "$got" = "${want# }" ] || { echo "make_dataset: $split shard episode counts are '$got', not '${want# }'" >&2; exit 1; }
+  uvr python collect.py merge ../data/so101_$split$SUFFIX.h5 $list
+  total=$(uvr python collect.py count ../data/so101_$split$SUFFIX.h5)
+  [ "$total" = "$n" ] || { echo "make_dataset: ../data/so101_$split$SUFFIX.h5 has $total episodes, not $n" >&2; exit 1; }
 done
 ls -la ../data/so101_*$SUFFIX.h5
