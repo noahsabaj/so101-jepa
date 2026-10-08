@@ -47,7 +47,7 @@ def episode(env, seed, policy="expert"):
     obs = env.reset(seed)
     if policy not in ("expert", "play"):
         raise ValueError(f"unknown policy {policy!r}: expert or play")
-    expert = (Play if policy == "play" else Expert)(env, np.random.default_rng(seed))
+    expert = (Play if policy == "play" else Expert)(env, np.random.default_rng([seed, 1]))  # not env.reset's stream
     cols = {k: [] for k in ["pixels", "proprio", "action", "ee", "cube_pos", "cube_quat", "phase"]}
     for _ in range(STEPS):
         action = expert.act()

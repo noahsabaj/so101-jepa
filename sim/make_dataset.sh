@@ -2,14 +2,14 @@
 # Make the SO-101 sim dataset on one Linux machine: train seeds 1000000.., val seeds 2000000..
 # Usage: sh sim/make_dataset.sh TRAIN_EPISODES VAL_EPISODES PARALLEL
 # Output: data/so101_train$SUFFIX.h5 and data/so101_val$SUFFIX.h5 (H-JEPA layout), shards in
-# data/sim/shards_$POLICY$SUFFIX/. A split with 0 episodes is skipped. SO101_IMAGE renders larger views (the
+# data/sim/shards_${POLICY}_$SO101_IMAGE$SUFFIX/. A split with 0 episodes is skipped. SO101_IMAGE renders larger views (the
 # same episodes): SO101_IMAGE=224 SUFFIX=_224 sh sim/make_dataset.sh 0 100 8 makes data/so101_val_224.h5.
 # POLICY=play (no expert, sim/collect.py) with SUFFIX=_play makes the play dataset.
 set -e
 . "$(dirname "$0")/../scripts/gpu.sh"  # GPU, uvr (uv run with this GPU's torch build), GL
 TRAIN=$1; VAL=$2; P=$3; PER=25; SUFFIX=${SUFFIX:-}; export POLICY=${POLICY:-expert}
 export MUJOCO_GL=${MUJOCO_GL:-$GL} SO101_IMAGE=${SO101_IMAGE:-64}
-SHARDS=data/sim/shards_$POLICY$SUFFIX  # the policy is in the path: a play run never reuses expert shards
+SHARDS=data/sim/shards_${POLICY}_$SO101_IMAGE$SUFFIX  # policy and image size in the path: no run reuses another's shards
 mkdir -p $SHARDS
 cd sim
 uvr python -c "import mujoco" >/dev/null

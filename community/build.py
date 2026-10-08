@@ -6,7 +6,7 @@ Run from the project root on samsung-1, one step after the other:
 
     python community/build.py sample     # community/sample.json: dataset, camera and split
     python community/build.py download   # data/community/raw/ (~105 GB); a re-run skips finished files
-    python community/build.py convert    # data/community/community_{train,test}.h5 + community_meta.json
+    python community/build.py convert    # data/community_{train,test}.h5 (where the configs read them) + data/community/community_meta.json
 
 Step k of an episode covers source frames [6k, 6k+6) (30 fps -> 5 Hz). pixels and state_raw come from
 frame 6k, action_raw (the commanded target) from frame 6k+5 or the episode's last frame.
@@ -239,7 +239,7 @@ def merge(rows, summaries):
         ids = [i for i in sorted(summaries) if rows[i]["split"] == split and summaries[i]["steps"]]
         n = sum(summaries[i]["steps"] for i in ids)
         n_ep = sum(summaries[i]["episodes"]["kept"] for i in ids)
-        path = OUT / f"community_{split}.h5"
+        path = OUT.parent / f"community_{split}.h5"
         with h5py.File(path.with_suffix(".tmp"), "w") as f:
             def column(name, shape, dtype, chunk_rows=1000, **kw):
                 f.create_dataset(name, shape, dtype, chunks=(min(chunk_rows, shape[0]),) + shape[1:], **kw)
@@ -305,7 +305,7 @@ def renormalize():
     meta_path = OUT / "community_meta.json"
     meta = json.loads(meta_path.read_text())
     for split in ("train", "test"):
-        with h5py.File(OUT / f"community_{split}.h5", "r+") as f:
+        with h5py.File(OUT.parent / f"community_{split}.h5", "r+") as f:
             ds, s, a = f["dataset_id"][:], f["state_raw"][:].astype(np.float64), f["action_raw"][:].astype(np.float64)
             proprio, action = np.empty_like(s, np.float32), np.empty_like(s, np.float32)
             for i in np.unique(ds):

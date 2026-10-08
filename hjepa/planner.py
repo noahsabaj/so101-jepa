@@ -11,7 +11,8 @@ A time-step model (PLAN.md A21, trained with level1 strides) plans with `strides
 k / K, as in training), the plan with the lowest cost wins, and the robot replans after the receding
 horizon in raw steps (plan far, act short).
 Speed (eval config or overrides): `precision: bf16` runs the model under bf16 autocast, as in
-training; `compile: true` compiles the level-1 predictor (torch.compile).
+training; `compile: true` (or a torch.compile mode, e.g. reduce-overhead for CUDA graphs) compiles
+the level-1 predictor.
 """
 
 import contextlib
@@ -52,7 +53,7 @@ class Planner:
         cfg = OmegaConf.load(ROOT / "hjepa/config/eval" / f"{eval_config}.yaml")
         cfg = OmegaConf.merge(cfg, OmegaConf.from_dotlist([f"policy={ckpt}", f"seed={seed}", *overrides]))
         self.cfg = cfg
-        self.model = load_model(cfg)
+        self.model = load_model(cfg).requires_grad_(False)  # planning differentiates the actions only
         if cfg.get("cost", "latent") == "value":
             from value import load_value
             level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
@@ -72,9 +73,10 @@ class Planner:
         self.last_stride = self.strides[0]
         bf16 = cfg.get("precision", "fp32") == "bf16"
         self.autocast = (lambda: torch.autocast("cuda", dtype=torch.bfloat16)) if bf16 else contextlib.nullcontext
-        if cfg.get("compile", False):
+        mode = cfg.get("compile", False)
+        if mode:
             level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
-            level1.predictor = torch.compile(level1.predictor)
+            level1.predictor = torch.compile(level1.predictor, mode=None if mode is True else mode)
 
     def _pixels(self, pixels):
         x = torch.from_numpy(pixels).permute(2, 0, 1).float() / 255.0

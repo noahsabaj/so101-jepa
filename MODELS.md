@@ -58,7 +58,7 @@ integer versions in the order of registration, with the lineage in the registry.
 | v36 | v31 | Seed 43 (v31's replicate). | sim-2 | as v31, seed 43 | a19f4e4, f1eee9a | sojepa-v36; sojepa-v36 | Ridge table 4.16, grasp 2.05; attentive table 3.22 cm. Jump test 0.68 s at 2 s, 1.76 s at 4 s. Confirms v31. |
 | v37 | v29 | Seed 43 (v29's replicate). | sim-2 | as v29, seed 43 | a19f4e4, f1eee9a | sojepa-v37; sojepa-v37 | Training |
 | v38 | v6 | ScheduleFree+ (h_jepa/sfplus.py, a port of Meta's reference, Apache-2.0): Polyak step with f* = 0, schedule-free averaging, AdamC weight decay. No learning rate, no schedule. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v38; sojepa-v38 | Diverged (NaN): gradient clipping ran before the Polyak step, so steps were 30-90x too large. |
-| v39 | v38 | f* fitted during training instead of 0. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v39; sojepa-v39 | Diverged: the fit is unstable. The fit code is removed. |
+| v39 | v38 | f* fitted during training instead of 0. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v39; sojepa-v39 | Diverged, but it inherited gradient clipping (only v40 turns it off), so it does not test the fit. Not needed: f* = 0 trains without clipping (v40). The fit code is removed. |
 | v40 | v38 | No gradient clipping. | sim-2 | 3 epochs, seed 42 | a19f4e4, f1eee9a | sojepa-v40; sojepa-v40 | Ridge table 6.58, grasp 2.51; attentive table 4.57 cm (rerun 4.69): trains, 0.5 cm behind v6 and v22. |
 | v41 | v40 | Seed 43 (v40's replicate). | sim-2 | as v40, seed 43 | 23998e4, 3645eb9 | sojepa-v41; sojepa-v41 | Training |
 

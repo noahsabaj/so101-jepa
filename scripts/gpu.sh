@@ -10,7 +10,7 @@
 #   gpu_sample   "memory used (MiB),use (%)" of GPU 0, all processes ("?" if unknown)
 if [ -n "${SO101_GPU:-}" ]; then
   GPU=$SO101_GPU
-elif command -v nvidia-smi > /dev/null 2>&1; then
+elif nvidia-smi -L > /dev/null 2>&1; then
   GPU=cuda
 elif [ -e /dev/kfd ]; then
   GPU=rocm

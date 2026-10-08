@@ -97,6 +97,9 @@ def done_seeds(out):
 def main(task, ckpt, eval_config, first_seed, n, out):
     done = done_seeds(out)
     planner, env = Planner(ckpt, eval_config), SO101Env(randomize=True)
+    if Path(out).exists() and Path(out).stat().st_size and not Path(out).read_bytes().endswith(b"\n"):
+        with open(out, "a") as fh:  # end a line cut short by a stop, so the next record starts a line
+            fh.write("\n")
     with open(out, "a") as fh:
         for i in range(int(n)):
             if int(first_seed) + i in done:

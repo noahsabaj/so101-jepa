@@ -4,7 +4,7 @@
 
 Random search over the CEM settings: horizon, samples, kept samples, rounds and the replanning
 interval, drawn from wide ranges (numpy seed 0; settings FIRST.. of the sequence, so several
-processes can split the search). Each setting plays TRIALS closed-loop trials of TASK (reach or
+processes can split the search, each with its own OUT.json). Each setting plays TRIALS closed-loop trials of TASK (reach or
 pick) on the tuning seeds 1000.. (rule 6: never the test seeds 5000..), the same seeds for every
 setting. Score: success rate, then mean error. OUT.json lists every setting, best first.
 """

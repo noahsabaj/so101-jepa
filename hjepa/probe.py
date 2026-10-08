@@ -97,11 +97,11 @@ def attentive(tokens, y, fit, sel, val, epochs=40):
     probe = AttentiveProbe(tokens.shape[1], dim=tokens.shape[2], out=y.shape[1]).cuda()
     opt = torch.optim.AdamW(probe.parameters(), lr=1e-3, weight_decay=0.05)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, 1e-3, total_steps=epochs * (int(sel.sum()) // 128 + 1))
-    idx_sel, best, best_state = np.flatnonzero(sel), np.inf, None
+    idx_sel, best, best_state, rng = np.flatnonzero(sel), np.inf, None, np.random.default_rng(0)
     predict = lambda rows: torch.cat([probe(tokens[rows[k:k + 512]].cuda()).cpu() for k in range(0, len(rows), 512)])  # noqa: E731
     for _ in range(epochs):
         probe.train()
-        for b in np.array_split(np.random.permutation(idx_sel), len(idx_sel) // 128 + 1):
+        for b in np.array_split(rng.permutation(idx_sel), len(idx_sel) // 128 + 1):
             loss = ((probe(tokens[b].cuda()) - yt[b].cuda()) ** 2).mean()
             opt.zero_grad(set_to_none=True)
             loss.backward()

@@ -1,5 +1,6 @@
-"""Planning speed: seconds per plan in fp32, bf16 autocast and bf16 + torch.compile, and how far the
-bf16 plans move from the fp32 plans (same seed, same observations).
+"""Planning speed: seconds per plan in fp32, bf16 autocast, bf16 + torch.compile and bf16 + CUDA graphs
+(compile mode reduce-overhead), and how far the bf16 plans move from the fp32 plans (same seed, same
+observations).
 
     sh scripts/uvr python hjepa/bench_plan.py CKPT EVAL_CONFIG PLANS OUT.json
 
@@ -20,7 +21,8 @@ from closed_loop import make_trial  # noqa: E402
 from env import SO101Env  # noqa: E402
 from planner import Planner  # noqa: E402
 
-MODES = {"fp32": [], "bf16": ["precision=bf16"], "bf16_compile": ["precision=bf16", "compile=true"]}
+MODES = {"fp32": [], "bf16": ["precision=bf16"], "bf16_compile": ["precision=bf16", "compile=true"],
+         "bf16_graphs": ["precision=bf16", "compile=reduce-overhead"]}
 WARMUP = 3
 
 
