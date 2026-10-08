@@ -5,6 +5,7 @@
 #   UV_GROUPS  the uv options for that torch build: none for cuda, "--no-group cuda --group rocm" for rocm
 #   GL         the default MuJoCo renderer: egl on NVIDIA; osmesa (CPU) on AMD, as Instinct GPUs have
 #              no graphics (a Radeon card can set MUJOCO_GL=egl)
+#   GALLIUM_DRIVER  d3d12 under WSL, so EGL renders on the GPU, not on llvmpipe (set it to llvmpipe to undo)
 # and defines
 #   uvr ARGS...  uv run with this GPU's torch build
 #   gpu_sample   "memory used (MiB),use (%)" of GPU 0, all processes ("?" if unknown)
@@ -23,6 +24,11 @@ case $GPU in
   *) echo "gpu.sh: SO101_GPU must be cuda or rocm, not $GPU" >&2; exit 2 ;;
 esac
 export GPU UV_GROUPS GL
+# WSL (kat-pc): Mesa's EGL falls back to llvmpipe (CPU, 4.1 steps/s); its D3D12 driver renders on the
+# NVIDIA GPU (11.9 steps/s, 2026-10-08). Pixels differ from llvmpipe: 18% of pixels, mean 0.09 grey levels.
+if [ "$GPU" = cuda ] && [ -e /dev/dxg ]; then
+  export GALLIUM_DRIVER=${GALLIUM_DRIVER:-d3d12}
+fi
 
 uvr() {
   uv run $UV_GROUPS "$@"
