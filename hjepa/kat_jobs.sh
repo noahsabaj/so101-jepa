@@ -41,7 +41,9 @@ v47|v47b|v48|v48b|v49)
     for f in lewam_best.pt lewam_config.json; do curl -sfL -o $U/$f https://huggingface.co/LeWAM/lewam-cube/resolve/main/$f; done
   fi
   { [ -f data/lewam/so101_train$R.h5 ] || uvr python hjepa/lewam_data.py data/so101_train$R.h5 data/lewam/so101_train$R.h5; } &&
-    { [ -f data/decomp/so101_train$R/pixels_wrist.npy ] || PYTHONPATH=third_party/lewam uvr python \n      third_party/lewam/scripts/decompress_h5.py --dataset_path data/lewam/so101_train$R.h5 --decomp_dir data/decomp \n      --views pixels_scene,pixels_wrist > $O/decompress.log 2>&1; } &&
+    { [ -f data/decomp/so101_train$R/pixels_wrist.npy ] || PYTHONPATH=third_party/lewam uvr python \
+      third_party/lewam/scripts/decompress_h5.py --dataset_path data/lewam/so101_train$R.h5 --decomp_dir data/decomp \
+      --views pixels_scene,pixels_wrist > $O/decompress.log 2>&1; } &&
     uvr python hjepa/lewam_train.py $M data/lewam/so101_train$R.h5 > $O/train.log 2>&1 &&
     uvr python hjepa/probe.py $L so101_lewam_policy data/so101_val$R.h5 outputs/probe_$M.json > $O/probe.log 2>&1 || exit 1
   for cfg in so101_lewam_policy so101_lewam_grad; do
