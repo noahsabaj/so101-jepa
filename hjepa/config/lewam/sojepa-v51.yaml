@@ -1,0 +1,11 @@
+# SO-JEPA v51 (PLAN.md A25): v47b (warm start from the authors' OGBench Cube checkpoint, 64 px views upsampled to
+# 96, a 3 x 3 map) for 35 epochs, not 20. v47b gave the first useful LeWAM head (reach median 4.8 cm; v47 from
+# scratch 19.5 cm), and v49 (v47 for 50 epochs) kept lowering val act after epoch 20. Does more training help the
+# warm-started head in closed loop? 35, not the paper's 50: the time left on the node.
+# Run: sh hjepa/kat_jobs.sh v51
+defaults:
+  - sojepa-v47b
+  - _self_
+
+train:
+  epochs: 35
