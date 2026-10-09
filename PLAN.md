@@ -299,3 +299,9 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   (github.com/robo-render/RoboRender-Video-Model, huggingface.co/RoboRender/roborender-video), but
   the code repo has no licence (2026-10-09). Test candidate for A5, against community-1 (A24), once
   the sim rungs pass.
+- LeAVJEPA ([2610.06226](https://arxiv.org/abs/2610.06226), Aalto): one early-fusion ViT, LeJEPA
+  objective (SIGReg, no EMA, no decoder) on audio, video and both. Modality dropout (a missing input
+  is another view of the same event) is what aligns the modalities (ablation); 91.3% ESC-50 frozen.
+  For us: low priority while the stack is vision only. If a second input enters (servo current, A4;
+  contact sound), one encoder with input dropout is the way, and the model still runs on vision alone.
+  The same dropout over our two views (scene, wrist) would let the model run with one camera.
