@@ -7,6 +7,7 @@ So the frames are upsampled to UPSAMPLE px on the GPU and cropped to the same 20
 as Diffusion Policy's 84 px robomimic frames). Parameter names are LeWAM's own, so its checkpoints load as is.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -19,7 +20,7 @@ sys.path.insert(0, str(ROOT / "third_party" / "lewam"))
 import lewam.models.lewam as lewam_model  # noqa: E402
 from lewam.models.encoders import ResNetEncoder, build_encoder  # noqa: E402
 
-UPSAMPLE = 96
+UPSAMPLE = int(os.environ.get("LEWAM_UPSAMPLE", "96"))  # 224: the paper's 7 x 7 map from our 64 px (v50)
 VIEWS = ["pixels_scene", "pixels_wrist"]  # the two halves of our 64 x 128 frame, scene first
 
 

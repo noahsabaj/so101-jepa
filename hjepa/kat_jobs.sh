@@ -33,9 +33,9 @@ v44)
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh offline &&
     MODELS=sojepa-v44 sh hjepa/run_phase0.sh probe &&
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh closed_loop ;;
-v47|v47b|v48|v48b|v49)
+v47|v47b|v48|v48b|v49|v50)
   M=sojepa-$1 O=outputs/$1 U=data/ckpts/lewam/upstream/lewam-cube
-  R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; esac  # v48: the 224 px data, and the sim renders 224
+  R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; v50) export LEWAM_UPSAMPLE=224 ;; esac  # v48: 224 px data and sim
   mkdir -p data/lewam $O $U
   if [ "${1#v4?}" = b ] && [ ! -f $U/lewam_best.pt ]; then
     for f in lewam_best.pt lewam_config.json; do curl -sfL -o $U/$f https://huggingface.co/LeWAM/lewam-cube/resolve/main/$f; done

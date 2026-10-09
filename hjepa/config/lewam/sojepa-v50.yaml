@@ -1,0 +1,11 @@
+# SO-JEPA v50 (PLAN.md A25): v47 with our 64 px views upsampled to 224 (LEWAM_UPSAMPLE=224, set by
+# hjepa/kat_jobs.sh and hjepa/lewam_eval.sh), not 96: the encoder's 7 x 7 map of v48 without v48's real 224 px
+# detail. v47's 3 x 3 map gave poor latents (grasp-point probe 10.7 cm) and a head no better than the mean
+# action; v50 against v48 separates the map size from the image detail. bf16, 20 epochs, warmup 1 as v48.
+# Run: sh hjepa/kat_jobs.sh v50
+defaults:
+  - sojepa-v47
+  - _self_
+
+train:
+  warmup_epochs: 1
