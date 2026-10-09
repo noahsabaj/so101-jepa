@@ -4,6 +4,7 @@
 # all at once, 10 processes each (seeds 5000..). Results in outputs/TAG/.
 #   sh hjepa/lewam_eval.sh TAG        (e.g. v47; v48* use the 224 px val set and render at 224 px)
 . "$(dirname "$0")/../scripts/gpu.sh"
+export MUJOCO_GL=${MUJOCO_GL:-$GL}
 M=sojepa-$1 O=outputs/$1 L=data/ckpts/lewam/sojepa-$1/seed42/lewam_best.pt
 R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; esac
 mkdir -p $O
