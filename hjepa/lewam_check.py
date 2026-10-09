@@ -26,7 +26,7 @@ def main(ckpt, data, samples=200):
     with h5py.File(data, "r") as f:
         px, act = f["pixels"], f["action"][:]
         off, ln = f["ep_offset"][:], f["ep_len"][:]
-        errs, base_other = [], []
+        errs, base_other, hs_used = [], [], []
         for _ in range(samples):
             e = rng.integers(len(off))
             t = int(rng.integers(0, ln[e] - fs * 2))
@@ -47,11 +47,17 @@ def main(ckpt, data, samples=200):
             if len(truth) < n:
                 continue
             errs.append(((a - truth) ** 2).mean())
+            hs_used.append(h)
             o = rng.integers(len(act) - n)
             base_other.append((((act[o:o + n] - ad.action_mean) / ad.action_std - truth) ** 2).mean())
     print(f"{ckpt}: {len(errs)} samples, proposed actions vs expert (normalized MSE): {np.mean(errs):.3f} "
           f"(median {np.median(errs):.3f}); mean-action baseline ~1; another sample's actions "
           f"{np.mean(base_other):.3f}", flush=True)
+    errs, hs_used = np.array(errs), np.array(hs_used)
+    for lo, hi in ((1, 1), (2, 4), (5, 10), (11, 20)):
+        m = (hs_used >= lo) & (hs_used <= hi)
+        if m.any():
+            print(f"  goal {lo}-{hi} chunks ahead: {errs[m].mean():.3f} (n {m.sum()})", flush=True)
 
 
 if __name__ == "__main__":

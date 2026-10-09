@@ -14,6 +14,7 @@
 #   v47b      the same, warm-started from the authors' OGBench Cube checkpoint (downloaded here)
 #   v49       v47 for the paper's 50 epochs
 #   v48, v48b v47, v47b at 224 px (data/so101_train_224.h5: SO101_IMAGE=224 SUFFIX=_224 sh sim/make_dataset.sh)
+#   v50, v50b v47, v47b with the 64 px views upsampled to 224 (the paper's 7 x 7 map)
 . "$(dirname "$0")/../scripts/gpu.sh"
 CKPT_ON="level1.encoder.pixel_encoder.encoder.gradient_checkpointing=true num_workers=8"
 K=data/ckpts/so101
@@ -33,11 +34,11 @@ v44)
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh offline &&
     MODELS=sojepa-v44 sh hjepa/run_phase0.sh probe &&
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh closed_loop ;;
-v47|v47b|v48|v48b|v49|v50)
+v47|v47b|v48|v48b|v49|v50|v50b)
   M=sojepa-$1 O=outputs/$1 U=data/ckpts/lewam/upstream/lewam-cube
-  R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; v50) export LEWAM_UPSAMPLE=224 ;; esac  # v48: 224 px data and sim
+  R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; v50*) export LEWAM_UPSAMPLE=224 ;; esac  # v48: 224 px data and sim
   mkdir -p data/lewam $O $U
-  if [ "${1#v4?}" = b ] && [ ! -f $U/lewam_best.pt ]; then
+  if [ "${1%b}" != $1 ] && [ ! -f $U/lewam_best.pt ]; then
     for f in lewam_best.pt lewam_config.json; do curl -sfL -o $U/$f https://huggingface.co/LeWAM/lewam-cube/resolve/main/$f; done
   fi
   { [ -f data/lewam/so101_train$R.h5 ] || uvr python hjepa/lewam_data.py data/so101_train$R.h5 data/lewam/so101_train$R.h5; } &&
@@ -47,5 +48,5 @@ v47|v47b|v48|v48b|v49|v50)
     uvr python hjepa/lewam_train.py $M data/lewam/so101_train$R.h5 > $O/train.log 2>&1 &&
     sh hjepa/lewam_eval.sh $1 ;;
 step5) TRAIN_ARGS="$CKPT_ON" sh hjepa/run_step5.sh train && sh hjepa/run_step5.sh offline ;;
-*) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5|v47|v47b|v48|v48b|v49" >&2; exit 2 ;;
+*) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5|v47|v47b|v48|v48b|v49|v50|v50b" >&2; exit 2 ;;
 esac

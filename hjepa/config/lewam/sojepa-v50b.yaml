@@ -1,0 +1,13 @@
+# SO-JEPA v50b (PLAN.md A25): v50 (64 px views upsampled to 224: the paper's 7 x 7 map) warm-started from the
+# authors' OGBench Cube checkpoint, as v47b and v48b. v47b (warm, 3 x 3 map) reached 4.8 cm median in reach, v47
+# (scratch) 19.5 cm; scratch runs with the 7 x 7 map (v48, v50) stalled at val act 1.11. v50b against v48b: does
+# warm start need real 224 px detail, or only the map size the checkpoint was trained with? 15 epochs (time left
+# on the node). Run: sh hjepa/kat_jobs.sh v50b
+defaults:
+  - sojepa-v50
+  - _self_
+
+init_from: data/ckpts/lewam/upstream/lewam-cube/lewam_best.pt
+
+train:
+  epochs: 15

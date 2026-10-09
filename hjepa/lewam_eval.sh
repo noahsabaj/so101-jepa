@@ -6,7 +6,7 @@
 . "$(dirname "$0")/../scripts/gpu.sh"
 export MUJOCO_GL=${MUJOCO_GL:-$GL}
 M=sojepa-$1 O=outputs/$1 L=data/ckpts/lewam/sojepa-$1/seed42/lewam_best.pt
-R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; v50) export LEWAM_UPSAMPLE=224 ;; esac
+R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; v50*) export LEWAM_UPSAMPLE=224 ;; esac
 mkdir -p $O
 uvr python hjepa/probe.py $L so101_lewam_policy data/so101_val$R.h5 outputs/probe_$M.json > $O/probe.log 2>&1 &
 pids="$!"
