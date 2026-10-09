@@ -46,16 +46,17 @@ v47|v47b|v48|v48b|v49)
       --views pixels_scene,pixels_wrist > $O/decompress.log 2>&1; } &&
     uvr python hjepa/lewam_train.py $M data/lewam/so101_train$R.h5 > $O/train.log 2>&1 &&
     uvr python hjepa/probe.py $L so101_lewam_policy data/so101_val$R.h5 outputs/probe_$M.json > $O/probe.log 2>&1 || exit 1
+  pids=""  # every rung and planner at once, 10 processes each (the same 100 reach and 50 pick seeds)
   for cfg in so101_lewam_policy so101_lewam_grad; do
-    for task_n in reach:20 pick:10; do
-      task=${task_n%%:*} n=${task_n##*:} pids=""
-      for c in 0 1 2 3 4; do
+    for task_n in reach:10 pick:5; do
+      task=${task_n%%:*} n=${task_n##*:}
+      for c in 0 1 2 3 4 5 6 7 8 9; do
         uvr python sim/closed_loop.py $task $L $cfg $((5000 + c * n)) $n $O/${task}_$cfg.jsonl \
           > $O/${task}_${cfg}_$c.log 2>&1 & pids="$pids $!"
       done
-      for p in $pids; do wait $p; done
     done
-  done ;;
+  done
+  for p in $pids; do wait $p; done ;;
 step5) TRAIN_ARGS="$CKPT_ON" sh hjepa/run_step5.sh train && sh hjepa/run_step5.sh offline ;;
 *) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5|v47|v47b|v48|v48b|v49" >&2; exit 2 ;;
 esac
