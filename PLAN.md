@@ -280,6 +280,10 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   rendered scenes, N = 8 factors). For us: a rotation changes no L2 or L1 latent distance and no
   dense probe, so our CEM cost and probes stay the same; it helps only modules that read a few
   latents (a sparse cost, monitor or few-shot readout). It adds no information the latents lack (A15).
+  Authors' code (github.com/kunwuz/dsreg, no licence on 2026-10-09; a Lean 4 proof of the theorem):
+  synthetic nested footprints, N = 4-14, MCC 0.52-0.77 -> 0.97-0.997. hjepa/dsreg.py follows its fit
+  (identity start kept unless beaten, gradient clip 10, 12 restarts x 3,000 steps); on a nested
+  6-factor test it recovers the factors (MCC 0.80 -> 1.00). Our arm's joints are nested footprints too.
 - RoboRender ([2610.09254](https://arxiv.org/abs/2610.09254), Stanford, Li Fei-Fei, Jiajun Wu):
   Wan2.1-T2V-1.3B fine-tuned on ~130k real robot clips (AgiBot-World, DROID) at 416x240 renders
   photoreal video of a sim trajectory, conditioned on its depth video, a robot mask video and a

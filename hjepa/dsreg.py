@@ -66,18 +66,23 @@ def local_jacobians(h, x, m, k, lam, rng):
 
 
 def fit_rotation(b, restarts, steps, seed):
-    """W in O(K) minimizing mean_a ||W^T B_a||_1 (the paper's anchor-averaged L1 criterion)."""
+    """W in O(K) minimizing mean_a ||W^T B_a||_1 (the paper's anchor-averaged L1 criterion). As the
+    authors' code (github.com/kunwuz/dsreg, dsreg/rotation.py): the first start is the identity (the
+    PCA basis is kept unless a rotation beats it), the others random; Adam with the gradient clipped at 10."""
     torch.manual_seed(seed)
-    kdim, best = b.shape[1], (np.inf, None)
-    for _ in range(restarts):
-        w0 = torch.linalg.qr(torch.randn(kdim, kdim, device="cuda"))[0]
-        s = torch.zeros(kdim, kdim, device="cuda", requires_grad=True)
+    kdim = b.shape[1]
+    eye = torch.eye(kdim, device="cuda", dtype=b.dtype)
+    best = (float((eye.T @ b).abs().sum((1, 2)).mean()), eye.cpu().numpy().astype(np.float64))
+    for r in range(restarts):
+        w0 = eye if r == 0 else torch.linalg.qr(torch.randn(kdim, kdim, device="cuda", dtype=b.dtype))[0]
+        s = torch.zeros(kdim, kdim, device="cuda", dtype=b.dtype, requires_grad=True)
         opt = torch.optim.Adam([s], lr=0.01)
         for _ in range(steps):
             w = w0 @ torch.linalg.matrix_exp(s - s.T)
             loss = (w.T @ b).abs().sum((1, 2)).mean()
             opt.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_([s], max_norm=10.0)
             opt.step()
         with torch.no_grad():
             w = w0 @ torch.linalg.matrix_exp(s - s.T)
@@ -112,7 +117,7 @@ def scores(zfit, zte, yfit, yte):
                 single_r2_mean=round(float(np.mean(single)), 3))
 
 
-def main(ckpt, eval_config, data, out, kdim=32, max_frames=0, m=1024, k=128, lam=1e-2, restarts=8, steps=1500):
+def main(ckpt, eval_config, data, out, kdim=32, max_frames=0, m=1024, k=128, lam=1e-2, restarts=12, steps=3000):
     t0, kdim, max_frames = time.time(), int(kdim), int(max_frames)
     rng = np.random.default_rng(0)
     f = h5py.File(data, "r")
