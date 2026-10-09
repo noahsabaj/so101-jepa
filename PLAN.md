@@ -280,3 +280,18 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   rendered scenes, N = 8 factors). For us: a rotation changes no L2 or L1 latent distance and no
   dense probe, so our CEM cost and probes stay the same; it helps only modules that read a few
   latents (a sparse cost, monitor or few-shot readout). It adds no information the latents lack (A15).
+- RoboRender ([2610.09254](https://arxiv.org/abs/2610.09254), Stanford, Li Fei-Fei, Jiajun Wu):
+  Wan2.1-T2V-1.3B fine-tuned on ~130k real robot clips (AgiBot-World, DROID) at 416x240 renders
+  photoreal video of a sim trajectory, conditioned on its depth video, a robot mask video and a
+  prompt; geometry, motion and actions stay the sim's. Pi0.5 policies trained only on these videos,
+  zero shot on real arms (8 tasks, 10 trials each): 71% against 10% (raw sim render) and 20% (domain
+  randomization); depth-only input 10-30%. More renders per sim trajectory raise success with no new
+  trajectories (opening +65 points), and the mask lets it render arms it never saw (YAM, R1Pro).
+  For us (A5): a learned renderer beats hand-made randomization by 3.6x (rule 11), and MuJoCo gives
+  depth and robot masks for free. Our JEPA learns from pixels, so rendered sim-3 episodes would feed
+  it directly; the SO-101 is an unseen arm, and the prompt is a generation input only, not in the
+  model we run. Cost: 4.3 s per 3-view 81-frame clip on an H200 after distillation (DMD2, 6 steps);
+  a 1.3B model at 416x240 may fit the 4060 Ti, untested. Inference code and weights are public
+  (github.com/robo-render/RoboRender-Video-Model, huggingface.co/RoboRender/roborender-video), but
+  the code repo has no licence (2026-10-09). Test candidate for A5, against community-1 (A24), once
+  the sim rungs pass.
