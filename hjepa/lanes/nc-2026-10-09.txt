@@ -1,15 +1,23 @@
-# National Compute node, 8x AMD MI355X, 2026-10-09 ($100 credit, ~4 h): sh scripts/run_lanes.sh hjepa/lanes/nc-2026-10-09.txt
-# with OMP_NUM_THREADS=2. The kat-pc queue's v42, self-play 1c, v43, v44 and step5 move here; LeWAM v47, v47b (A25) too.
+# National Compute node, 8x AMD MI355X (288 GB each), 236 CPUs, 2026-10-09 ($100 credit, ~4 h), every GPU and most
+# CPUs busy: OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 LP_NUM_THREADS=1 PATH=$HOME/.local/bin:$PATH sh scripts/run_lanes.sh hjepa/lanes/nc-2026-10-09.txt
+# The kat-pc queue's v42, self-play 1c, v43, v44 and step5 moved here, with LeWAM v47-v48b (A25), the reruns of
+# 2026-10-08 and DSReg (from noah-pc), and the 224 px re-render of sim-2 (CPU). Small models share GPUs.
 # Lane 0: v47 (LeWAM from scratch): convert sim-2 to LeWAM's layout, train, probe, rungs 1 and 2 (head alone, gradient planner).
 0 | sh hjepa/kat_jobs.sh v47
 # Lane 1: v47b (warm start from the authors' Cube checkpoint), after lane 0 has converted the data.
-1 | sh scripts/wait_for data/lewam/so101_train.h5 0 && sh hjepa/kat_jobs.sh v47b
+1 | until [ -f data/lewam/so101_train.h5 ]; do sleep 20; done && sh hjepa/kat_jobs.sh v47b
 # Lane 2: v42 (the new default recipe), its probe and jump test.
 2 | MODELS=sojepa-v42 sh hjepa/run_phase0.sh train && MODELS=sojepa-v42 sh hjepa/run_phase0.sh probe && sh scripts/uvr python hjepa/jump_test.py data/ckpts/so101/sojepa-v42/seed42/sojepa-v42_object.ckpt data/so101_val.h5 outputs/jump_sojepa-v42.json 1,2,3,5,10 300
 # Lane 3: v44 (2-level H-JEPA, vision only): train, offline tests, probe, rungs 1 and 2.
 3 | MODELS=sojepa-v44 sh hjepa/run_phase0.sh train && RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh offline && MODELS=sojepa-v44 sh hjepa/run_phase0.sh probe && RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh closed_loop
-# Lanes 4-5: v45 and v46 on the community data (uploaded while the other lanes run), offline tests on the held-out setups.
-4 | sh scripts/wait_for data/community_test.h5 4 && MODELS=sojepa-v45 sh hjepa/run_step5.sh train && MODELS=sojepa-v45 sh hjepa/run_step5.sh offline
-5 | sh scripts/wait_for data/community_test.h5 5 && MODELS=sojepa-v46 sh hjepa/run_step5.sh train && MODELS=sojepa-v46 sh hjepa/run_step5.sh offline
+# Lanes 4-5: v45 and v46 on the community data (data/community.done: written when its upload ends), offline tests on the held-out setups.
+4 | until [ -f data/community.done ]; do sleep 20; done && MODELS=sojepa-v45 sh hjepa/run_step5.sh train && MODELS=sojepa-v45 sh hjepa/run_step5.sh offline
+5 | until [ -f data/community.done ]; do sleep 20; done && MODELS=sojepa-v46 sh hjepa/run_step5.sh train && MODELS=sojepa-v46 sh hjepa/run_step5.sh offline
 # Lane 6: self-play round 1c on GPUs 6 and 7 (v21, CEM, 10 processes per GPU, 100 min), merged into so101_train_play_r1; then v43 on it, its probe.
 6 | STOP_AT="$(date -d '+100 minutes' '+%F %T')" GPUS="6 7" sh hjepa/self_improve.sh data/ckpts/so101/sojepa-v21/seed42/sojepa-v21_object.ckpt so101_train_play so101_train_play_r1 400 20 3300000 && MODELS=sojepa-v43 sh hjepa/run_phase0.sh train && MODELS=sojepa-v43 sh hjepa/run_phase0.sh probe
+# Lane 7 (GPU 1, beside v47b): the reruns of 2026-10-08 (A20 value v7, A21 jump tests, offline with history), then DSReg on v6 (K 32, 16) and v31.
+1 | sh hjepa/reruns_20261008.sh; mkdir -p outputs/dsreg; for r in "v6 sojepa-v6 32" "v6 sojepa-v6 16" "v31 sojepa-v31 32"; do set -- $r; sh scripts/uvr python hjepa/dsreg.py data/ckpts/so101/$2/seed42/$2_object.ckpt so101_flat data/so101_val.h5 outputs/dsreg/dsreg_$1_K$3.json $3 > outputs/dsreg/dsreg_$1_K$3.log 2>&1; done
+# Lane 8 (CPU, then GPU 4): sim-2 and its val set re-rendered at 224 px (the same episodes, 110 processes, 5 episodes per shard), then v48 (LeWAM at 224 px).
+4 | SO101_IMAGE=224 SUFFIX=_224 PER=5 sh sim/make_dataset.sh 1200 100 110 && sh hjepa/kat_jobs.sh v48
+# Lane 9 (GPU 5): v48b (224 px, Cube warm start), after lane 8 has converted the 224 px data.
+5 | sh scripts/wait_for data/lewam/so101_train_224.h5 8 && sh hjepa/kat_jobs.sh v48b

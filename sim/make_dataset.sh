@@ -4,10 +4,11 @@
 # Output: data/so101_train$SUFFIX.h5 and data/so101_val$SUFFIX.h5 (H-JEPA layout), shards in
 # data/sim/shards_${POLICY}_$SO101_IMAGE$SUFFIX/. A split with 0 episodes is skipped. SO101_IMAGE renders larger views (the
 # same episodes): SO101_IMAGE=224 SUFFIX=_224 sh sim/make_dataset.sh 0 100 8 makes data/so101_val_224.h5.
-# POLICY=play (no expert, sim/collect.py) with SUFFIX=_play makes the play dataset.
+# POLICY=play (no expert, sim/collect.py) with SUFFIX=_play makes the play dataset. PER: episodes per shard (25;
+# smaller for many processes). The episodes do not depend on it (one seed per episode).
 set -e
 . "$(dirname "$0")/../scripts/gpu.sh"  # GPU, uvr (uv run with this GPU's torch build), GL
-TRAIN=$1; VAL=$2; P=$3; PER=25; SUFFIX=${SUFFIX:-}; export POLICY=${POLICY:-expert}
+TRAIN=$1; VAL=$2; P=$3; PER=${PER:-25}; SUFFIX=${SUFFIX:-}; export POLICY=${POLICY:-expert}
 export MUJOCO_GL=${MUJOCO_GL:-$GL} SO101_IMAGE=${SO101_IMAGE:-64}
 SHARDS=data/sim/shards_${POLICY}_$SO101_IMAGE$SUFFIX  # policy and image size in the path: no run reuses another's shards
 mkdir -p $SHARDS

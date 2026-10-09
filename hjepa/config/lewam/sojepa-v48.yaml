@@ -1,0 +1,14 @@
+# SO-JEPA v48 (PLAN.md A25): v47 at 224 px, the paper's image size (sim-2 re-rendered with SO101_IMAGE=224, the
+# same episodes): LeWAM's own encoder as published (no upsampling, 202 px crop). bf16 and 10 epochs to fit one
+# National Compute lease. Run: sh hjepa/kat_jobs.sh v48
+defaults:
+  - sojepa-v47
+  - _self_
+
+data:
+  img_size: 224
+
+train:
+  epochs: 10
+  warmup_epochs: 1
+  precision: bf16

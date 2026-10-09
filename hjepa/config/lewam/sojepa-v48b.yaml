@@ -1,0 +1,7 @@
+# SO-JEPA v48b (PLAN.md A25): v48 warm-started from the authors' OGBench Cube checkpoint, which was trained at
+# 224 px with the same encoder: the closest match to the paper. Run: sh hjepa/kat_jobs.sh v48b
+defaults:
+  - sojepa-v48
+  - _self_
+
+init_from: data/ckpts/lewam/upstream/lewam-cube/lewam_best.pt
