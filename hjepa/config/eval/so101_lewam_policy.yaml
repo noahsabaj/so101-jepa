@@ -1,0 +1,6 @@
+# LeWAM's action head alone (PLAN.md A25; hjepa/lewam_planner.py): the best of 1 proposal, no refinement:
+# the reactive goal-conditioned policy, the baseline the planner must beat.
+type: lewam
+plan_mode: best_of_k
+num_proposals: 1
+horizon_frac: 0.5

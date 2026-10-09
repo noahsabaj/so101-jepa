@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "hjepa"))
 from collect import PHASES, STEPS, append, create  # noqa: E402
 from env import MAX_ACTION, SO101Env  # noqa: E402
 from expert import GRASP_POINT  # noqa: E402
-from planner import Planner  # noqa: E402
+from planner import make_planner  # noqa: E402
 
 GOAL_EVERY = 50  # steps (10 s) per goal
 
@@ -61,7 +61,7 @@ def main(ckpt, eval_config, goals, out, first_seed, n):
     os.makedirs(out, exist_ok=True)
     with h5py.File(goals, "r") as g:
         g_joints, g_pos, g_quat = g["proprio"][:], g["cube_pos"][:], g["cube_quat"][:]
-    planner, env = Planner(ckpt, eval_config), SO101Env(randomize=True)
+    planner, env = make_planner(ckpt, eval_config), SO101Env(randomize=True)
     t0 = time.perf_counter()
     for i in range(n):
         seed = first_seed + i

@@ -1,0 +1,9 @@
+# SO-JEPA v47b (PLAN.md A25): v47 warm-started from the authors' OGBench Cube checkpoint (huggingface.co/LeWAM/
+# lewam-cube, MIT: one 224 px camera, 5-dim end-effector actions). The encoder and the predictor load; the
+# action input and output (6 joint deltas here) and the view embedding (two cameras) start fresh. Does
+# pretraining on another arm's block moving help? Run: sh hjepa/kat_jobs.sh v47b
+defaults:
+  - sojepa-v47
+  - _self_
+
+init_from: data/ckpts/lewam/upstream/lewam-cube/lewam_best.pt

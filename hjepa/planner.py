@@ -203,3 +203,11 @@ class Planner:
 
     def normalize_action(self, action):
         return (np.asarray(action) - self.action_mean) / self.action_std  # action_std: safe_std, as in training
+
+
+def make_planner(ckpt, eval_config, seed=1234, overrides=()):
+    """The planner an eval config names: `type: lewam` (hjepa/lewam_planner.py, PLAN.md A25), else Planner."""
+    if OmegaConf.load(ROOT / "hjepa/config/eval" / f"{eval_config}.yaml").get("type") == "lewam":
+        from lewam_planner import LeWAMAdapter
+        return LeWAMAdapter(ckpt, eval_config, seed=seed, overrides=overrides)
+    return Planner(ckpt, eval_config, seed=seed, overrides=overrides)

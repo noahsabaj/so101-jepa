@@ -8,6 +8,10 @@
 #   v43       train SO-JEPA v43 on it, probe
 #   v44       train SO-JEPA v44 (2-level H-JEPA, vision only), offline tests, probe, rungs 1 and 2
 #   step5     train SO-JEPA v45 and v46 on the community data, offline tests on the held-out setups
+#   v47       LeWAM (PLAN.md A25) on sim-2: convert the data, train, probe, rungs 1 and 2 with its action head
+#             alone and with its gradient planner (fleet project so101-jepa-lewam: LeWAM is a submodule,
+#             which `fleet submit --git` does not push)
+#   v47b      the same, warm-started from the authors' OGBench Cube checkpoint (downloaded here)
 . "$(dirname "$0")/../scripts/gpu.sh"
 CKPT_ON="level1.encoder.pixel_encoder.encoder.gradient_checkpointing=true num_workers=8"
 K=data/ckpts/so101
@@ -27,6 +31,25 @@ v44)
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh offline &&
     MODELS=sojepa-v44 sh hjepa/run_phase0.sh probe &&
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh closed_loop ;;
+v47|v47b)
+  M=sojepa-$1 O=outputs/$1 L=data/ckpts/lewam/sojepa-$1/seed42/lewam_best.pt U=data/ckpts/lewam/upstream/lewam-cube
+  mkdir -p data/lewam $O $U
+  if [ $1 = v47b ] && [ ! -f $U/lewam_best.pt ]; then
+    for f in lewam_best.pt lewam_config.json; do curl -sfL -o $U/$f https://huggingface.co/LeWAM/lewam-cube/resolve/main/$f; done
+  fi
+  { [ -f data/lewam/so101_train.h5 ] || uvr python hjepa/lewam_data.py data/so101_train.h5 data/lewam/so101_train.h5; } &&
+    uvr python hjepa/lewam_train.py $M data/lewam/so101_train.h5 > $O/train.log 2>&1 &&
+    uvr python hjepa/probe.py $L so101_lewam_policy data/so101_val.h5 outputs/probe_$M.json > $O/probe.log 2>&1 || exit 1
+  for cfg in so101_lewam_policy so101_lewam_grad; do
+    for task_n in reach:20 pick:10; do
+      task=${task_n%%:*} n=${task_n##*:} pids=""
+      for c in 0 1 2 3 4; do
+        uvr python sim/closed_loop.py $task $L $cfg $((5000 + c * n)) $n $O/${task}_$cfg.jsonl \
+          > $O/${task}_${cfg}_$c.log 2>&1 & pids="$pids $!"
+      done
+      for p in $pids; do wait $p; done
+    done
+  done ;;
 step5) TRAIN_ARGS="$CKPT_ON" sh hjepa/run_step5.sh train && sh hjepa/run_step5.sh offline ;;
-*) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5" >&2; exit 2 ;;
+*) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5|v47|v47b" >&2; exit 2 ;;
 esac

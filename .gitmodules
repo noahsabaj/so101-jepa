@@ -1,3 +1,6 @@
 [submodule "third_party/H-JEPA"]
 	path = third_party/H-JEPA
 	url = https://github.com/noahsabaj/H-JEPA.git
+[submodule "third_party/lewam"]
+	path = third_party/lewam
+	url = https://github.com/MinghaoFu/lewam.git

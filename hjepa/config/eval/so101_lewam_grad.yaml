@@ -1,0 +1,11 @@
+# LeWAM's gradient planner (PLAN.md A25; hjepa/lewam_planner.py), the paper's settings
+# (third_party/lewam/docs/REPRODUCE.md): 32 action-head proposals, all refined by 50 Adam steps through the
+# dynamics (lr 0.05, trust region 0.01), the cheapest wins; one chunk (5 steps) run per replan.
+type: lewam
+plan_mode: grad
+num_proposals: 32
+grad_steps: 50
+grad_lr: 0.05
+grad_tr: 0.01
+grad_all_k: true
+horizon_frac: 0.5

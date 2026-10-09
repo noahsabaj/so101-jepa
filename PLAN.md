@@ -114,6 +114,7 @@ back into the data.
 | A22 | Planner settings found by search on the tuning seeds are better than hand-set ones (horizon 5, 300 samples, 30 kept, 30 rounds, replan every 2 steps). | Random search on tuning seeds 1000-4999 (rule 6), scored by rung success then error; the best setting against the hand-set one on the test seeds. | Open. Debt (rule 11). |
 | A23 | Training settings found by search are better than hand-set ones: loss weights (SIGReg 0.08, inverse dynamics 100, EP-IDM 10), learning rate 5e-4, weight decay 1e-4, batch 128. A learning-rate-free optimizer (schedule-free AdamW or Prodigy) removes the learning rate. | Random search (v13-v20: loss weights; then lr, weight decay, batch), scored by the probe (A15 mark); the optimizer test against the best searched lr. | Open. Loss-weight search started 2026-10-07 (v13-v20). Debt (rule 11). |
 | A24 | Real community SO-100/SO-101 episodes (community-1: 441 datasets, human teleoperation) improve the sim model. | Train on community-1 + sim-2 against sim-2 only; probe on sim-2 val and offline tests on held-out community setups. The data loader handles the camera difference (one 64x64 view against two 64x128 views). | Tested once, not settled. v30 trained on sim-2 plus community-1: 5.68 cm on sim val, with half the steps from community data. The offline tests on held-out community setups and the transfer to the real arm are not done. |
+| A25 | One JEPA trained end to end on next-latent prediction, goal-conditioned action flow matching and SIGReg (LeWAM, Fu, Siebert, Halicki, Balestriero 2026) is better than our world model with CEM: its action head proposes plans and gradient steps through its own dynamics refine them. | v47: LeWAM's code (third_party/lewam, MIT) on sim-2, both views, vision only; rungs 1 and 2 on the test seeds with the action head alone and with the gradient planner, against v6 and v31 with CEM; probe on sim-2 val. | Open. |
 
 ## 6. The ladder
 
@@ -299,6 +300,18 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   (github.com/robo-render/RoboRender-Video-Model, huggingface.co/RoboRender/roborender-video), but
   the code repo has no licence (2026-10-09). Test candidate for A5, against community-1 (A24), once
   the sim rungs pass.
+- LeWAM ([paper](http://minghaofu.com/files/lewam.pdf), [site](https://le-wam.github.io/), [code](https://github.com/MinghaoFu/lewam), MIT; Fu, Siebert, Halicki, Balestriero): one model, a
+  ResNet-18 encoder (one 192-d latent per view, a 32-keypoint spatial softmax) and a mixture-of-transformers
+  predictor with a state stream (next latent from history latents and actions) and an action stream (flow
+  matching of an action chunk, conditioned on a goal latent and the horizon left), trained jointly with SIGReg;
+  history latents never see the clean actions, so the policy cannot copy them. Planning: 32 head proposals
+  imagined to the goal step, refined by Adam through the dynamics, cheapest wins (32x faster than CEM). Ten
+  sim tasks, goal reaching: 93.5% against LeWM's 50.9% (CEM); OGBench Cube (pick and place) 100%; long
+  horizon (100 steps) 46.2% against 10.9%. With the head removed, CEM on its dynamics still beats LeWM on
+  Cube (86% against 64%): action learning shapes the latents (probe R2 +0.2 for joints and actions), as our
+  EP-IDM. Real 7-DoF arm, scene + wrist cameras, 30 trials: pick and place 16/30, as Diffusion Policy (19)
+  and better than pi0.5 (14), at 1/13 of pi0.5's compute. Our closest relative: same objective family
+  (SIGReg), same data format (stable-worldmodel HDF5), same two cameras. A25 tests it here (v47).
 - LeAVJEPA ([2610.06226](https://arxiv.org/abs/2610.06226), Aalto): one early-fusion ViT, LeJEPA
   objective (SIGReg, no EMA, no decoder) on audio, video and both. Modality dropout (a missing input
   is another view of the same event) is what aligns the modalities (ablation); 91.3% ESC-50 frozen.

@@ -1,0 +1,23 @@
+# SO-JEPA v47 (PLAN.md A25): LeWAM's goal-reaching protocol (third_party/lewam configs/train/gr.yaml) on
+# sim-2, both views (scene, wrist), vision only. Run: sh hjepa/lewam_train.sh sojepa-v47
+# Changes from the paper's gr settings, all for our data: 64 px views (upsampled to 96 in the encoder,
+# hjepa/lewam_common.py), both views as goal, H_max 20 (100 steps = 20 s, the reach budget; the paper's
+# 10 x 5 steps is 10 s at our 5 Hz), 20 epochs (2,500 batches each; the paper's 50 are 125k batches).
+defaults:
+  - gr
+  - _self_
+
+data:
+  source: h5
+  load_in_ram: false
+  img_size: 64
+  views: [pixels_scene, pixels_wrist]
+  goal_views: [pixels_scene, pixels_wrist]
+  num_workers: 8
+
+model:
+  H_max: 20
+
+train:
+  epochs: 20
+  warmup_epochs: 2

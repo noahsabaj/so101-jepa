@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hjepa"))
 from env import MAX_ACTION, REST, SO101Env, sample_cube_xy  # noqa: E402
 from expert import CLOSED, DOWN, GRASP_POINT, OPEN, ik, jaw_dir_for  # noqa: E402
-from planner import Planner  # noqa: E402
+from planner import make_planner  # noqa: E402
 from scene import CUBE_HALF  # noqa: E402
 from value import sha256_file  # noqa: E402
 
@@ -167,7 +167,7 @@ def done_seeds(out, run_id):
 def main(task, ckpt, eval_config, first_seed, n, out):
     ident = run_identity(task, ckpt, eval_config)
     done = done_seeds(out, ident["run_id"])
-    planner, env = Planner(ckpt, eval_config), SO101Env(randomize=True)
+    planner, env = make_planner(ckpt, eval_config), SO101Env(randomize=True)
     if Path(out).exists() and Path(out).stat().st_size and not Path(out).read_bytes().endswith(b"\n"):
         with open(out, "a") as fh:  # end a line cut short by a stop, so the next record starts a line
             fh.write("\n")

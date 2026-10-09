@@ -66,6 +66,7 @@ integer versions in the order of registration, with the lineage in the registry.
 | v44 | v4 | 2-level H-JEPA on v4's vision-only recipe (EP-IDM); level 2 of so101_hjepa_l2 (stride 5, history 3). The first H-JEPA config was built on v1's blind recipe and never trained. | sim-2 | 3 epochs, seed 42 | (this commit) | sojepa-v44; sojepa-v44 | Queued (kat-pc) |
 | v45 | v4 | v4's recipe on the community data (real SO-100/SO-101, one 64x64 view; A5, A24). | community-1 | 5 epochs, seed 42 | (this commit) | sojepa-v45; sojepa-v45 | Queued (kat-pc) |
 | v46 | v44 | v44 (2-level, vision only) on the community data. | community-1 | 5 epochs, seed 42 | (this commit) | sojepa-v46; sojepa-v46 | Queued (kat-pc) |
+| v47 | (new) | LeWAM (A25): ResNet-18 encoder per view (64 px upsampled to 96), MoT predictor with a state stream and a goal-conditioned flow-matching action stream, SIGReg; LeWAM's gr protocol (frameskip 5, history 2, H_max 20), both views as goal, vision only. Trained with LeWAM's own code (third_party/lewam). | sim-2 | 20 epochs, seed 42 | (this commit) | lewam/sojepa-v47 | Queued (kat-pc) |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed<seed>/` on the
 training computer (kat-pc: WSL home).

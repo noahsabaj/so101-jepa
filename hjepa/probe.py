@@ -23,7 +23,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from planner import MEAN, STD, Planner
+from planner import MEAN, STD, make_planner
 
 CUBE_HALF = 0.0125  # sim/scene.py
 LAMBDAS = 10.0 ** np.arange(-5, 3)
@@ -32,6 +32,10 @@ TOKEN_EVERY = 3  # frames the attentive probe uses (LeVJEPA: 2 x 196 x 1024 fp16
 
 @torch.no_grad()
 def latents(planner, f, batch=256):
+    if hasattr(planner, "encode_views"):  # LeWAM (hjepa/lewam_planner.py): one latent per view, vision only
+        z = np.concatenate([planner.encode_views(f["pixels"][i:i + batch]).flatten(1).float().cpu().numpy()
+                            for i in range(0, len(f["pixels"]), batch)]).astype(np.float64)
+        return {"pixel": z, "full": z}, None
     level1 = planner.model.get_level(1) if hasattr(planner.model, "get_level") else planner.model
     out = {"pixel": [], "full": [], "tokens": []}
     for i in range(0, len(f["pixels"]), batch):
@@ -119,7 +123,7 @@ def attentive(tokens, y, fit, sel, val, epochs=40):
 
 
 def main(ckpt, eval_config, data, out):
-    planner, f = Planner(ckpt, eval_config), h5py.File(data, "r")
+    planner, f = make_planner(ckpt, eval_config), h5py.File(data, "r")
     ep, cube, gp = f["ep_idx"][:], f["cube_pos"][:].astype(np.float64), f["ee"][:].astype(np.float64)
     eps = np.unique(ep)
     fit, sel = np.isin(ep, eps[: int(0.8 * len(eps))]), np.isin(ep, eps[: int(0.6 * len(eps))])
