@@ -14,11 +14,45 @@ embedding for another number of cameras) keep their fresh initialization. A resu
 import os
 import runpy
 import sys
+import time
 
 import torch
 from omegaconf import OmegaConf
 
 from lewam_common import ROOT, lewam_model
+
+
+def speedups():
+    """CPU-side speed for LeWAM's trainer, whose step is bound by Python dispatch on a loaded node (profiled
+    on an MI355X: the AdamW step was 28% of the main thread). LEWAM_FUSED=0 keeps LeWAM's foreach AdamW.
+    Also prints the seconds per batch every LEWAM_TIMER (default 200) train batches: LeWAM logs per epoch."""
+    if os.environ.get("LEWAM_FUSED", "1") == "1" and torch.cuda.is_available():
+        class FusedAdamW(torch.optim.AdamW):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, fused=True, **kwargs)
+
+            def load_state_dict(self, state_dict):  # a resumed foreach run: its groups and step counters
+                super().load_state_dict(state_dict)
+                for group in self.param_groups:
+                    group["fused"], group["foreach"] = True, None
+                    for p in group["params"]:
+                        s = self.state.get(p, {})
+                        if "step" in s:
+                            s["step"] = s["step"].to(device=p.device, dtype=torch.float32)
+
+        torch.optim.AdamW = FusedAdamW
+    every, clip = int(os.environ.get("LEWAM_TIMER", "200")), torch.nn.utils.clip_grad_norm_
+    state = {"n": 0, "t": time.perf_counter()}
+
+    def timed_clip(*args, **kwargs):  # called once per train batch
+        state["n"] += 1
+        if every and state["n"] % every == 0:
+            now = time.perf_counter()
+            print(f"[lewam] batch {state['n']}: {(now - state['t']) / every:.4f} s/batch", flush=True)
+            state["t"] = now
+        return clip(*args, **kwargs)
+
+    torch.nn.utils.clip_grad_norm_ = timed_clip
 
 
 def warm_start(path):
@@ -42,6 +76,7 @@ if __name__ == "__main__":
     init = OmegaConf.load(config_dir / f"{model}.yaml").get("init_from")
     if init:
         warm_start(ROOT / init)
+    speedups()
     os.environ.setdefault("STABLEWM_HOME", str(ROOT / "data"))
     run_dir = ROOT / "data" / "ckpts" / "lewam" / model / "seed42"
     sys.argv = [sys.argv[0], "--config-dir", str(config_dir), "--config-name", model,

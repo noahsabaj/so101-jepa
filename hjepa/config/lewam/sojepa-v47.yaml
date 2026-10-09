@@ -2,7 +2,9 @@
 # sim-2, both views (scene, wrist), vision only. Run: sh hjepa/lewam_train.sh sojepa-v47
 # Changes from the paper's gr settings, all for our data: 64 px views (upsampled to 96 in the encoder,
 # hjepa/lewam_common.py), both views as goal, H_max 20 (100 steps = 20 s, the reach budget; the paper's
-# 10 x 5 steps is 10 s at our 5 Hz), 20 epochs (2,500 batches each; the paper's 50 are 125k batches).
+# 10 x 5 steps is 10 s at our 5 Hz), 10 epochs (2,500 batches each; the paper's 50 are 125k batches), bf16.
+# On an MI355X an epoch took 766 s in fp32 (GPU-bound): the first run (2026-10-09) did epoch 1 in fp32 with
+# 20 epochs, then resumed with these settings to fit the lease (epoch 1 is the same: warmup).
 defaults:
   - gr
   - _self_
@@ -19,5 +21,6 @@ model:
   H_max: 20
 
 train:
-  epochs: 20
+  epochs: 10
   warmup_epochs: 2
+  precision: bf16

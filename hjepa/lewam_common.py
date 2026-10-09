@@ -36,6 +36,18 @@ def _build_encoder(backbone, output_dim, proj_hidden, size="tiny", img_size=224,
 
 lewam_model.build_encoder = _build_encoder
 
+_forward_mot = lewam_model.LeWAM.forward_mot
+
+
+def _forward_mot_fp32_tokens(self, z_history, *args, **kwargs):
+    # Under bf16 autocast the encoder gives bf16 latents, and forward_mot allocates its token buffer in their
+    # dtype; the embeddings written into it add fp32 parameters (fp32), and the index put fails. An fp32
+    # buffer fixes that; the blocks still run in bf16 under autocast. A no-op in fp32.
+    return _forward_mot(self, z_history.float(), *args, **kwargs)
+
+
+lewam_model.LeWAM.forward_mot = _forward_mot_fp32_tokens
+
 
 def split_views(pixels):
     """(..., 64, 128, 3) frame -> (scene, wrist), each (..., 64, 64, 3)."""
