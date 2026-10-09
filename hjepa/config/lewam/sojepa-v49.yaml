@@ -1,0 +1,10 @@
+# SO-JEPA v49 (PLAN.md A25): v47 for the paper's 50 epochs (gr: 50 epochs, 5 of warmup) instead of 20: does
+# LeWAM gain from training as long as in the paper? ~2 h on an MI355X (bf16, fused AdamW).
+# Run: sh hjepa/kat_jobs.sh v49
+defaults:
+  - sojepa-v47
+  - _self_
+
+train:
+  epochs: 50
+  warmup_epochs: 5

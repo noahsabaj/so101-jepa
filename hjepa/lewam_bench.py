@@ -11,16 +11,20 @@ MODEL: a config in hjepa/config/lewam/. VARIANTS: comma-separated, each a +-join
   tf32                  TF32 matmuls and convs
   cenc                  torch.compile the encoder
   closs                 torch.compile the predictor loss (model.loss)
+  ctrunk                torch.compile the encoder's ResNet trunk only (in place: checkpoint keys unchanged)
+  gtrunk                ctrunk with CUDA graphs (mode reduce-overhead)
   fused                 fused AdamW
   live                  batches from the data loader in the loop (as in training), not cached on the GPU
   workersN              with live: N loader workers (default: the config's)
+  ram                   with live: frames from the uncompressed copy in RAM (data.source decomp, load_in_ram;
+                        LeWAM's scripts/decompress_h5.py writes it), not read from the h5 per sample
+  prof                  also profile 10 steps: the top GPU kernels by their own time
   loader8, loader16 ... the data loader alone, with that many workers (batches per second)
 e.g. fp32,bf16,bf16+bench,bf16+cl+bench,bf16+cenc+fused. Prints one line per variant: s/batch and the epoch
 time it gives (train + val batches of one pass, val at 1/3 of a train batch).
 """
 
 import os
-import runpy
 import sys
 import time
 from contextlib import nullcontext
@@ -29,10 +33,10 @@ from functools import partial
 import torch
 from omegaconf import OmegaConf
 
-from lewam_common import ROOT
+from lewam_common import ROOT, trainer_namespace
 
 os.environ.setdefault("STABLEWM_HOME", str(ROOT / "data"))
-T = runpy.run_path(str(ROOT / "third_party" / "lewam" / "scripts" / "train_lewam.py"), run_name="lewam_bench")
+T = trainer_namespace("lewam_bench", nosync=os.environ.get("LEWAM_NOSYNC", "1") == "1")
 
 
 def load_cfg(model):
@@ -82,6 +86,10 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
         model.encoder.to(memory_format=torch.channels_last)
     if "cenc" in flags:
         model.encoder = torch.compile(model.encoder)
+    if "ctrunk" in flags:
+        model.encoder.trunk.compile()
+    if "gtrunk" in flags:
+        model.encoder.trunk.compile(mode="reduce-overhead")
     if "closs" in flags:
         model.loss = torch.compile(model.loss)
     sigreg = T["SIGReg"]().cuda()
@@ -98,7 +106,7 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
         opt.step()
 
     get = (lambda i: next(live)) if live is not None else (lambda i: batches[i % len(batches)])
-    warm = 15 if ("cenc" in flags or "closs" in flags) else 5
+    warm = 15 if flags & {"cenc", "closs", "ctrunk", "gtrunk"} else 5
     t0 = time.perf_counter()
     for i in range(warm):
         step(get(i))
@@ -108,7 +116,16 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
     for i in range(steps):
         step(get(i))
     torch.cuda.synchronize()
-    return (time.perf_counter() - t0) / steps, t_warm
+    seconds = (time.perf_counter() - t0) / steps
+    if "prof" in flags:
+        from torch.profiler import ProfilerActivity, profile
+        with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA]) as prof:
+            for i in range(10):
+                step(get(i))
+            torch.cuda.synchronize()
+        print(prof.key_averages().table(sort_by="self_device_time_total", row_limit=30, max_name_column_width=70),
+              flush=True)
+    return seconds, t_warm
 
 
 if __name__ == "__main__":
@@ -133,7 +150,10 @@ if __name__ == "__main__":
         live = None
         if "live" in flags:
             workers = next((int(f[7:]) for f in flags if f.startswith("workers")), cfg.data.num_workers)
-            live = iter(make_data(cfg, data, workers)[0])
+            live_cfg = cfg.copy()
+            if "ram" in flags:
+                live_cfg.data.source, live_cfg.data.load_in_ram = "decomp", True
+            live = iter(make_data(live_cfg, data, workers)[0])
         try:
             s, t_warm = bench_model(cfg, flags, batches, actions, steps, live)
             epoch = s * (n_train + n_val / 3)

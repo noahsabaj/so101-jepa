@@ -12,6 +12,7 @@
 #             alone and with its gradient planner (fleet project so101-jepa-lewam: LeWAM is a submodule,
 #             which `fleet submit --git` does not push)
 #   v47b      the same, warm-started from the authors' OGBench Cube checkpoint (downloaded here)
+#   v49       v47 for the paper's 50 epochs
 #   v48, v48b v47, v47b at 224 px (data/so101_train_224.h5: SO101_IMAGE=224 SUFFIX=_224 sh sim/make_dataset.sh)
 . "$(dirname "$0")/../scripts/gpu.sh"
 CKPT_ON="level1.encoder.pixel_encoder.encoder.gradient_checkpointing=true num_workers=8"
@@ -32,7 +33,7 @@ v44)
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh offline &&
     MODELS=sojepa-v44 sh hjepa/run_phase0.sh probe &&
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh closed_loop ;;
-v47|v47b|v48|v48b)
+v47|v47b|v48|v48b|v49)
   M=sojepa-$1 O=outputs/$1 L=data/ckpts/lewam/sojepa-$1/seed42/lewam_best.pt U=data/ckpts/lewam/upstream/lewam-cube
   R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; esac  # v48: the 224 px data, and the sim renders 224
   mkdir -p data/lewam $O $U
@@ -40,6 +41,7 @@ v47|v47b|v48|v48b)
     for f in lewam_best.pt lewam_config.json; do curl -sfL -o $U/$f https://huggingface.co/LeWAM/lewam-cube/resolve/main/$f; done
   fi
   { [ -f data/lewam/so101_train$R.h5 ] || uvr python hjepa/lewam_data.py data/so101_train$R.h5 data/lewam/so101_train$R.h5; } &&
+    { [ -f data/decomp/so101_train$R/pixels_wrist.npy ] || PYTHONPATH=third_party/lewam uvr python \n      third_party/lewam/scripts/decompress_h5.py --dataset_path data/lewam/so101_train$R.h5 --decomp_dir data/decomp \n      --views pixels_scene,pixels_wrist > $O/decompress.log 2>&1; } &&
     uvr python hjepa/lewam_train.py $M data/lewam/so101_train$R.h5 > $O/train.log 2>&1 &&
     uvr python hjepa/probe.py $L so101_lewam_policy data/so101_val$R.h5 outputs/probe_$M.json > $O/probe.log 2>&1 || exit 1
   for cfg in so101_lewam_policy so101_lewam_grad; do
@@ -53,5 +55,5 @@ v47|v47b|v48|v48b)
     done
   done ;;
 step5) TRAIN_ARGS="$CKPT_ON" sh hjepa/run_step5.sh train && sh hjepa/run_step5.sh offline ;;
-*) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5|v47|v47b|v48|v48b" >&2; exit 2 ;;
+*) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5|v47|v47b|v48|v48b|v49" >&2; exit 2 ;;
 esac

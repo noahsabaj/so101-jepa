@@ -12,14 +12,13 @@ embedding for another number of cameras) keep their fresh initialization. A resu
 """
 
 import os
-import runpy
 import sys
 import time
 
 import torch
 from omegaconf import OmegaConf
 
-from lewam_common import ROOT, lewam_model
+from lewam_common import ROOT, lewam_model, trainer_namespace
 
 
 def speedups():
@@ -41,6 +40,20 @@ def speedups():
                             s["step"] = s["step"].to(device=p.device, dtype=torch.float32)
 
         torch.optim.AdamW = FusedAdamW
+    if os.environ.get("LEWAM_COMPILE", "1") == "1" and torch.cuda.is_available():
+        # torch.compile the encoder's ResNet trunk (in place: checkpoint keys unchanged) and the predictor loss:
+        # 15% faster on an MI355X. Not the whole encoder: its random crop (unfold + gather) crashed the compiled
+        # graph on ROCm (illegal memory access).
+        build = lewam_model.build_model
+
+        def build_compiled(cfg):
+            model = build(cfg)
+            if hasattr(model.encoder, "trunk"):
+                model.encoder.trunk.compile()
+            model.loss = torch.compile(model.loss)
+            return model
+
+        lewam_model.build_model = build_compiled
     every, clip = int(os.environ.get("LEWAM_TIMER", "200")), torch.nn.utils.clip_grad_norm_
     state = {"n": 0, "t": time.perf_counter()}
 
@@ -82,4 +95,5 @@ if __name__ == "__main__":
     sys.argv = [sys.argv[0], "--config-dir", str(config_dir), "--config-name", model,
                 f"dataset_path={data}", f"run_name={model}", f"run_dir={run_dir}",
                 f"hydra.run.dir={run_dir}/hydra", *overrides]
-    runpy.run_path(str(ROOT / "third_party" / "lewam" / "scripts" / "train_lewam.py"), run_name="__main__")
+    sys.argv[0] = str(ROOT / "third_party" / "lewam" / "scripts" / "train_lewam.py")
+    trainer_namespace("__main__", nosync=os.environ.get("LEWAM_NOSYNC", "1") == "1")

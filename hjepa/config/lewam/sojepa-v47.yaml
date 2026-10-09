@@ -2,16 +2,18 @@
 # sim-2, both views (scene, wrist), vision only. Run: sh hjepa/lewam_train.sh sojepa-v47
 # Changes from the paper's gr settings, all for our data: 64 px views (upsampled to 96 in the encoder,
 # hjepa/lewam_common.py), both views as goal, H_max 20 (100 steps = 20 s, the reach budget; the paper's
-# 10 x 5 steps is 10 s at our 5 Hz), 10 epochs (2,500 batches each; the paper's 50 are 125k batches), bf16.
-# On an MI355X an epoch took 766 s in fp32 (GPU-bound): the first run (2026-10-09) did epoch 1 in fp32 with
-# 20 epochs, then resumed with these settings to fit the lease (epoch 1 is the same: warmup).
+# 10 x 5 steps is 10 s at our 5 Hz), 20 epochs (2,500 batches each; the paper's 50 are 125k batches), bf16.
+# Speed on an MI355X (hjepa/lewam_bench.py, hjepa/lewam_train.py speedups): fp32 with LeWAM's foreach AdamW
+# took 766 s an epoch, bound by Python dispatch; bf16 and fused AdamW take ~140 s. The first run (2026-10-09)
+# did epoch 1 in fp32, then resumed in bf16 with fused AdamW (the same schedule: epochs 1-2 are warmup), then
+# from epoch 4 or 5 with the compiled trunk and loss, no per-batch syncs and the frames in RAM (~80 s an epoch).
 defaults:
   - gr
   - _self_
 
 data:
-  source: h5
-  load_in_ram: false
+  source: decomp            # frames in RAM from LeWAM's uncompressed copy (hjepa/kat_jobs.sh makes it): 9% faster
+  load_in_ram: true         # than reading the h5 per sample
   img_size: 64
   views: [pixels_scene, pixels_wrist]
   goal_views: [pixels_scene, pixels_wrist]
@@ -21,6 +23,6 @@ model:
   H_max: 20
 
 train:
-  epochs: 10
+  epochs: 20
   warmup_epochs: 2
   precision: bf16
