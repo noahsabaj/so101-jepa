@@ -83,10 +83,23 @@ def warm_start(path):
     lewam_model.build_model = build_and_load
 
 
+def config_value(config_dir, name, key):
+    """`key` of our config `name`, or else of the configs in its defaults (the last one first, as Hydra composes)."""
+    cfg = OmegaConf.load(config_dir / f"{name}.yaml")
+    if key in cfg:
+        return cfg[key]
+    for parent in reversed(cfg.get("defaults", [])):
+        if isinstance(parent, str) and (config_dir / f"{parent}.yaml").exists():
+            value = config_value(config_dir, parent, key)
+            if value is not None:
+                return value
+    return None
+
+
 if __name__ == "__main__":
     model, data, *overrides = sys.argv[1:]
     config_dir = ROOT / "hjepa" / "config" / "lewam"
-    init = OmegaConf.load(config_dir / f"{model}.yaml").get("init_from")
+    init = config_value(config_dir, model, "init_from")
     if init:
         warm_start(ROOT / init)
     speedups()
