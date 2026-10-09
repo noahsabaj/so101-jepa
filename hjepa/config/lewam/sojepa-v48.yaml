@@ -1,14 +1,17 @@
 # SO-JEPA v48 (PLAN.md A25): v47 at 224 px, the paper's image size (sim-2 re-rendered with SO101_IMAGE=224, the
-# same episodes): LeWAM's own encoder as published (no upsampling, 202 px crop). bf16 and 10 epochs to fit one
-# National Compute lease. Run: sh hjepa/kat_jobs.sh v48
+# same episodes): LeWAM's own encoder as published (no upsampling, 202 px crop). bf16, 20 epochs as v47 (~4 min
+# an epoch on an MI355X with the speedups of hjepa/lewam_train.py). One epoch of warmup, not v47's two: the run
+# started with 10 epochs and was resumed with 20 after its first epoch (the same schedule until then).
+# Run: sh hjepa/kat_jobs.sh v48
 defaults:
   - sojepa-v47
   - _self_
 
 data:
   img_size: 224
+  load_in_ram: false        # memory-map the uncompressed copy (108 GB, in the page cache): no copy at start
 
 train:
-  epochs: 10
+  epochs: 20
   warmup_epochs: 1
   precision: bf16

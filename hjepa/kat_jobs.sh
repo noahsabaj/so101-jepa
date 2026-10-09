@@ -34,7 +34,7 @@ v44)
     MODELS=sojepa-v44 sh hjepa/run_phase0.sh probe &&
     RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh closed_loop ;;
 v47|v47b|v48|v48b|v49)
-  M=sojepa-$1 O=outputs/$1 L=data/ckpts/lewam/sojepa-$1/seed42/lewam_best.pt U=data/ckpts/lewam/upstream/lewam-cube
+  M=sojepa-$1 O=outputs/$1 U=data/ckpts/lewam/upstream/lewam-cube
   R=""; case $1 in v48*) R=_224; export SO101_IMAGE=224 ;; esac  # v48: the 224 px data, and the sim renders 224
   mkdir -p data/lewam $O $U
   if [ "${1#v4?}" = b ] && [ ! -f $U/lewam_best.pt ]; then
@@ -45,18 +45,7 @@ v47|v47b|v48|v48b|v49)
       third_party/lewam/scripts/decompress_h5.py --dataset_path data/lewam/so101_train$R.h5 --decomp_dir data/decomp \
       --views pixels_scene,pixels_wrist > $O/decompress.log 2>&1; } &&
     uvr python hjepa/lewam_train.py $M data/lewam/so101_train$R.h5 > $O/train.log 2>&1 &&
-    uvr python hjepa/probe.py $L so101_lewam_policy data/so101_val$R.h5 outputs/probe_$M.json > $O/probe.log 2>&1 || exit 1
-  pids=""  # every rung and planner at once, 10 processes each (the same 100 reach and 50 pick seeds)
-  for cfg in so101_lewam_policy so101_lewam_grad; do
-    for task_n in reach:10 pick:5; do
-      task=${task_n%%:*} n=${task_n##*:}
-      for c in 0 1 2 3 4 5 6 7 8 9; do
-        uvr python sim/closed_loop.py $task $L $cfg $((5000 + c * n)) $n $O/${task}_$cfg.jsonl \
-          > $O/${task}_${cfg}_$c.log 2>&1 & pids="$pids $!"
-      done
-    done
-  done
-  for p in $pids; do wait $p; done ;;
+    sh hjepa/lewam_eval.sh $1 ;;
 step5) TRAIN_ARGS="$CKPT_ON" sh hjepa/run_step5.sh train && sh hjepa/run_step5.sh offline ;;
 *) echo "usage: sh hjepa/kat_jobs.sh check|v42|selfplay|v43|v44|step5|v47|v47b|v48|v48b|v49" >&2; exit 2 ;;
 esac
