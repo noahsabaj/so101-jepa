@@ -1,0 +1,15 @@
+# National Compute node, 8x AMD MI355X, 2026-10-09 ($100 credit, ~4 h): sh scripts/run_lanes.sh hjepa/lanes/nc-2026-10-09.txt
+# with OMP_NUM_THREADS=2. The kat-pc queue's v42, self-play 1c, v43, v44 and step5 move here; LeWAM v47, v47b (A25) too.
+# Lane 0: v47 (LeWAM from scratch): convert sim-2 to LeWAM's layout, train, probe, rungs 1 and 2 (head alone, gradient planner).
+0 | sh hjepa/kat_jobs.sh v47
+# Lane 1: v47b (warm start from the authors' Cube checkpoint), after lane 0 has converted the data.
+1 | sh scripts/wait_for data/lewam/so101_train.h5 0 && sh hjepa/kat_jobs.sh v47b
+# Lane 2: v42 (the new default recipe), its probe and jump test.
+2 | MODELS=sojepa-v42 sh hjepa/run_phase0.sh train && MODELS=sojepa-v42 sh hjepa/run_phase0.sh probe && sh scripts/uvr python hjepa/jump_test.py data/ckpts/so101/sojepa-v42/seed42/sojepa-v42_object.ckpt data/so101_val.h5 outputs/jump_sojepa-v42.json 1,2,3,5,10 300
+# Lane 3: v44 (2-level H-JEPA, vision only): train, offline tests, probe, rungs 1 and 2.
+3 | MODELS=sojepa-v44 sh hjepa/run_phase0.sh train && RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh offline && MODELS=sojepa-v44 sh hjepa/run_phase0.sh probe && RUNS=sojepa-v44:so101_l2 sh hjepa/run_phase0.sh closed_loop
+# Lanes 4-5: v45 and v46 on the community data (uploaded while the other lanes run), offline tests on the held-out setups.
+4 | sh scripts/wait_for data/community_test.h5 4 && MODELS=sojepa-v45 sh hjepa/run_step5.sh train && MODELS=sojepa-v45 sh hjepa/run_step5.sh offline
+5 | sh scripts/wait_for data/community_test.h5 5 && MODELS=sojepa-v46 sh hjepa/run_step5.sh train && MODELS=sojepa-v46 sh hjepa/run_step5.sh offline
+# Lane 6: self-play round 1c on GPUs 6 and 7 (v21, CEM, 10 processes per GPU, 100 min), merged into so101_train_play_r1; then v43 on it, its probe.
+6 | STOP_AT="$(date -d '+100 minutes' '+%F %T')" GPUS="6 7" sh hjepa/self_improve.sh data/ckpts/so101/sojepa-v21/seed42/sojepa-v21_object.ckpt so101_train_play so101_train_play_r1 400 20 3300000 && MODELS=sojepa-v43 sh hjepa/run_phase0.sh train && MODELS=sojepa-v43 sh hjepa/run_phase0.sh probe
