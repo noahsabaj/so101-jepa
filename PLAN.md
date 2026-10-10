@@ -315,6 +315,17 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   observation (the cube is a few pixels), K 32 keeps 64% of the variance, and the yaw target is the raw angle
   (the cube has 90-degree symmetry: use sin/cos of 4 x yaw; its R2 is 0 in every basis). No further use now;
   a re-test fits LeWAM's 192-d keypoint latent on OGBench Cube (A27 test bed).
+  Rerun (node, 2026-10-10, 10 settings in 6 min; outputs/dsreg2 and outputs/lewam_dsreg in
+  so101-jepa-node-data): observations 4x and 16x finer (pool 4 and 2), K 16-64, yaw as sin/cos of
+  4 x yaw, and an oracle check (the factor basis from the ridge readout, the rest of the space rotated
+  by DSReg's fit). The answer is the same in all 10 settings. MCC PCA / DSReg / oracle: SO-101 v6, v31,
+  v36 at K32 pool 4: 0.48 / 0.48 / 0.66, 0.44 / 0.44 / 0.67, 0.49 / 0.47 / 0.68; v6 at K16, K64 and pool 2:
+  DSReg 0.44-0.46, oracle 0.62-0.72. LeWAM's released Cube model (pool 14 and 7, K 16/32/64): PCA
+  0.28-0.37, DSReg 0.27-0.44, oracle 0.32-0.63. The cause: in every setting DSReg's L1 criterion is
+  lower at its own rotation than at the factor basis (v6 K32: 10,983 against 11,305; Cube K32: 1,883
+  against 1,966), and a fit that starts at the factor basis leaves it (MCC falls to the PCA level). So
+  for these encoders the sparsest-Jacobian basis is not the factor basis, also with finer observations.
+  Closed: no more DSReg work.
 - RoboRender ([2610.09254](https://arxiv.org/abs/2610.09254), Stanford, Li Fei-Fei, Jiajun Wu):
   Wan2.1-T2V-1.3B fine-tuned on ~130k real robot clips (AgiBot-World, DROID) at 416x240 renders
   photoreal video of a sim trajectory, conditioned on its depth video, a robot mask video and a
