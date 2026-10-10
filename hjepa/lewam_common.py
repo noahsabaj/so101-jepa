@@ -67,6 +67,29 @@ def _build_attn_mask_nosync(self, history_pad, goal_keep=None):
 lewam_model.LeWAM._build_attn_mask = _build_attn_mask_nosync
 
 TRAINER = ROOT / "third_party" / "lewam" / "scripts" / "train_lewam.py"
+SPLIT = "for starts in (possible_starts[n_val:], possible_starts[:n_val])"
+
+
+def episode_split(possible_starts, n_val, ep_starts):
+    """LeWAM's train/val split, or with LEWAM_DATA_FRACTION=F (data scaling, v53) a split by episode: val is a
+    fixed 10% of the episodes, train the start points of a fraction F of the other episodes, repeated to the
+    length of the full train set so that every F gets the same epochs, steps and val passes. LeWAM's own split
+    is by start point: its val frames come from training episodes."""
+    fraction = float(os.environ.get("LEWAM_DATA_FRACTION", "0"))
+    if not fraction:
+        return possible_starts[n_val:], possible_starts[:n_val]
+    episodes = torch.unique(ep_starts)
+    episodes = episodes[torch.randperm(len(episodes), generator=torch.Generator().manual_seed(0))]
+    held, pool = episodes[:len(episodes) // 10], episodes[len(episodes) // 10:]
+    keep = pool[:max(1, round(fraction * len(pool)))]
+    episode_of = ep_starts[possible_starts]
+    full = possible_starts[torch.isin(episode_of, pool)]
+    train = possible_starts[torch.isin(episode_of, keep)]
+    train = train.repeat(-(-len(full) // len(train)))[:len(full)]
+    val = possible_starts[torch.isin(episode_of, held)]
+    print(f"[lewam] data fraction {fraction}: {len(keep)} of {len(pool)} train episodes ({len(held)} held out "
+          f"for val), {len(train)} train starts (repeated), {len(val)} val starts", flush=True)
+    return train, val
 
 
 def trainer_namespace(name, nosync=True):
@@ -86,7 +109,9 @@ def trainer_namespace(name, nosync=True):
             src = src.replace(line, f"{lhs} = float({rhs})")
         if torch.cuda.is_available():
             utils._IMG_MEAN, utils._IMG_STD = utils._IMG_MEAN.cuda(), utils._IMG_STD.cuda()
-    namespace = {"__name__": name, "__file__": str(TRAINER)}
+    assert SPLIT in src, SPLIT
+    src = src.replace(SPLIT, "for starts in _episode_split(possible_starts, n_val, ep_starts)")
+    namespace = {"__name__": name, "__file__": str(TRAINER), "_episode_split": episode_split}
     exec(compile(src, str(TRAINER), "exec"), namespace)
     return namespace
 

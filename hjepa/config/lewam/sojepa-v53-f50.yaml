@@ -1,0 +1,4 @@
+# SO-JEPA v53 at 50% of the train episodes (hjepa/lewam_scaling.sh sets LEWAM_DATA_FRACTION).
+defaults:
+  - sojepa-v53
+  - _self_

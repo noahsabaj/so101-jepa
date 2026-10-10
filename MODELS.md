@@ -75,6 +75,7 @@ integer versions in the order of registration, with the lineage in the registry.
 | v50b | v50 | v50 warm-started from the Cube checkpoint: does warm start need real 224 px (v48b), or only the checkpoint's map size? | sim-2 | 15 epochs, 1 of warmup, seed 42, bf16 | (this commit) | lewam/sojepa-v50b | Training (National Compute, 2026-10-09) |
 | v51 | v47b | v47b for 35 epochs: does more training help the warm-started head in closed loop? | sim-2 | 35 epochs, 2 of warmup, seed 42, bf16 | (this commit) | lewam/sojepa-v51 | Training (National Compute, 2026-10-09) |
 | v47c | v47b | v47b with seed 43 (its replicate): is the reach gap between v47b (4.8 cm) and v49 (6.7 cm) larger than the seed noise? | sim-2 | as v47b (20 epochs), seed 43 | (this commit) | lewam/sojepa-v47c | Training (National Compute, 2026-10-09) |
+| v53 | v47b | Data scaling: v47b's recipe at a fixed budget (8 epochs of the full train set) on 1/8, 1/4, 1/2 and all of the train episodes (repeated to the same steps; sojepa-v53-f12 ... -f100); val on a held-out 10% of the episodes for all, then the offline action check on the val set. | sim-2 (fractions) | 8 epochs, 1 of warmup, seed 42, bf16; all 4 on one GPU | (this commit) | lewam/sojepa-v53-f* | Training (National Compute, 2026-10-10) |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed<seed>/` on the
 training computer (kat-pc: WSL home).
