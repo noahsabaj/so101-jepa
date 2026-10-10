@@ -320,3 +320,13 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   For us: low priority while the stack is vision only. If a second input enters (servo current, A4;
   contact sound), one encoder with input dropout is the way, and the model still runs on vision alone.
   The same dropout over our two views (scene, wrist) would let the model run with one camera.
+- Mulligan ([2610.05882](https://arxiv.org/abs/2610.05882), Ankile, Song, Finn et al.; [site](https://mulligan.page/)):
+  supervised deployment (operator resets and takes over on failure) with the start states chosen, not
+  uniform: replay the last round's failures, then fill the least-covered start states (farthest point).
+  A critic (IQL) trained on all data, failures included, picks the best of N action chunks from a
+  diffusion policy. Franka (DROID), 3 real tasks, 2,550 blind trials: +10 to +34 points over HG-DAgger.
+  For us: (1) sim data rounds for the SO-101 (and LeWAM tests, A27 data scale) can start from the
+  start states where the policy failed, at no cost in sim. (2) Phase 1: the same protocol for the real
+  arm's data (leader-arm takeover). (3) A learned critic over sampled chunks from our action head is a
+  learned replacement for the latent-distance score of LeWAM's best-of-N, but it is search; Noah's
+  target is the action head alone, so only as a teacher to distill into it (their future work too).
