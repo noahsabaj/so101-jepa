@@ -330,3 +330,23 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   arm's data (leader-arm takeover). (3) A learned critic over sampled chunks from our action head is a
   learned replacement for the latent-distance score of LeWAM's best-of-N, but it is search; Noah's
   target is the action head alone, so only as a teacher to distill into it (their future work too).
+- SGS, "A Balanced Data Diet" ([2610.12465](https://arxiv.org/abs/2610.12465), Zhang, Guaman Castro, Yin, Gupta,
+  Boots et al., UW and NVIDIA; [site](https://sgs-rl.github.io/)): PPO with up to 2^20 parallel envs from a fixed
+  set of start configurations (32,768 for manipulation) that are sampled by success, not uniformly. Each start
+  keeps its last 100 outcomes; weight = Beta-shaped kernel of its success rate (mode t 0.5, concentration 1 for
+  manipulation), softmax at temperature 2, with a floor, so no start goes to 0. One sparse reward per domain, no
+  demonstrations. Franka nut-and-bolt at 1M envs: 70% (uniform 6%, PLR 5%); easy insertions: the same as
+  uniform at scale. Start families (OmniReset): near the goal, grasped, reaching; without the near-goal starts,
+  rod insertion stays at 0%. A point-cloud teacher distilled (DAgger) into an RGB student (2 cameras, ResNet-18):
+  real UR5e, zero-shot, gear 94%, rod 61%, nut 37.5%. A teacher whose starts and success test accept every
+  symmetric pose (what the cameras cannot tell apart): student 98%, against 55%. Pad friction 100 made
+  impossible grasps succeed in sim (ours: 0.7 to 1.2, checked 2026-10-10). Cost: 36 to 335 GPU-h a run.
+  For us: (1) rung 2 (0 of 50, the cube never lifted): the expert data has every phase (sim/collect.py), but
+  the policy's own episodes (self-play, closed-loop rounds) all start from rest and end before a grasp, so
+  on-policy data never reaches lift, carry and place. Start some of them from a grasp and near the goal (cube
+  held above the goal place), as their start families.
+  (2) Choose each round's start seeds by their success rate with this kernel (Mulligan's failure replay is a
+  special case); no cost in sim. (3) A27 step 3, untested idea: the same kernel over training samples (by
+  per-sample action loss) for LeWAM training. (4) If a sim teacher with privileged state ever makes data for the
+  action head, its success test must ignore what the cameras cannot see (the cube's 90-degree symmetry).
+  Not taken: model-free RL at their scale (compute).
