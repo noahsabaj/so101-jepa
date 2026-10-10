@@ -94,13 +94,109 @@ def episode_split(possible_starts, n_val, ep_starts):
     return train, val
 
 
+class Ddp:
+    """Data-parallel training of LeWAM's trainer under torchrun (PLAN.md A27: the paper's 50 epochs on Cube or Push-T
+    take ~9 h on one MI355X, ~1.2 h on eight). Each rank trains on its own 1/W of every epoch with data.batch_size
+    samples, so the batch is W x data.batch_size; the gradients are averaged over the ranks before the clip, the
+    epoch's losses before the log, the best-checkpoint choice and the collapse check. Only rank 0 prints and saves.
+    The model has no batch statistics (GroupNorm), and SIGReg sees each rank's own batch, as on one GPU."""
+
+    def __init__(self):
+        import torch.distributed as dist
+
+        self.dist, self.world = dist, int(os.environ.get("WORLD_SIZE", "1"))
+        self.rank = int(os.environ.get("RANK", "0"))
+        self.on, self.checked = self.world > 1, False
+        if self.on and not dist.is_initialized():
+            # device "cuda" is then this rank's GPU (a test with more ranks than GPUs shares them, over gloo)
+            torch.cuda.set_device(int(os.environ["LOCAL_RANK"]) % torch.cuda.device_count())
+            dist.init_process_group(os.environ.get("LEWAM_DDP_BACKEND", "nccl"))
+
+    def sampler(self, dataset, num_samples):
+        if not self.on:
+            return torch.utils.data.RandomSampler(dataset, num_samples=num_samples)
+        return _ShardSampler(len(dataset), num_samples // self.world, self.rank, self.world)
+
+    def grads(self, optimizer):
+        if not self.on:
+            return
+        grads = [p.grad for g in optimizer.param_groups for p in g["params"] if p.grad is not None]
+        flat = torch._utils._flatten_dense_tensors(grads)
+        self.dist.all_reduce(flat)
+        flat /= self.world
+        for grad, avg in zip(grads, torch._utils._unflatten_dense_tensors(flat, grads)):
+            grad.copy_(avg)
+
+    def stats(self, store, n):
+        """The sums of the logged losses and of the sample counts over the ranks."""
+        if not self.on:
+            return store, n
+        keys = sorted(store)
+        t = torch.tensor([float(store[k]) for k in keys] + [float(n)], device="cuda", dtype=torch.float64)
+        self.dist.all_reduce(t)
+        if not self.checked:  # once an epoch (stats() runs for train, then val): the weights must stay the same
+            in_sync = self.in_sync()
+            if self.rank == 0:
+                print(f"[ddp] {self.world} ranks, weights {'in sync' if in_sync else 'OUT OF SYNC'}", flush=True)
+        self.checked = not self.checked
+        return dict(zip(keys, t[:-1].tolist())), int(t[-1].item())
+
+    def in_sync(self):
+        total = torch.stack([p.detach().double().sum() for p in self.model.parameters()]).sum()
+        lo, hi = total.clone(), total.clone()
+        self.dist.all_reduce(lo, self.dist.ReduceOp.MIN)
+        self.dist.all_reduce(hi, self.dist.ReduceOp.MAX)
+        return bool(hi - lo <= 1e-6 * max(1.0, abs(float(total))))
+
+    def broadcast(self, model, seed):
+        """Rank 0's initial weights on every rank, then a different random stream per rank (dropout, goals)."""
+        self.model = model
+        if self.on:
+            for tensor in list(model.parameters()) + list(model.buffers()):
+                self.dist.broadcast(tensor.data, 0)
+            torch.manual_seed(seed + self.rank)
+
+
+class _ShardSampler(torch.utils.data.Sampler):
+    """One random permutation per epoch, the same on every rank (the same seed); each rank takes every W-th index."""
+
+    def __init__(self, n, num_samples, rank, world):
+        self.n, self.num_samples, self.rank, self.world, self.epoch = n, num_samples, rank, world, 0
+
+    def __len__(self):
+        return self.num_samples
+
+    def __iter__(self):
+        g = torch.Generator().manual_seed(1234 + self.epoch)
+        self.epoch += 1
+        perm = torch.randperm(self.n, generator=g)
+        if self.n < self.num_samples * self.world:
+            perm = perm.repeat(-(-self.num_samples * self.world // self.n))
+        return iter(perm[self.rank::self.world][:self.num_samples].tolist())
+
+
+DDP_PATCHES = [  # (LeWAM's line, the line in its place); each must occur exactly once
+    ("sampler=RandomSampler(dataset, num_samples=num_samples)", "sampler=_ddp.sampler(dataset, num_samples)"),
+    ("    model = build_model(lewam_cfg).to(device)\n",
+     "    model = build_model(lewam_cfg).to(device)\n    _ddp.broadcast(model, cfg.seed)\n"),
+    ("            loss.backward()\n", "            loss.backward()\n            _ddp.grads(optimizer)\n"),
+    ("        val_action_loss = ", "        train_stats, train_n = _ddp.stats(train_stats, train_n)\n"
+     "        val_stats, val_n = _ddp.stats(val_stats, val_n)\n        val_action_loss = "),
+]
+
+
 def trainer_namespace(name, nosync=True):
     """Run LeWAM's train_lewam.py as module `name` ("__main__" trains) and return its globals. nosync: its
     run_batch keeps the logged losses on the GPU (.detach(), not .item(): five CPU-GPU syncs a batch), read
-    once an epoch; the normalization constants live on the GPU (a pageable copy syncs the stream)."""
+    once an epoch; the normalization constants live on the GPU (a pageable copy syncs the stream). Under torchrun
+    (WORLD_SIZE > 1) it trains data-parallel (Ddp)."""
     import lewam.train.utils as utils
 
+    ddp = Ddp()
     src = TRAINER.read_text()
+    for old, new in DDP_PATCHES:
+        assert src.count(old) == 1, old
+        src = src.replace(old, new)
     if nosync:
         a, b = src.index("def run_batch("), src.index("def accumulate(")
         src = src[:a] + src[a:b].replace(".item()", ".detach().float()") + src[b:]
@@ -113,7 +209,13 @@ def trainer_namespace(name, nosync=True):
             utils._IMG_MEAN, utils._IMG_STD = utils._IMG_MEAN.cuda(), utils._IMG_STD.cuda()
     assert SPLIT in src, SPLIT
     src = src.replace(SPLIT, "for starts in _episode_split(possible_starts, n_val, ep_starts)")
-    namespace = {"__name__": name, "__file__": str(TRAINER), "_episode_split": episode_split}
+    namespace = {"__name__": name, "__file__": str(TRAINER), "_episode_split": episode_split, "_ddp": ddp}
+    if ddp.rank > 0:  # only rank 0 logs and writes files (checkpoints, configs)
+        import pathlib
+
+        namespace["print"] = lambda *args, **kwargs: None
+        torch.save = lambda *args, **kwargs: None
+        pathlib.Path.write_text = lambda *args, **kwargs: None
     exec(compile(src, str(TRAINER), "exec"), namespace)
     return namespace
 

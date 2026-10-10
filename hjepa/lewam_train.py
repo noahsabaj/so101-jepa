@@ -9,6 +9,8 @@ lewam_full.pt for resuming).
 Warm start: `init_from: PATH` in the MODEL config loads a LeWAM checkpoint (e.g. one of the authors') before
 training; tensors whose shape differs (the action input and output for another action size, the view
 embedding for another number of cameras) keep their fresh initialization. A resumed run loads its own state.
+Data-parallel on W GPUs (hjepa/lewam_common.py Ddp; the batch is then W x train.batch_size):
+    torchrun --nproc_per_node W hjepa/lewam_train.py MODEL DATA.h5 [key=value ...]
 """
 
 import os
@@ -59,7 +61,7 @@ def speedups():
 
     def timed_clip(*args, **kwargs):  # called once per train batch
         state["n"] += 1
-        if every and state["n"] % every == 0:
+        if every and state["n"] % every == 0 and os.environ.get("RANK", "0") == "0":
             now = time.perf_counter()
             print(f"[lewam] batch {state['n']}: {(now - state['t']) / every:.4f} s/batch", flush=True)
             state["t"] = now
@@ -105,8 +107,9 @@ if __name__ == "__main__":
     speedups()
     os.environ.setdefault("STABLEWM_HOME", str(ROOT / "data"))
     run_dir = ROOT / "data" / "ckpts" / "lewam" / model / "seed42"
+    rank_suffix = "" if os.environ.get("RANK", "0") == "0" else os.environ["RANK"]  # torchrun: one hydra dir a rank
     sys.argv = [sys.argv[0], "--config-dir", str(config_dir), "--config-name", model,
                 f"dataset_path={data}", f"run_name={model}", f"run_dir={run_dir}",
-                f"hydra.run.dir={run_dir}/hydra", *overrides]
+                f"hydra.run.dir={run_dir}/hydra{rank_suffix}", *overrides]
     sys.argv[0] = str(ROOT / "third_party" / "lewam" / "scripts" / "train_lewam.py")
     trainer_namespace("__main__", nosync=os.environ.get("LEWAM_NOSYNC", "1") == "1")

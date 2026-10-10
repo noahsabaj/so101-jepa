@@ -1,0 +1,17 @@
+# LeWAM reproduction (PLAN.md A27): the paper's goal-reaching runs (third_party/lewam configs/train/gr.yaml: 50
+# epochs, 5 of warmup, batch 128, lr 1.5e-4, 224 px, one camera), as data-parallel runs on 8 GPUs
+# (torchrun, hjepa/lewam_common.py Ddp), with LeWAM's own train/val split (LEWAM_SPLIT=frame).
+# Changes, all for speed: batch 128 a GPU (1024 in all, 8x fewer steps) with the lr x sqrt(8); bf16; the frames
+# memory-mapped from the uncompressed copy (one copy in the page cache for all ranks, not one in RAM a rank).
+# Run: hjepa/lewam_repro_node.sh.
+defaults:
+  - gr
+  - _self_
+
+data:
+  load_in_ram: false
+  num_workers: 12
+
+train:
+  lr: 4.24e-4
+  precision: bf16
