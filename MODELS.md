@@ -74,6 +74,7 @@ integer versions in the order of registration, with the lineage in the registry.
 | v50 | v47 | v47 with the 64 px views upsampled to 224 (LEWAM_UPSAMPLE=224): v48's 7 x 7 map without its 224 px detail. | sim-2 | 20 epochs, 1 of warmup, seed 42, bf16 | a9bad6c | lewam/sojepa-v50 | Stopped after 4 epochs: val act stuck at 1.12, as v48 from scratch (1.11 at epoch 7); GPU given to v50b. From scratch, the 7 x 7 map trains worse than the 3 x 3 (v47: 0.79). |
 | v50b | v50 | v50 warm-started from the Cube checkpoint: does warm start need real 224 px (v48b), or only the checkpoint's map size? | sim-2 | 15 epochs, 1 of warmup, seed 42, bf16 | (this commit) | lewam/sojepa-v50b | Training (National Compute, 2026-10-09) |
 | v51 | v47b | v47b for 35 epochs: does more training help the warm-started head in closed loop? | sim-2 | 35 epochs, 2 of warmup, seed 42, bf16 | (this commit) | lewam/sojepa-v51 | Training (National Compute, 2026-10-09) |
+| v47c | v47b | v47b with seed 43 (its replicate): is the reach gap between v47b (4.8 cm) and v49 (6.7 cm) larger than the seed noise? | sim-2 | as v47b (20 epochs), seed 43 | (this commit) | lewam/sojepa-v47c | Training (National Compute, 2026-10-09) |
 
 Configs are in `hjepa/config/train/`. Checkpoints are in `data/ckpts/so101/<name>/seed<seed>/` on the
 training computer (kat-pc: WSL home).

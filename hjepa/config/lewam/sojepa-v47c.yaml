@@ -1,0 +1,8 @@
+# SO-JEPA v47c (PLAN.md A25): v47b with seed 43, its replicate. v47b (warm start, 20 epochs) reached a reach median
+# of 4.8 cm, v49 (from scratch, 50 epochs) 6.7 cm: is that gap larger than the seed noise?
+# Run: sh hjepa/kat_jobs.sh v47c
+defaults:
+  - sojepa-v47b
+  - _self_
+
+seed: 43
