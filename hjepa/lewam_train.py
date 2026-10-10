@@ -44,18 +44,37 @@ def speedups():
         torch.optim.AdamW = FusedAdamW
     if os.environ.get("LEWAM_COMPILE", "1") == "1" and torch.cuda.is_available():
         # torch.compile the encoder after its crop as one graph (lewam_common.after_crop; checkpoint keys
-        # unchanged) and the predictor loss. Not the crop: compiled (unfold + gather), it crashed on ROCm
-        # (illegal memory access).
-        import torch._dynamo
+        # unchanged), SIGReg and the predictor loss. Not the crop: compiled (unfold + gather), it crashed on ROCm
+        # (illegal memory access). LEWAM_GRAPHS=1: all three also as CUDA graphs (mode reduce-overhead): the CPU
+        # time a step fell 26 -> 5 ms at batch 8 on noah-pc (~1,000 kernel launches a step; the loss alone ~700).
+        # Off by default: on Kaggle's T4 at batch 16 graphs broke training (epoch-1 train state loss 0.59 against
+        # 0.014 eager; jobs 1010-122303-3n, 1010-131012-8c), at batch 8 they matched eager; cause not found yet
+        # (hjepa/jobs/graphs_*.sh).
+        import torch._dynamo as dynamo  # not `import torch._dynamo`: that makes torch a local name here
 
-        torch._dynamo.config.cache_size_limit = 32  # one graph per batch shape (train, val, last batch) and mode
-        AFTER_CROP["fn"] = torch.compile(after_crop, fullgraph=True, dynamic=False)
-        COMPILED["on"] = True  # SIGReg (lewam_common.fast)
+        dynamo.config.cache_size_limit = 32  # one graph per batch shape (train, val, last batch) and mode
+        graphs = os.environ.get("LEWAM_GRAPHS", "0")  # 1 | 0 | a comma list of enc, sig, loss (debug)
+        parts = {"enc", "sig", "loss"} if graphs == "1" else set() if graphs == "0" else set(graphs.split(","))
+        if os.environ.get("LEWAM_FALLBACK_RANDOM") == "1":
+            import torch._inductor.config as inductor_config
+            inductor_config.fallback_random = True
+        part_mode = {k: "reduce-overhead" if k in parts else None for k in ("enc", "sig", "loss")}
+        mode = part_mode["enc"]
+        encode = torch.compile(after_crop, fullgraph=True, dynamic=False, mode=mode)
+        # a CUDA graph's output lives in its pool until the graph's next run: the copy keeps the latents valid
+        # (without it, validation read latents a later run had overwritten)
+        AFTER_CROP["fn"] = (lambda encoder, pixels: encode(encoder, pixels).clone()) if mode else encode
+        COMPILED["on"], COMPILED["mode"] = True, part_mode["sig"]  # SIGReg (lewam_common.fast)
+        mode = part_mode["loss"]
+        print(f"[lewam] graphs on: {sorted(parts)}, fallback_random {os.environ.get('LEWAM_FALLBACK_RANDOM') == '1'}",
+              flush=True)
         build = lewam_model.build_model
 
         def build_compiled(cfg):
             model = build(cfg)
-            model.loss = torch.compile(model.loss)
+            loss = torch.compile(model.loss, mode=mode)
+            # the copies again: the trainer keeps the loss tensors past the next batch (its val sums read them later)
+            model.loss = (lambda *args, **kwargs: tuple(t.clone() for t in loss(*args, **kwargs))) if mode else loss
             return model
 
         lewam_model.build_model = build_compiled

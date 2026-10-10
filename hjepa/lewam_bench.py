@@ -18,6 +18,7 @@ MODEL: a config in hjepa/config/lewam/. VARIANTS: comma-separated, each a +-join
   csig                  torch.compile the SIGReg loss (lewam_common.fast), as training does
   cpu                   also time the CPU side of a step alone (the step's launch time on an idle GPU: the limit
                         on a node whose CPU is slower than its GPU)
+  gsig                  csig with CUDA graphs (mode reduce-overhead)
   sync                  after the warm-up, warn with a stack trace at every CPU-GPU sync (torch sync debug mode)
   fused                 fused AdamW
   live                  batches from the data loader in the loop (as in training), not cached on the GPU
@@ -94,9 +95,11 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
     model = T["build_model"](T["model_config"](cfg, actions.shape[1])).cuda()
     AFTER_CROP["fn"] = after_crop
     if flags & {"wenc", "genc"}:
-        AFTER_CROP["fn"] = torch.compile(after_crop, fullgraph=True, dynamic=False,
-                                         mode="reduce-overhead" if "genc" in flags else None)
-    COMPILED["on"], COMPILED["fns"] = "csig" in flags, {}
+        encode = torch.compile(after_crop, fullgraph=True, dynamic=False,
+                               mode="reduce-overhead" if "genc" in flags else None)
+        AFTER_CROP["fn"] = (lambda encoder, pixels: encode(encoder, pixels).clone()) if "genc" in flags else encode
+    COMPILED["on"], COMPILED["fns"] = bool(flags & {"csig", "gsig"}), {}
+    COMPILED["mode"] = "reduce-overhead" if "gsig" in flags else None
     if "cl" in flags:
         model.encoder.to(memory_format=torch.channels_last)
     if "cenc" in flags:
@@ -126,7 +129,7 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
         opt.step()
 
     get = (lambda i: next(live)) if live is not None else (lambda i: batches[i % len(batches)])
-    warm = 15 if flags & {"cenc", "closs", "ctrunk", "gtrunk", "gloss", "aloss", "wenc", "genc", "csig"} else 5
+    warm = 15 if flags & {"cenc", "closs", "ctrunk", "gtrunk", "gloss", "aloss", "wenc", "genc", "csig", "gsig"} else 5
     t0 = time.perf_counter()
     for i in range(warm):
         step(get(i))

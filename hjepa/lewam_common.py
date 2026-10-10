@@ -59,6 +59,22 @@ def _resnet_forward(self, pixels):
 ResNetEncoder.forward = _resnet_forward
 
 
+def _attn_mask(self, history_pad, goal_keep=None):
+    """LeWAM._build_attn_mask (the same mask) without its branches on the data (history_pad.any(),
+    goal_keep.all()): each split the compiled loss and synced the stream. A key_pad of all False changes nothing."""
+    B = history_pad.shape[0]
+    key_pad = torch.zeros(B, self.n_tokens, dtype=torch.bool, device=history_pad.device)
+    key_pad[:, self.token_indices["hist"]] = history_pad.repeat(1, self.num_views)
+    if goal_keep is not None:
+        key_pad[:, self.token_indices["goal"]] = ~goal_keep[:, None]
+    attends = self.attends[None] & ~key_pad[:, None, :]
+    mask = torch.zeros(B, self.n_tokens, self.n_tokens, device=history_pad.device)
+    return mask.masked_fill(~attends, float("-inf"))[:, None]
+
+
+lewam_model.LeWAM._build_attn_mask = _attn_mask
+
+
 def _build_encoder(backbone, output_dim, proj_hidden, size="tiny", img_size=224, checkpoint=None):
     if backbone == "resnet18dp" and img_size < 224:
         return SmallImageResNet(output_dim, proj_hidden, group_norm=True, crop_size=round(UPSAMPLE * 202 / 224))
@@ -204,7 +220,7 @@ class _ShardSampler(torch.utils.data.Sampler):
         return iter(perm[self.rank::self.world][:self.num_samples].tolist())
 
 
-COMPILED = {"on": False, "fns": {}}  # lewam_train.speedups turns it on
+COMPILED = {"on": False, "fns": {}, "mode": None}  # lewam_train.speedups turns it on; mode: torch.compile's
 
 
 def fast(fn):
@@ -212,7 +228,7 @@ def fast(fn):
     if not COMPILED["on"]:
         return fn
     if fn not in COMPILED["fns"]:
-        COMPILED["fns"][fn] = torch.compile(fn, dynamic=False)
+        COMPILED["fns"][fn] = torch.compile(fn, dynamic=False, mode=COMPILED["mode"])
     return COMPILED["fns"][fn]
 
 
