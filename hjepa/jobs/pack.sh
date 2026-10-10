@@ -9,6 +9,6 @@ cp -r third_party/lewam "$D/third_party/"
 rm -rf "$D/third_party/lewam/.git" "$D/third_party/lewam/assets"
 cp -r hjepa/config/lewam "$D/hjepa/config/"
 cp -r hjepa/jobs "$D/hjepa/"
-cp hjepa/lewam_common.py hjepa/lewam_train.py hjepa/lewam_bench.py hjepa/lewam_decompress.py hjepa/lewam_repro_env.sh hjepa/lewam_repro_node.sh \
+cp hjepa/lewam_common.py hjepa/lewam_train.py hjepa/lewam_bench.py hjepa/lewam_plus.py hjepa/lewam_eval_plus.py hjepa/lewam_plus_node.sh hjepa/lewam_decompress.py hjepa/lewam_repro_env.sh hjepa/lewam_repro_node.sh \
     hjepa/lewam_repro_table.py "$D/hjepa/"
 du -sh "$D"
