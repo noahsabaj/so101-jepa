@@ -1,0 +1,8 @@
+# SO-JEPA v54c (PLAN.md A25): v54 (batch 512) for 5 epochs: about the wall-clock time of v53-f100's 4 epochs at
+# batch 128 (67 s against ~85 s an epoch, alone on a GPU). Faster to the same held-out val (0.882)?
+defaults:
+  - sojepa-v54
+  - _self_
+
+train:
+  epochs: 5

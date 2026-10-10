@@ -1,0 +1,8 @@
+# SO-JEPA v54d (PLAN.md A25): v54 (batch 512) with the SIGReg weight / 4 (0.01): SIGReg's statistic grows with the
+# batch (reg 3.6 at 128, 6.1 at 256, 8.8 at 512), so a larger batch also strengthens it. Is that v54's gap?
+defaults:
+  - sojepa-v54
+  - _self_
+
+train:
+  w_reg: 0.01
