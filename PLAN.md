@@ -350,3 +350,10 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   per-sample action loss) for LeWAM training. (4) If a sim teacher with privileged state ever makes data for the
   action head, its success test must ignore what the cameras cannot see (the cube's 90-degree symmetry).
   Not taken: model-free RL at their scale (compute).
+- EVEWorld ([2610.03374](https://arxiv.org/abs/2610.03374)): a 2B pixel video-diffusion world model (GigaWorld-0,
+  image + text to video, no actions) fine-tuned 250 steps on 92 GR1 videos. Its "model laziness" (the object
+  count changes in a rollout: duplicates, disappears) falls from 12.7% to 1.6% of rollouts with two losses that
+  need GroundingDINO and an LLM in training: restore a clean clip from one with a pasted extra object, and
+  match the object's features across adjacent frames. No policy or robot result. For us: nothing new; the
+  failure is the one A16 tests in latent space (the predictor keeps the cube when held), and the fixes are
+  hand-made supervision (rule 11).
