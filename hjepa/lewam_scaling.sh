@@ -1,9 +1,9 @@
 #!/bin/sh
 # LeWAM data scaling (SO-JEPA v53, PLAN.md A25): v53 on a fraction of the train episodes, all fractions at once on
 # this GPU, then the offline action check of each on the val episodes. Results in outputs/v53-fNN/.
-#   sh hjepa/lewam_scaling.sh [FRACTIONS]   (default "0.125 0.25 0.5 1")
+#   sh hjepa/lewam_scaling.sh [FRACTIONS]   (default "0.125 0.5 1")
 . "$(dirname "$0")/../scripts/gpu.sh"
-FRACTIONS=${1:-0.125 0.25 0.5 1}
+FRACTIONS=${1:-0.125 0.5 1}
 name() { echo v53-f$(awk "BEGIN{print int($1 * 100)}"); }
 pids=""
 for f in $FRACTIONS; do

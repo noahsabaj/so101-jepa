@@ -1,6 +1,6 @@
 # SO-JEPA v53 (PLAN.md A25): data scaling of LeWAM. v47b's recipe (warm start from the authors' Cube checkpoint,
-# 64 px views upsampled to 96) at a fixed compute budget, 8 epochs of the full train set, trained on a fraction F of
-# the train episodes (repeated to the same steps), F = 1/8, 1/4, 1/2, 1 (sojepa-v53-f12 ... -f100). Val: a held-out
+# 64 px views upsampled to 96) at a fixed compute budget, 4 epochs of the full train set, trained on a fraction F of
+# the train episodes (repeated to the same steps), F = 1/8, 1/2, 1 (sojepa-v53-f12, -f50, -f100; -f25 too). Val: a held-out
 # 10% of the episodes for every F (LEWAM_DATA_FRACTION in hjepa/lewam_common.py); then hjepa/lewam_check.py on
 # the val episodes. How fast does the head improve with more data? Run: sh hjepa/lewam_scaling.sh
 defaults:
@@ -8,5 +8,5 @@ defaults:
   - _self_
 
 train:
-  epochs: 8
+  epochs: 4
   warmup_epochs: 1
