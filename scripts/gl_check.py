@@ -47,7 +47,7 @@ def main():
     for name, extra in CONFIGS.items():
         env = {**os.environ, **extra}
         r = subprocess.run([sys.executable, __file__, "child", name], env=env, capture_output=True, text=True, timeout=600)
-        print("\n".join(l for l in (r.stdout + r.stderr).splitlines() if name in l or "Error" in l or "error" in l)[-1500:], flush=True)
+        print("\n".join(s for s in (r.stdout + r.stderr).splitlines() if name in s or "Error" in s or "error" in s)[-1500:], flush=True)
     ref = f"{OUT}/egl_llvmpipe.npy"
     if os.path.exists(ref):
         a = np.load(ref)

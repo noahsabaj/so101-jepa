@@ -123,6 +123,19 @@ def test_value_head_bound_to_its_checkpoint():
         assert w
 
 
+def test_time_step_model_needs_a_stride_config():
+    """offline_v31/_v36 (2026-10-08) gave a time-step model (61-d actions) so101_flat's 6-d actions: refused now."""
+    planner.check_action_dim(6, 1, "so101_flat")
+    planner.check_action_dim(61, 10, "so101_flat_cem_dt")
+    planner.check_action_dim(None, 1, "so101_flat")  # a run config without action_dim: not checked
+    for dim, kmax in ((61, 1), (6, 10), (31, 10)):
+        try:
+            planner.check_action_dim(dim, kmax, "x")
+            raise AssertionError(f"{dim}-d actions accepted with max_stride {kmax}")
+        except ValueError:
+            pass
+
+
 def test_nan_costs_do_not_rank_perfect():
     """Finding 2: with NaN costs every comparison was false and the expert's rank 0 (perfect)."""
     assert offline.rank_of_expert(np.array([np.nan, 1.0, 2.0])) == 1.0

@@ -9,7 +9,7 @@ angles (no vision: a baseline) and none (the mean: the spread of the target). Ta
 the grasp point, the cube relative to the grasp point, and the cube on the frames where it rests on
 the table (there, only vision can show it). Also: the share of each latent's variance that is
 within episodes (near 0: the latent is mostly constant per episode, e.g. light and colours).
-Token latents (SO-JEPA v6 and later) also get the attentive probe of hjepa/levjepa_probe.py (one
+Token latents (SO-JEPA v6 and later) also get an attentive probe (as in A2's frozen-encoder probe: one
 learned query attends over the patch tokens; every 3rd frame), the fair readout for tokens: where
 the cube is lies in which token, which a linear map of all tokens reads badly.
 """

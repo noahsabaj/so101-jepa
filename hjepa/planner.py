@@ -79,6 +79,16 @@ class StrideEmbed(torch.nn.Module):
         return torch.cat([a, pad, a.new_full((*a.shape[:-1], 1), self.k / self.kmax)], -1)
 
 
+def check_action_dim(action_dim, kmax, eval_config, dim=6):
+    """The model's action size (level1.wm.action_dim) must match the eval config's: a time-step model takes
+    6 * max_stride + 1 per step, so it needs a config with max_stride (offline_v31 and _v36 of 2026-10-08
+    crashed on 6-d actions with so101_flat)."""
+    want = dim * kmax + 1 if kmax > 1 else dim
+    if action_dim is not None and int(action_dim) != want:
+        raise ValueError(f"the model takes {action_dim}-d actions, but eval config {eval_config} gives {want}-d "
+                         f"(max_stride {kmax}): a time-step model needs a config with max_stride (so101_flat_cem_dt)")
+
+
 class Planner:
     def __init__(self, ckpt, eval_config, seed=1234, overrides=()):
         cfg = OmegaConf.load(ROOT / "hjepa/config/eval" / f"{eval_config}.yaml")
@@ -103,6 +113,7 @@ class Planner:
             if bad:
                 raise ValueError(f"plan_steps={self.plan_steps} is not a multiple of strides {bad}")
         train_cfg = OmegaConf.load(Path(ckpt).parent / "config.yaml")
+        check_action_dim(OmegaConf.select(train_cfg, "level1.wm.action_dim"), self.kmax, eval_config)
         self.history = int(cfg.get("plan_history", train_cfg.level1.wm.history_size))
         level1 = self.model.get_level(1) if hasattr(self.model, "get_level") else self.model
         level1.plan_history = self.history

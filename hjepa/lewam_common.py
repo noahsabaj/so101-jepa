@@ -48,7 +48,7 @@ AFTER_CROP = {"fn": after_crop}  # lewam_train.speedups puts the compiled functi
 
 # Inductor's GroupNorm backward is wrong in torch 2.11 at our sizes, on CUDA and ROCm: compiled, every GroupNorm
 # weight gradient of the encoder was off by 0.6 (relative, against float64) at 512 images on an MI355X, and from
-# 48 images on a T4 the gradients changed from call to call (eager 0.005; hjepa/jobs/graphs_ref.py, 2026-10-10).
+# 48 images on a T4 the gradients changed from call to call (eager 0.005; PLAN.md results log, 2026-10-10).
 # That was the "CUDA graphs" gap: graphs only fixed the memory each call read. So when the encoder is compiled
 # (GN_ATEN on), GroupNorm runs as ATen's own kernels, the eager ones, in an op Inductor does not look into.
 GN_ATEN = {"on": False}
