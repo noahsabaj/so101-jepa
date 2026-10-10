@@ -1,0 +1,10 @@
+# SO-JEPA v54 (PLAN.md A25): v53 at all episodes (v53-f100: held-out val 0.882) with batch 512 and the learning rate
+# scaled by sqrt(4) (3e-4): 24% less time an epoch (hjepa/lewam_bench.py bs512). Does it keep the quality?
+# Run: sh scripts/uvr python hjepa/lewam_train.py sojepa-v54 data/lewam/so101_train.h5
+defaults:
+  - sojepa-v53
+  - _self_
+
+train:
+  batch_size: 512
+  lr: 3.0e-4
