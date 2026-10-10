@@ -2,7 +2,7 @@
 # sim-2, both views (scene, wrist), vision only. Run: sh hjepa/lewam_train.sh sojepa-v47
 # Changes from the paper's gr settings, all for our data: 64 px views (upsampled to 96 in the encoder,
 # hjepa/lewam_common.py), both views as goal, H_max 20 (100 steps = 20 s, the reach budget; the paper's
-# 10 x 5 steps is 10 s at our 5 Hz), 20 epochs (2,500 batches each; the paper's 50 are 125k batches), bf16.
+# 10 x 5 steps is 10 s at our 5 Hz), 20 epochs (2,500 batches each; the paper's 50 on Cube are ~700k: ~2.0 M frames, 5.6x ours), bf16.
 # Speed on an MI355X (hjepa/lewam_bench.py, hjepa/lewam_train.py speedups): fp32 with LeWAM's foreach AdamW
 # took 766 s an epoch, bound by Python dispatch; bf16 and fused AdamW take ~140 s. The first run (2026-10-09)
 # did epoch 1 in fp32, then resumed in bf16 with fused AdamW (the same schedule: epochs 1-2 are warmup), then
