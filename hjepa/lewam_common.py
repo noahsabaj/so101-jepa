@@ -30,6 +30,35 @@ class SmallImageResNet(ResNetEncoder):
         return super().features(pixels)
 
 
+def after_crop(encoder, pixels):
+    """LeWAM's ResNetEncoder after its crop: trunk, 32-keypoint spatial softmax (its features()) and projector.
+    One function, so that torch.compile (lewam_train.speedups) makes it one graph: compiling the trunk module alone
+    compiled each residual block apart (8 recompiles; past the limit the rest ran eager, GroupNorm included)."""
+    fmap = encoder.kp_conv(encoder.trunk(pixels))
+    N, K, H, W = fmap.shape
+    attn = fmap.flatten(2).softmax(-1)
+    xs = torch.linspace(-1.0, 1.0, W, device=fmap.device)
+    ys = torch.linspace(-1.0, 1.0, H, device=fmap.device)
+    keypoints = torch.cat([(attn * xs.repeat(H)).sum(-1), (attn * ys.repeat_interleave(W)).sum(-1)], dim=-1)
+    return encoder.projector(keypoints)
+
+
+AFTER_CROP = {"fn": after_crop}  # lewam_train.speedups puts the compiled function here
+
+
+def _resnet_forward(self, pixels):
+    """ResNetEncoder.forward (the same math): our upsample, LeWAM's crop (eager: compiled, it crashed on ROCm), then
+    after_crop."""
+    if isinstance(self, SmallImageResNet):
+        pixels = F.interpolate(pixels, size=(UPSAMPLE, UPSAMPLE), mode="bilinear", align_corners=False)
+    if self.crop_size:
+        pixels = self.crop(pixels)
+    return AFTER_CROP["fn"](self, pixels)
+
+
+ResNetEncoder.forward = _resnet_forward
+
+
 def _build_encoder(backbone, output_dim, proj_hidden, size="tiny", img_size=224, checkpoint=None):
     if backbone == "resnet18dp" and img_size < 224:
         return SmallImageResNet(output_dim, proj_hidden, group_norm=True, crop_size=round(UPSAMPLE * 202 / 224))
@@ -175,7 +204,36 @@ class _ShardSampler(torch.utils.data.Sampler):
         return iter(perm[self.rank::self.world][:self.num_samples].tolist())
 
 
-DDP_PATCHES = [  # (LeWAM's line, the line in its place); each must occur exactly once
+COMPILED = {"on": False, "fns": {}}  # lewam_train.speedups turns it on
+
+
+def fast(fn):
+    """fn compiled once (one graph per input shape) when compiling is on, else fn itself."""
+    if not COMPILED["on"]:
+        return fn
+    if fn not in COMPILED["fns"]:
+        COMPILED["fns"][fn] = torch.compile(fn, dynamic=False)
+    return COMPILED["fns"][fn]
+
+
+GOAL_INDEX = {}
+
+
+def goal_index(views):
+    """The goal views as a GPU index, made once: a Python list as an index is copied to the GPU each batch,
+    and that copy syncs the stream."""
+    if tuple(views) not in GOAL_INDEX:
+        GOAL_INDEX[tuple(views)] = torch.tensor(views, device="cuda")
+    return GOAL_INDEX[tuple(views)]
+
+
+PATCHES = [  # (LeWAM's line, the line in its place); each must occur exactly once
+    # speed: SIGReg's latent groups compiled as one graph (fast), not ~200 small kernels
+    ("loss_reg = sigreg_loss(", "loss_reg = _fast(sigreg_loss)("),
+    # LeWAM bug: lewam_full.pt is saved before this epoch's best_val update, so a resumed run takes an old
+    # best_val and may overwrite lewam_best.pt with a worse epoch
+    ("epoch=epoch, best_val=best_val", "epoch=epoch, best_val=min(best_val, val_action_loss)"),
+    # data-parallel training (Ddp)
     ("sampler=RandomSampler(dataset, num_samples=num_samples)", "sampler=_ddp.sampler(dataset, num_samples)"),
     ("    model = build_model(lewam_cfg).to(device)\n",
      "    model = build_model(lewam_cfg).to(device)\n    _ddp.broadcast(model, cfg.seed)\n"),
@@ -188,13 +246,13 @@ DDP_PATCHES = [  # (LeWAM's line, the line in its place); each must occur exactl
 def trainer_namespace(name, nosync=True):
     """Run LeWAM's train_lewam.py as module `name` ("__main__" trains) and return its globals. nosync: its
     run_batch keeps the logged losses on the GPU (.detach(), not .item(): five CPU-GPU syncs a batch), read
-    once an epoch; the normalization constants live on the GPU (a pageable copy syncs the stream). Under torchrun
-    (WORLD_SIZE > 1) it trains data-parallel (Ddp)."""
+    once an epoch; the normalization constants and the goal-view index live on the GPU (a pageable copy syncs
+    the stream). Under torchrun (WORLD_SIZE > 1) it trains data-parallel (Ddp)."""
     import lewam.train.utils as utils
 
     ddp = Ddp()
     src = TRAINER.read_text()
-    for old, new in DDP_PATCHES:
+    for old, new in PATCHES:
         assert src.count(old) == 1, old
         src = src.replace(old, new)
     if nosync:
@@ -207,9 +265,14 @@ def trainer_namespace(name, nosync=True):
             src = src.replace(line, f"{lhs} = float({rhs})")
         if torch.cuda.is_available():
             utils._IMG_MEAN, utils._IMG_STD = utils._IMG_MEAN.cuda(), utils._IMG_STD.cuda()
+            line = "goal_frames[:, model.goal_view_indices]"
+            assert src.count(line) == 1, line
+            src = src.replace(line, "goal_frames[:, _goal_index(model.goal_view_indices)]")
     assert SPLIT in src, SPLIT
     src = src.replace(SPLIT, "for starts in _episode_split(possible_starts, n_val, ep_starts)")
-    namespace = {"__name__": name, "__file__": str(TRAINER), "_episode_split": episode_split, "_ddp": ddp}
+    namespace = {"__name__": name, "__file__": str(TRAINER), "_episode_split": episode_split, "_ddp": ddp,
+                 "_fast": fast,
+                 "_goal_index": goal_index}
     if ddp.rank > 0:  # only rank 0 logs and writes files (checkpoints, configs)
         import pathlib
 

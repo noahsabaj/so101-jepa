@@ -13,6 +13,12 @@ MODEL: a config in hjepa/config/lewam/. VARIANTS: comma-separated, each a +-join
   closs                 torch.compile the predictor loss (model.loss)
   ctrunk                torch.compile the encoder's ResNet trunk only (in place: checkpoint keys unchanged)
   gtrunk                ctrunk with CUDA graphs (mode reduce-overhead)
+  wenc                  torch.compile the encoder after its crop as one graph (lewam_common.after_crop), as training does
+  genc                  wenc with CUDA graphs (mode reduce-overhead)
+  csig                  torch.compile the SIGReg loss (lewam_common.fast), as training does
+  cpu                   also time the CPU side of a step alone (the step's launch time on an idle GPU: the limit
+                        on a node whose CPU is slower than its GPU)
+  sync                  after the warm-up, warn with a stack trace at every CPU-GPU sync (torch sync debug mode)
   fused                 fused AdamW
   live                  batches from the data loader in the loop (as in training), not cached on the GPU
   workersN              with live: N loader workers (default: the config's)
@@ -37,7 +43,7 @@ from functools import partial
 import torch
 from omegaconf import OmegaConf
 
-from lewam_common import ROOT, trainer_namespace
+from lewam_common import AFTER_CROP, COMPILED, ROOT, after_crop, trainer_namespace
 
 os.environ.setdefault("STABLEWM_HOME", str(ROOT / "data"))
 T = trainer_namespace("lewam_bench", nosync=os.environ.get("LEWAM_NOSYNC", "1") == "1")
@@ -86,6 +92,11 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
     torch.backends.cudnn.benchmark = "bench" in flags
     torch.backends.cuda.matmul.allow_tf32 = torch.backends.cudnn.allow_tf32 = "tf32" in flags
     model = T["build_model"](T["model_config"](cfg, actions.shape[1])).cuda()
+    AFTER_CROP["fn"] = after_crop
+    if flags & {"wenc", "genc"}:
+        AFTER_CROP["fn"] = torch.compile(after_crop, fullgraph=True, dynamic=False,
+                                         mode="reduce-overhead" if "genc" in flags else None)
+    COMPILED["on"], COMPILED["fns"] = "csig" in flags, {}
     if "cl" in flags:
         model.encoder.to(memory_format=torch.channels_last)
     if "cenc" in flags:
@@ -115,17 +126,28 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
         opt.step()
 
     get = (lambda i: next(live)) if live is not None else (lambda i: batches[i % len(batches)])
-    warm = 15 if flags & {"cenc", "closs", "ctrunk", "gtrunk", "gloss", "aloss"} else 5
+    warm = 15 if flags & {"cenc", "closs", "ctrunk", "gtrunk", "gloss", "aloss", "wenc", "genc", "csig"} else 5
     t0 = time.perf_counter()
     for i in range(warm):
         step(get(i))
     torch.cuda.synchronize()
     t_warm = time.perf_counter() - t0
+    if "sync" in flags:
+        torch.cuda.set_sync_debug_mode("warn")
     t0 = time.perf_counter()
     for i in range(steps):
         step(get(i))
     torch.cuda.synchronize()
     seconds = (time.perf_counter() - t0) / steps
+    if "cpu" in flags:
+        launch = []
+        for i in range(5):
+            torch.cuda.synchronize()
+            t0 = time.perf_counter()
+            step(get(i))
+            launch.append(time.perf_counter() - t0)
+        torch.cuda.synchronize()
+        print(f"[bench] CPU side {sorted(launch)[2]:.4f} s/batch (median of 5)", flush=True)
     if "prof" in flags:
         from torch.profiler import ProfilerActivity, profile
         with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA]) as prof:

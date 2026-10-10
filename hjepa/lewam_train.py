@@ -20,7 +20,7 @@ import time
 import torch
 from omegaconf import OmegaConf
 
-from lewam_common import ROOT, lewam_model, trainer_namespace
+from lewam_common import AFTER_CROP, COMPILED, ROOT, after_crop, lewam_model, trainer_namespace
 
 
 def speedups():
@@ -43,15 +43,18 @@ def speedups():
 
         torch.optim.AdamW = FusedAdamW
     if os.environ.get("LEWAM_COMPILE", "1") == "1" and torch.cuda.is_available():
-        # torch.compile the encoder's ResNet trunk (in place: checkpoint keys unchanged) and the predictor loss:
-        # 15% faster on an MI355X. Not the whole encoder: its random crop (unfold + gather) crashed the compiled
-        # graph on ROCm (illegal memory access).
+        # torch.compile the encoder after its crop as one graph (lewam_common.after_crop; checkpoint keys
+        # unchanged) and the predictor loss. Not the crop: compiled (unfold + gather), it crashed on ROCm
+        # (illegal memory access).
+        import torch._dynamo
+
+        torch._dynamo.config.cache_size_limit = 32  # one graph per batch shape (train, val, last batch) and mode
+        AFTER_CROP["fn"] = torch.compile(after_crop, fullgraph=True, dynamic=False)
+        COMPILED["on"] = True  # SIGReg (lewam_common.fast)
         build = lewam_model.build_model
 
         def build_compiled(cfg):
             model = build(cfg)
-            if hasattr(model.encoder, "trunk"):
-                model.encoder.trunk.compile()
             model.loss = torch.compile(model.loss)
             return model
 

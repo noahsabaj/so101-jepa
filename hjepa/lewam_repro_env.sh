@@ -15,5 +15,5 @@ uv pip install -q -p "$VENV/bin/python" --index-strategy unsafe-best-match \
     "torch==2.11.0+$GPU" "torchvision==0.26.0+$GPU" \
     "stable-worldmodel[format,train]==0.1.1" "stable-pretraining==0.1.7" "timm>=1.0.20" pygame pymunk shapely \
     "ogbench==1.2.1" "mujoco==3.8.1" "dm_control==1.0.41" "robosuite==1.5.1" egl_probe termcolor tensorboardX psutil \
-    hdf5plugin hydra-core "datasets==5.1.0" "huggingface_hub==1.33.0"  # as in uv.lock: a newer hub drags datasets back to 1.x
+    hdf5plugin zstandard hydra-core "datasets==5.1.0" "huggingface_hub==1.33.0"  # as in uv.lock: a newer hub drags datasets back to 1.x
 "$VENV/bin/python" -c "import torch, mujoco, ogbench, stable_worldmodel; print('torch', torch.__version__, 'gpu', torch.cuda.is_available(), 'mujoco', mujoco.__version__)"
