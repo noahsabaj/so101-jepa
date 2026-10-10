@@ -51,7 +51,7 @@ train() {  # TASK: Cube or Push-T from scratch, data-parallel on all GPUs, LeWAM
         "$H/datasets/$1.h5" "data.decomp_dir=$H/decomp" > "$O/train_$1.log" 2>&1
 }
 
-one() {  # RUN TASK GPU MODE SEED: one eval_lewam.py run of 50 episodes
+one() {  # RUN TASK GPU MODE SEED: one eval_lewam.py run of 50 episodes (LEWAM_EVAL_SCRIPT=hjepa/lewam_eval_plus.py: plus models)
     case $4 in
         policy) args="eval.mode=lewam_policy" ;;
         best_of_k) args="eval.mode=lewam_plan eval.plan_mode=best_of_k" ;;
@@ -59,7 +59,7 @@ one() {  # RUN TASK GPU MODE SEED: one eval_lewam.py run of 50 episodes
     esac
     log="$O/eval_$(basename "$1")_$2_$4_$5.log"
     grep -q "RESULTS" "$log" 2>/dev/null && return
-    HIP_VISIBLE_DEVICES=$3 CUDA_VISIBLE_DEVICES=$3 $PY third_party/lewam/scripts/eval_lewam.py --config-name "$2"         "policy=$1" "seed=$5" $args "hydra.run.dir=$O/hydra/$(basename "$1")-$2-$4-$5" > "$log" 2>&1
+    HIP_VISIBLE_DEVICES=$3 CUDA_VISIBLE_DEVICES=$3 $PY "${LEWAM_EVAL_SCRIPT:-third_party/lewam/scripts/eval_lewam.py}" --config-name "$2"         "policy=$1" "seed=$5" $args "hydra.run.dir=$O/hydra/$(basename "$1")-$2-$4-$5" > "$log" 2>&1
 }
 
 eval_() {  # RUN TASK [GPU]: every mode and seed of the paper's table, PAR (default 9) at a time on one GPU

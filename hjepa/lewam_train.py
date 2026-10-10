@@ -20,7 +20,7 @@ import time
 import torch
 from omegaconf import OmegaConf
 
-from lewam_common import AFTER_CROP, COMPILED, ROOT, after_crop, lewam_model, trainer_namespace
+from lewam_common import AFTER_CROP, COMPILED, GN_ATEN, ROOT, after_crop, lewam_model, trainer_namespace
 
 
 def speedups():
@@ -42,14 +42,14 @@ def speedups():
                             s["step"] = s["step"].to(device=p.device, dtype=torch.float32)
 
         torch.optim.AdamW = FusedAdamW
-    if os.environ.get("LEWAM_COMPILE", "1") == "1" and torch.cuda.is_available():
+    if os.environ.get("LEWAM_COMPILE", "0") == "1" and torch.cuda.is_available():
         # torch.compile the encoder after its crop as one graph (lewam_common.after_crop; checkpoint keys
         # unchanged), SIGReg and the predictor loss. Not the crop: compiled (unfold + gather), it crashed on ROCm
         # (illegal memory access). LEWAM_GRAPHS=1: all three also as CUDA graphs (mode reduce-overhead): the CPU
         # time a step fell 26 -> 5 ms at batch 8 on noah-pc (~1,000 kernel launches a step; the loss alone ~700).
-        # Off by default: on Kaggle's T4 at batch 16 graphs broke training (epoch-1 train state loss 0.59 against
-        # 0.014 eager; jobs 1010-122303-3n, 1010-131012-8c), at batch 8 they matched eager; cause not found yet
-        # (hjepa/jobs/graphs_*.sh).
+        # Inductor's own GroupNorm backward gave wrong gradients (lewam_common.GN_ATEN): GroupNorm runs as ATen's
+        # kernels when compiled. Off by default until the whole compiled step matches float64
+        # (hjepa/jobs/step_ref.py); runs before 2026-10-10 15:10 EDT with the encoder compiled are suspect.
         import torch._dynamo as dynamo  # not `import torch._dynamo`: that makes torch a local name here
 
         dynamo.config.cache_size_limit = 32  # one graph per batch shape (train, val, last batch) and mode
@@ -60,6 +60,7 @@ def speedups():
             inductor_config.fallback_random = True
         part_mode = {k: "reduce-overhead" if k in parts else None for k in ("enc", "sig", "loss")}
         mode = part_mode["enc"]
+        GN_ATEN["on"] = True
         encode = torch.compile(after_crop, fullgraph=True, dynamic=False, mode=mode)
         # a CUDA graph's output lives in its pool until the graph's next run: the copy keeps the latents valid
         # (without it, validation read latents a later run had overwritten)

@@ -1,0 +1,33 @@
+# PLAN.md A27 step 3, the test bed (hjepa/lewam_plus.py): the paper's goal-reaching run (repro-gr) with the episode
+# split (lewam_common.episode_split, the default) and every plus change off. Each test run turns one on:
+#   A17 plus.proprio_keys=[proprio] (Push-T: agent x, y, vx, vy)
+#       plus.proprio_keys=[proprio_joint_pos,proprio_gripper_opening] (Cube: 6 joints + gripper)
+#   A26 plus.hier=true   A28 plus.distill=true   A29 plus.roll_k=5   A32 plus.shortcut=true
+#   A30 train.p_drop_goal=0.1   A31 model.state_head=flow   A33 model.encoder_backbone=vit model.encoder_size=tiny
+defaults:
+  - repro-gr
+  - _self_
+
+plus:
+  proprio_keys: []
+  proprio_dims: null        # columns of the concatenated keys; null = all
+  p_drop_proprio: 0.3
+  roll_k: 1                 # chunks of the rollout loss; 1 = off
+  roll_frac: 0.25           # share of each batch it sees (their frames are read only for them)
+  w_roll: 1.0
+  shortcut: false
+  shortcut_m: 32            # the finest step 1/M; trained steps 2/M .. 1, so 1..M/2 Euler steps
+  shortcut_frac: 0.25
+  w_shortcut: 1.0
+  distill: false
+  distill_k: 16             # policy rollouts per sample, as eval best_of_k with fewer proposals
+  distill_steps: 5          # chunks per rollout (the eval planners' 5)
+  distill_every: 4          # train steps
+  distill_frac: 0.25
+  distill_from: 10          # epoch
+  w_distill: 1.0
+  hier: false
+  hier_far: 30              # farthest training goal, chunks
+  hier_sub: 5               # subgoal distance, chunks
+  hier_frac: 0.5
+  w_hier: 1.0

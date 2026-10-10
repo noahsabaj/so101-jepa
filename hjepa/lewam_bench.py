@@ -44,7 +44,7 @@ from functools import partial
 import torch
 from omegaconf import OmegaConf
 
-from lewam_common import AFTER_CROP, COMPILED, ROOT, after_crop, trainer_namespace
+from lewam_common import AFTER_CROP, COMPILED, GN_ATEN, ROOT, after_crop, trainer_namespace
 
 os.environ.setdefault("STABLEWM_HOME", str(ROOT / "data"))
 T = trainer_namespace("lewam_bench", nosync=os.environ.get("LEWAM_NOSYNC", "1") == "1")
@@ -94,6 +94,7 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
     torch.backends.cuda.matmul.allow_tf32 = torch.backends.cudnn.allow_tf32 = "tf32" in flags
     model = T["build_model"](T["model_config"](cfg, actions.shape[1])).cuda()
     AFTER_CROP["fn"] = after_crop
+    GN_ATEN["on"] = bool(flags & {"wenc", "genc", "cenc"}) and "gninductor" not in flags
     if flags & {"wenc", "genc"}:
         encode = torch.compile(after_crop, fullgraph=True, dynamic=False,
                                mode="reduce-overhead" if "genc" in flags else None)

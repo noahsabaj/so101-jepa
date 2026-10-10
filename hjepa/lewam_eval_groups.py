@@ -320,6 +320,11 @@ if __name__ == "__main__":
         total = torch.cuda.get_device_properties(0).total_memory
         torch.cuda.set_per_process_memory_fraction(float(os.environ["LEWAM_EVAL_VRAM_GB"]) * 2**30 / total)
     sys.path.insert(0, str(SCRIPT.parent))
+    if os.environ.get("LEWAM_PLUS") == "1":  # lewam_plus checkpoints and eval settings (hjepa/lewam_eval_plus.py)
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import lewam_eval_plus
+
+        lewam_eval_plus.install()
     if os.environ.get("LEWAM_EVAL_RUNS"):
         run_many(os.environ["LEWAM_EVAL_RUNS"].split(), sys.argv[2:])
     else:

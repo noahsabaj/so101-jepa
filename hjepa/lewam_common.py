@@ -46,6 +46,69 @@ def after_crop(encoder, pixels):
 AFTER_CROP = {"fn": after_crop}  # lewam_train.speedups puts the compiled function here
 
 
+# Inductor's GroupNorm backward is wrong in torch 2.11 at our sizes, on CUDA and ROCm: compiled, every GroupNorm
+# weight gradient of the encoder was off by 0.6 (relative, against float64) at 512 images on an MI355X, and from
+# 48 images on a T4 the gradients changed from call to call (eager 0.005; hjepa/jobs/graphs_ref.py, 2026-10-10).
+# That was the "CUDA graphs" gap: graphs only fixed the memory each call read. So when the encoder is compiled
+# (GN_ATEN on), GroupNorm runs as ATen's own kernels, the eager ones, in an op Inductor does not look into.
+GN_ATEN = {"on": False}
+
+
+@torch.library.custom_op("lewam::group_norm", mutates_args=())
+def _gn_op(x: torch.Tensor, weight: torch.Tensor, bias: torch.Tensor, groups: int,
+           eps: float) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    x = x.contiguous()
+    N, C = x.shape[:2]
+    return torch.ops.aten.native_group_norm(x, weight, bias, N, C, x.numel() // (N * C), groups, eps)
+
+
+@_gn_op.register_fake
+def _(x, weight, bias, groups, eps):
+    N = x.shape[0]
+    return torch.empty_like(x, memory_format=torch.contiguous_format), x.new_empty(N, groups), x.new_empty(N, groups)
+
+
+@torch.library.custom_op("lewam::group_norm_backward", mutates_args=())
+def _gn_backward_op(dy: torch.Tensor, x: torch.Tensor, mean: torch.Tensor, rstd: torch.Tensor, weight: torch.Tensor,
+                    groups: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    x = x.contiguous()
+    N, C = x.shape[:2]
+    return torch.ops.aten.native_group_norm_backward(dy.contiguous(), x, mean, rstd, weight, N, C,
+                                                     x.numel() // (N * C), groups, [True, True, True])
+
+
+@_gn_backward_op.register_fake
+def _(dy, x, mean, rstd, weight, groups):
+    return torch.empty_like(x, memory_format=torch.contiguous_format), torch.empty_like(weight), torch.empty_like(weight)
+
+
+def _gn_setup(ctx, inputs, output):
+    x, weight, _, groups, _ = inputs
+    ctx.save_for_backward(x, output[1], output[2], weight)
+    ctx.groups = groups
+
+
+def _gn_backward(ctx, dy, _dmean, _drstd):
+    x, mean, rstd, weight = ctx.saved_tensors
+    dx, dw, db = _gn_backward_op(dy, x, mean, rstd, weight, ctx.groups)
+    return dx, dw, db, None, None
+
+
+_gn_op.register_autograd(_gn_backward, setup_context=_gn_setup)
+_group_norm_forward = torch.nn.GroupNorm.forward
+
+
+def _group_norm(self, x):
+    if not GN_ATEN["on"] or not x.is_cuda or self.weight is None:
+        return _group_norm_forward(self, x)
+    if torch.is_autocast_enabled():
+        x = x.float()  # as autocast runs group_norm: in fp32
+    return _gn_op(x, self.weight, self.bias, self.num_groups, self.eps)[0]
+
+
+torch.nn.GroupNorm.forward = _group_norm
+
+
 def _resnet_forward(self, pixels):
     """ResNetEncoder.forward (the same math): our upsample, LeWAM's crop (eager: compiled, it crashed on ROCm), then
     after_crop."""
@@ -259,17 +322,21 @@ PATCHES = [  # (LeWAM's line, the line in its place); each must occur exactly on
 ]
 
 
-def trainer_namespace(name, nosync=True):
+def trainer_namespace(name, nosync=True, patches=(), names=None, namespace=None):
     """Run LeWAM's train_lewam.py as module `name` ("__main__" trains) and return its globals. nosync: its
     run_batch keeps the logged losses on the GPU (.detach(), not .item(): five CPU-GPU syncs a batch), read
     once an epoch; the normalization constants and the goal-view index live on the GPU (a pageable copy syncs
-    the stream). Under torchrun (WORLD_SIZE > 1) it trains data-parallel (Ddp)."""
+    the stream). Under torchrun (WORLD_SIZE > 1) it trains data-parallel (Ddp). patches: more (LeWAM's text,
+    ours, count) after PATCHES; names: more globals for them; namespace: the dict to run in (lewam_plus)."""
     import lewam.train.utils as utils
 
     ddp = Ddp()
     src = TRAINER.read_text()
     for old, new in PATCHES:
         assert src.count(old) == 1, old
+        src = src.replace(old, new)
+    for old, new, count in patches:
+        assert src.count(old) == count, (old, src.count(old))
         src = src.replace(old, new)
     if nosync:
         a, b = src.index("def run_batch("), src.index("def accumulate(")
@@ -286,9 +353,9 @@ def trainer_namespace(name, nosync=True):
             src = src.replace(line, "goal_frames[:, _goal_index(model.goal_view_indices)]")
     assert SPLIT in src, SPLIT
     src = src.replace(SPLIT, "for starts in _episode_split(possible_starts, n_val, ep_starts)")
-    namespace = {"__name__": name, "__file__": str(TRAINER), "_episode_split": episode_split, "_ddp": ddp,
-                 "_fast": fast,
-                 "_goal_index": goal_index}
+    namespace = {} if namespace is None else namespace
+    namespace.update({"__name__": name, "__file__": str(TRAINER), "_episode_split": episode_split, "_ddp": ddp,
+                      "_fast": fast, "_goal_index": goal_index, **(names or {})})
     if ddp.rank > 0:  # only rank 0 logs and writes files (checkpoints, configs)
         import pathlib
 
