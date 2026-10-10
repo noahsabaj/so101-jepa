@@ -256,7 +256,16 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   Big gains under occlusion (RoboCasa navigation 45 to 72-90%, PointMaze Giant 65 to 86%), none on
   the OGBench manipulation scene (64 vs 60-62%). Its encoder objective is LeWM's, so it does not fix
   A15. Later use: one-model uncertainty (planner cost, A9 practice selection) and grasps that can
-  succeed or slip.
+  succeed or slip. Second read (2026-10-10, no planner): most of the gain needs no exploration
+  term. With beta = 0 the stochastic predictor alone gives RoboCasa 45 to 72% and PointMaze 65 to
+  82% (iMF, NFE 8), with LeWM's encoder (ViT-tiny from scratch, SIGReg; the flow loss also trains
+  the encoder). A 20x bigger CEM budget for LeWM (300 to 6,000 candidates) reaches only 74% on
+  PointMaze, so the gain comes from the model and not from more samples. LeWAM's action head
+  already uses flow matching, but its state stream is deterministic. The A26 subgoal head is this
+  kind of model. Candidate: an iMF state stream (2 NFE) in LeWAM, on the A27 test bed. Expect a
+  small effect on Cube and Push-T: the paper's gain on the OGBench manipulation scene was small, and
+  in our sim the cube is hidden only by the gripper at the grasp. The exploration term needs a
+  planner, so it stays out. No code released.
 - Tracking Is Not Permanence ([2610.07355](https://arxiv.org/abs/2610.07355), Xie and Alanwar):
   the frozen V-JEPA 2 predictor loses a hidden moving object within 0.3 s and keeps a stationary
   one in only 13 to 41% of scenes, but a linear probe reads the object from the encoder at 1.00.
