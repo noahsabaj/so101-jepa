@@ -275,7 +275,18 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   so pick needs no huge model there (blocking end-effector control, 3D translation and gripper only).
   Short training rollouts (2 steps) broke long-horizon planning; 10-step rollouts fixed it. A V-JEPA
   2 encoder made the predictor collapse; V-JEPA 2.1's dense features scaled (A2). Inputs always
-  include proprioception, so A17 is untested there. Weights: not released yet (2026-10-08).
+  include proprioception, so A17 is untested there. Weights (2026-10-10): all released at
+  github.com/facebookresearch/robo_jepa, every size with every saved step (22M 150k = 0.10 GB,
+  50M 120k = 0.21 GB), licence CC BY-NC-SA 4.0 (like LeVJEPA: research only, keep it off the
+  National Compute workspace). They need the V-JEPA 2.1 ViT-G/384 file (30 GB; A2 used G on kat-pc
+  and the node). SO-101 is 1.24% of the mix (LeRobot SO-100/101, 30 -> 5 Hz, 0.2 s a step, 2 views
+  at 240x320) under two ids: `so-101` (end-effector delta, 7-d) and `so-101_joints` (5 joint deltas
+  + gripper delta, 6-d, rad; gripper = LeRobot value x pi/180; the repo says its rollout state update
+  is wrong for this id). Both ids also take a proprio state token. Candidate probe (not run): the 22M
+  and 50M models, id `so-101_joints`, on sim SO-101 episodes rendered at 240x320: latent rollout L1
+  against copy-last, and the spread/motion probe (2610.03137). If they respond to our actions, they
+  are a warm start or a teacher for an action head on real SO-101 video, which our 64 px models
+  never saw. Cost: one kat-pc evening; it waits for A27.
 - DSReg ([2610.09457](https://arxiv.org/abs/2610.09457), Zheng, Klindt, Balestriero, Schölkopf):
   a SIGReg JEPA identifies the latent state only up to a rotation, so each latent mixes world
   factors. A post-hoc rotation, chosen to make the local Jacobians d(observation)/d(latent) sparse,
