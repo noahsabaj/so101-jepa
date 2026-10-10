@@ -71,13 +71,15 @@ SPLIT = "for starts in (possible_starts[n_val:], possible_starts[:n_val])"
 
 
 def episode_split(possible_starts, n_val, ep_starts):
-    """LeWAM's train/val split, or with LEWAM_DATA_FRACTION=F (data scaling, v53) a split by episode: val is a
-    fixed 10% of the episodes, train the start points of a fraction F of the other episodes, repeated to the
-    length of the full train set so that every F gets the same epochs, steps and val passes. LeWAM's own split
-    is by start point: its val frames come from training episodes."""
-    fraction = float(os.environ.get("LEWAM_DATA_FRACTION", "0"))
-    if not fraction:
+    """The train/val split by episode: val is a fixed 10% of the episodes, train the start points of a fraction
+    F (LEWAM_DATA_FRACTION, default 1; data scaling, v53) of the other episodes, repeated to the length of the
+    full train set so that every F gets the same epochs, steps and val passes. LeWAM's own split is by start
+    point: nearly every val start has train starts in its episode, a frame or two away, so its val loss rewards
+    recall, and lewam_best.pt (the best val) cannot show overfitting. Runs up to v51 and v47c used it
+    (LEWAM_SPLIT=frame reproduces them)."""
+    if os.environ.get("LEWAM_SPLIT", "episode") == "frame":
         return possible_starts[n_val:], possible_starts[:n_val]
+    fraction = float(os.environ.get("LEWAM_DATA_FRACTION", "1"))
     episodes = torch.unique(ep_starts)
     episodes = episodes[torch.randperm(len(episodes), generator=torch.Generator().manual_seed(0))]
     held, pool = episodes[:len(episodes) // 10], episodes[len(episodes) // 10:]
