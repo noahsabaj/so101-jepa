@@ -287,6 +287,14 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   synthetic nested footprints, N = 4-14, MCC 0.52-0.77 -> 0.97-0.997. hjepa/dsreg.py follows its fit
   (identity start kept unless beaten, gradient clip 10, 12 restarts x 3,000 steps); on a nested
   6-factor test it recovers the factors (MCC 0.80 -> 1.00). Our arm's joints are nested footprints too.
+  Result (node, 2026-10-09; 30,000 val frames, last 20% held out; outputs/dsreg in so101-jepa-node-data):
+  no recovery on our encoders. MCC PCA -> DSReg: v6 K32 0.48 -> 0.50, v6 K16 0.47 -> 0.46, v31 K32 0.45 ->
+  0.46 (random rotation 0.35-0.42); best-single-latent R2 0.42 -> 0.37, 0.42 -> 0.28, 0.27 -> 0.35. The fit
+  works (its L1 criterion falls 6%), and the factors are in the latents (dense R2: joints 0.64-0.99, cube
+  xyz 0.57-0.95), so the sparsest rotation is not the factor basis here. Untested causes: the 8 x 16 pooled
+  observation (the cube is a few pixels), K 32 keeps 64% of the variance, and the yaw target is the raw angle
+  (the cube has 90-degree symmetry: use sin/cos of 4 x yaw; its R2 is 0 in every basis). No further use now;
+  a re-test fits LeWAM's 192-d keypoint latent on OGBench Cube (A27 test bed).
 - RoboRender ([2610.09254](https://arxiv.org/abs/2610.09254), Stanford, Li Fei-Fei, Jiajun Wu):
   Wan2.1-T2V-1.3B fine-tuned on ~130k real robot clips (AgiBot-World, DROID) at 416x240 renders
   photoreal video of a sim trajectory, conditioned on its depth video, a robot mask video and a
