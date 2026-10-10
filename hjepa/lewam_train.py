@@ -48,8 +48,10 @@ def speedups():
         # (illegal memory access). LEWAM_GRAPHS=1: all three also as CUDA graphs (mode reduce-overhead): the CPU
         # time a step fell 26 -> 5 ms at batch 8 on noah-pc (~1,000 kernel launches a step; the loss alone ~700).
         # Inductor's own GroupNorm backward gave wrong gradients (lewam_common.GN_ATEN): GroupNorm runs as ATen's
-        # kernels when compiled. Off by default until the whole compiled step matches float64
-        # (hjepa/jobs/step_ref.py); runs before 2026-10-10 15:10 EDT with the encoder compiled are suspect.
+        # kernels when compiled. With that, the whole compiled step matches eager (hjepa/jobs/step_ref.py, T4 and
+        # MI355X), but it is off by default: only ~6% faster on an MI355X (52.8 vs 56.1 ms at batch 128), and
+        # Inductor's kernel loading crashed on ROCm (driver error 301). Runs before 2026-10-10 15:10 EDT with the
+        # encoder compiled are suspect.
         import torch._dynamo as dynamo  # not `import torch._dynamo`: that makes torch a local name here
 
         dynamo.config.cache_size_limit = 32  # one graph per batch shape (train, val, last batch) and mode
