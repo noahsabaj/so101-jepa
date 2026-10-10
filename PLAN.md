@@ -395,3 +395,8 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   v36 0.61; no frame of v6 or v31 below 0.05 (v36: 0.2%); every phase 0.47-0.78, highest in lift, carry
   and lower. 10.7% of the frame changes a step (arm and wrist view; SLIM 0.35%). So the latents do respond
   to the actions; the probe is global, so it cannot tell whether the cube part responds (A16 still open).
+- T-JEPA ([2610.05731](https://arxiv.org/abs/2610.05731), remote sensing): a predictor conditioned on the time
+  gap (only the predictor sees it: the encoder could use it as a shortcut), plus masked pixel reconstruction
+  for detail. Direct prediction at several gaps beats rolling out one step at a time. For us: nothing new;
+  it agrees with A21 (v31's jumps against v6's fixed steps: 0.79 s against 1.53 s time error at 2 s; 2.16
+  against 4.05 at 4 s). The pixel reconstruction is a decoder; not taken.
