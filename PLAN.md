@@ -365,3 +365,16 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   match the object's features across adjacent frames. No policy or robot result. For us: nothing new; the
   failure is the one A16 tests in latent space (the predictor keeps the cube when held), and the fixes are
   hand-made supervision (rule 11).
+- SplitJEPA ([2610.12349](https://arxiv.org/abs/2610.12349), Hua, Liu, Zhao, Zheng; [site](https://splitjepa.github.io/)):
+  a JEPA latent split into a fixed invariant block r_H and a variant block r_L. Loss = latent prediction +
+  an invariance loss on r_H over matched pairs (the same state seen by another camera; matched trajectories)
+  + SIGReg; no decoder. Proof: blocks identified up to a rotation inside each block; a predictor on r_H has
+  zero gradient to variant changes. ManiSkill (800 demos a task), behaviour cloning on the latent, success
+  within 10 cm, PushCube / PickCube: LeJEPA 67 / 16% in distribution, camera shift 25 / 10%, lighting
+  31 / 10%; SplitJEPA r_H + r_L 99 / 46%, camera 75 / 28%, lighting 98 / 43% (raw pixels on PushCube:
+  lighting 98%, camera 13%). Small scale (authors' main limitation); their LeJEPA baseline is weak in distribution.
+  For us (A5): the real arm's cameras will not sit where the sim's do, and its light differs. MuJoCo
+  renders the same state twice (other camera pose, lighting, textures) at no cost, so the pairs come from
+  data, not from hand-made structure; our scene + wrist views of one state are pairs too. First a cheap
+  test: rung 1 (96/100 with v4) with the scene camera moved 1-2 cm / 2-3 degrees and other lighting in sim.
+  If success falls a lot, train the invariant block on paired renders before the real arm.
