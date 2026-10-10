@@ -120,7 +120,6 @@ class Planner:
             s1.action_bounds = (np.tile(lo, s1.action_dim // 6), np.tile(hi, s1.action_dim // 6))
             self.solvers[k] = solver
         self.solver = self.solvers[self.strides[0]]
-        self.last_stride = self.strides[0]
         dtype = {"fp32": None, "bf16": torch.bfloat16, "fp16": torch.float16}[cfg.get("precision", "fp32")]
         self.autocast = (lambda: torch.autocast("cuda", dtype=dtype)) if dtype else contextlib.nullcontext
         mode = cfg.get("compile", False)
@@ -180,7 +179,7 @@ class Planner:
                 raise FloatingPointError(f"non-finite model cost {cost} for the stride-{k} plan")
             if best is None or cost < best[0]:
                 best = (cost, k, plan[0])
-        _, self.last_stride, plan = best
+        plan = best[2]
         actions = plan.float().cpu().numpy().reshape(-1, 6)[: self.receding]  # replan after the receding horizon (raw steps)
         return actions * self.action_std + self.action_mean
 
