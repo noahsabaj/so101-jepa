@@ -18,7 +18,11 @@ MODEL: a config in hjepa/config/lewam/. VARIANTS: comma-separated, each a +-join
   workersN              with live: N loader workers (default: the config's)
   ram                   with live: frames from the uncompressed copy in RAM (data.source decomp, load_in_ram;
                         LeWAM's scripts/decompress_h5.py writes it), not read from the h5 per sample
-  prof                  also profile 10 steps: the top GPU kernels by their own time
+  prof                  also profile 10 steps: the top GPU kernels by their own time, and the CPU ops
+  gloss                 closs with CUDA graphs (mode reduce-overhead)
+  aloss                 closs with mode max-autotune-no-cudagraphs
+  bsN                   batch size N (default: the config's); the epoch time is for the same samples
+  noclip                no gradient-norm clipping (to time its cost)
   loader8, loader16 ... the data loader alone, with that many workers (batches per second)
 e.g. fp32,bf16,bf16+bench,bf16+cl+bench,bf16+cenc+fused. Prints one line per variant: s/batch and the epoch
 time it gives (train + val batches of one pass, val at 1/3 of a train batch).
@@ -92,6 +96,10 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
         model.encoder.trunk.compile(mode="reduce-overhead")
     if "closs" in flags:
         model.loss = torch.compile(model.loss)
+    if "gloss" in flags:
+        model.loss = torch.compile(model.loss, mode="reduce-overhead")
+    if "aloss" in flags:
+        model.loss = torch.compile(model.loss, mode="max-autotune-no-cudagraphs")
     sigreg = T["SIGReg"]().cuda()
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay,
                             fused="fused" in flags)
@@ -102,11 +110,12 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
             loss, _, _ = T["run_batch"](batch, model, None, sigreg, cfg, "cuda", train=True)
         opt.zero_grad(set_to_none=True)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        if "noclip" not in flags:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         opt.step()
 
     get = (lambda i: next(live)) if live is not None else (lambda i: batches[i % len(batches)])
-    warm = 15 if flags & {"cenc", "closs", "ctrunk", "gtrunk"} else 5
+    warm = 15 if flags & {"cenc", "closs", "ctrunk", "gtrunk", "gloss", "aloss"} else 5
     t0 = time.perf_counter()
     for i in range(warm):
         step(get(i))
@@ -125,6 +134,8 @@ def bench_model(cfg, flags, batches, actions, steps, live=None):
             torch.cuda.synchronize()
         print(prof.key_averages().table(sort_by="self_device_time_total", row_limit=30, max_name_column_width=70),
               flush=True)
+        print(prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=25, max_name_column_width=70),
+              flush=True)
     return seconds, t_warm
 
 
@@ -133,20 +144,22 @@ if __name__ == "__main__":
     steps = int(rest[0]) if rest else 40
     cfg = load_cfg(model_name)
     cfg.dataset_path = data
-    batches = actions = None
+    cached, actions, base_bs = {}, None, cfg.train.batch_size
     for v in variants.split(","):
         flags = set(v.split("+"))
+        cfg.train.batch_size = next((int(f[2:]) for f in flags if f.startswith("bs")), base_bs)
         loaders = [f for f in flags if f.startswith("loader")]
         if loaders:
             s = bench_loader(cfg, data, int(loaders[0][6:]), steps)
             print(f"[bench] {v}: {s:.4f} s/batch ({1 / s:.1f} batches/s) from the loader alone", flush=True)
             continue
-        if batches is None:
+        if cfg.train.batch_size not in cached:
             loader, actions, n_starts = make_data(cfg, data, cfg.data.num_workers)
             it = iter(loader)
-            batches = [tuple(x.cuda() for x in next(it)) for _ in range(8)]
-            n_train = round(n_starts * cfg.data.train_split / cfg.train.batch_size)
-            n_val = round(n_starts * (1 - cfg.data.train_split) / cfg.train.batch_size)
+            cached[cfg.train.batch_size] = [tuple(x.cuda() for x in next(it)) for _ in range(8)]
+        batches = cached[cfg.train.batch_size]
+        n_train = round(n_starts * cfg.data.train_split / cfg.train.batch_size)
+        n_val = round(n_starts * (1 - cfg.data.train_split) / cfg.train.batch_size)
         live = None
         if "live" in flags:
             workers = next((int(f[7:]) for f in flags if f.startswith("workers")), cfg.data.num_workers)
