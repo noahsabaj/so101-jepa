@@ -378,3 +378,20 @@ Sim tests of rungs 1 and 2 (fixed 2026-10-06, before the first test; sim/closed_
   data, not from hand-made structure; our scene + wrist views of one state are pairs too. First a cheap
   test: rung 1 (96/100 with v4) with the scene camera moved 1-2 cm / 2-3 degrees and other lighting in sim.
   If success falls a lot, train the invariant block on paired renders before the real arm.
+- Keeping JEPA world models plannable when little of the frame moves ([2610.03137](https://arxiv.org/abs/2610.03137),
+  Strohm, Wagner, Schwab, Huber): SLIM, a 2-D pushing task with small objects (radius 15 px in 224; 0.35% of
+  the frame moves a step, PushT 0.6%). LeWM (ViT-Tiny, SIGReg, CEM) solves PushT but 0.3% of SLIM: its latent
+  ignores the actions (pusher and object probes at chance; rollouts no better than copying the latent).
+  Inverse dynamics on encoder latents (z_t, z_t+1 -> a_t, weight 1; the head is dropped at test) brings the
+  probes back (pusher 163 -> 8.5 px) and success to 30%; the same term on predicted latents adds 5 points
+  (35%); a shuffled-action null stays at 0.2%. PushT at twice the trained horizon: 53 -> 83%; OGBench Cube
+  and PushT at the trained horizon: no gain. A plannability probe with no env: spread/motion = variance of
+  the next latent over K = 32 random actions / its mean squared move; all 28 settings below 0.05 failed.
+  For us: v4 onward already have encoder inverse dynamics (EP-IDM). New: (1) the probe, run on v6, v31, v36
+  per expert phase (hjepa/action_sensitivity.py): if the grasp and lift phases score low, the predictor
+  ignores the gripper's effect on the cube (A16), a candidate cause of rung 2's 0 of 50; (2) the same
+  inverse-dynamics term on predicted latents (cheap).
+  Result (kat-pc, 2026-10-10; 600 val frames, K 32): all far above 0.05. Spread/motion v6 0.72, v31 0.63,
+  v36 0.61; no frame of v6 or v31 below 0.05 (v36: 0.2%); every phase 0.47-0.78, highest in lift, carry
+  and lower. 10.7% of the frame changes a step (arm and wrist view; SLIM 0.35%). So the latents do respond
+  to the actions; the probe is global, so it cannot tell whether the cube part responds (A16 still open).
